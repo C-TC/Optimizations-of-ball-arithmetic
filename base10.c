@@ -472,9 +472,10 @@ int biginteger_split(BigInteger* p_biginteger, int m, BigInteger* high, BigInteg
     return 0;
 }
 
+#define KARATSUBA_SWITCH 20
 // https://en.wikipedia.org/wiki/Karatsuba_algorithm
 BigInteger* karatsuba(BigInteger* p_biginteger1, BigInteger* p_biginteger2){
-    if(p_biginteger1->array_size == 1 || p_biginteger2->array_size == 1){
+    if(p_biginteger1->array_size <= KARATSUBA_SWITCH || p_biginteger2->array_size <= KARATSUBA_SWITCH){
         return biginteger_mul(p_biginteger1, p_biginteger2);
     }
     int middle = p_biginteger1->array_size < p_biginteger2->array_size ? p_biginteger1->array_size : p_biginteger2->array_size;
