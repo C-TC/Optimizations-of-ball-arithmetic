@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#define UNIT_CAPACITY 100000000
-#define UNIT_LEN 8
+#define UNIT_CAPACITY 1000000000
+#define UNIT_LEN 9
 
 typedef struct BigInteger{
     bool is_positive;
@@ -38,13 +38,13 @@ BigInteger* biginteger_from_string(char* integer_str, size_t size){
     p_biginteger->array = malloc(sizeof(int) * array_size);
     p_biginteger->array_size = array_size;
     p_biginteger->is_positive = is_positive;
-    int cur = 0;
+    long cur = 0;
     int idx = 0;
-    int coef = 1;
+    long coef = 1;
     for(int i=size-1;i>=0;i--){
         cur += (integer_str[i] - '0') * coef;
         if(coef >= UNIT_CAPACITY){
-            p_biginteger->array[idx++] = cur % UNIT_CAPACITY;
+            p_biginteger->array[idx++] = (int)(cur % UNIT_CAPACITY);
             cur /= UNIT_CAPACITY;
             coef = 1;
         }
@@ -94,8 +94,11 @@ int biginteger_print(BigInteger* p_biginteger){
     for(int i=p_biginteger->array_size-1;i>=0;i--){
         if(i == p_biginteger->array_size-1)
             printf("%d", p_biginteger->array[i]);
-        else
-            printf("%08d", p_biginteger->array[i]);
+        else{
+            char format_str[10] = "%0 d";
+            format_str[2] = UNIT_LEN + '0';
+            printf(format_str, p_biginteger->array[i]);
+        }
     }
     printf("\n");
     return 0;
