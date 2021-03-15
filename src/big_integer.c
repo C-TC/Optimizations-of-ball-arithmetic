@@ -105,11 +105,11 @@ void big_integer_resize( BigIntegerData *pBigIntData, const int new_capacity )
 {
     // int i;
     pBigIntData->capacity = new_capacity;
-    unsigned int* bits = (unsigned int*) malloc(pBigIntData->capacity);
+    unsigned int* bits = (unsigned int*) malloc(pBigIntData->capacity*UINT_NUM_BYTES);
     // for (i = 0; i < pBigIntData->size; ++i) {
     //     tmp[i] = pBigIntData->bits[i];
     // }
-    memcpy(bits, pBigIntData->bits, pBigIntData->capacity * UINT_NUM_BYTES);
+    memcpy(bits, pBigIntData->bits, pBigIntData->size*UINT_NUM_BYTES);
     free(pBigIntData->bits);
     pBigIntData->bits = bits;
     big_integer_clear_trash_data(pBigIntData);
@@ -194,7 +194,7 @@ BigIntegerData big_integer_add_data( const BigIntegerData left, const BigInteger
 	int size = MAX( left.size, right.size );
     int capacity = MAX(left.capacity, right.capacity);
 
-    result.bits = (unsigned int*) malloc(sizeof(capacity)*UINT_NUM_BITS);
+    result.bits = (unsigned int*) malloc(capacity*UINT_NUM_BYTES);
     result.capacity = capacity;
 
 	unsigned long long sum = 0;
@@ -233,7 +233,7 @@ BigIntegerData big_integer_subtract_data( const BigIntegerData left, const BigIn
 	int size = MAX( left.size, right.size );
     int capacity = MAX(left.capacity, right.capacity);
 
-    result.bits = (unsigned int*) malloc(sizeof(capacity)*UINT_NUM_BITS);
+    result.bits = (unsigned int*) malloc(capacity*UINT_NUM_BYTES);
     result.capacity = capacity;
 
 	unsigned long long borrow = 0;
@@ -253,6 +253,7 @@ BigIntegerData big_integer_subtract_data( const BigIntegerData left, const BigIn
 	}
 
 	big_integer_normalize_from( &result, i );
+    big_integer_clear_trash_data(&result);
 
 	return result;
 };
