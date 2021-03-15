@@ -8,4 +8,4 @@
 2. Test2: integer addition (possibly with leading zeros)
 3. Test3: integer * scalar multiplication
 4. Test4: integer * integer multiplication
-
+5. Test5: integer / integer div with fixed(static) precision
