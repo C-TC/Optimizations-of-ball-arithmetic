@@ -50,6 +50,8 @@ BigIntegerData big_integer_empty_data( )
 {
 	BigIntegerData bigIntData;
 	bigIntData.size = 0;
+    bigIntData.capacity = 0;
+    bigIntData.bits = NULL;
 	big_integer_clear_trash_data( &bigIntData );
 	return bigIntData;
 };
@@ -102,7 +104,7 @@ void big_integer_resize( BigIntegerData *pBigIntData, const int new_capacity )
     // for (i = 0; i < pBigIntData->size; ++i) {
     //     tmp[i] = pBigIntData->bits[i];
     // }
-    memcpy(bits, pBigIntData->bits, pBigIntData->size * UINT_NUM_BYTES);
+    memcpy(bits, pBigIntData->bits, pBigIntData->capacity * UINT_NUM_BYTES);
     free(pBigIntData->bits);
     pBigIntData->bits = bits;
     big_integer_clear_trash_data(pBigIntData);
