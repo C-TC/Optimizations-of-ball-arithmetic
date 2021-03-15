@@ -18,12 +18,6 @@
 #	define MIN( a, b ) ( (a)<(b) ? (a) : (b) )
 #endif
 
-#ifndef LLONG_MAX
-	#define LLONG_MAX	0x7FFFFFFFFFFFFFFF
-#endif
-#ifndef LLONG_MIN
-	#define LLONG_MIN	(-LLONG_MAX-1)
-#endif
 
 /*#define UINT_NUM_BITS		(sizeof(unsigned int) * 8)*/
 const int UINT_NUM_BYTES = (sizeof(unsigned int));
@@ -45,6 +39,11 @@ BigIntegerData big_integer_subtract_data( const BigIntegerData left, const BigIn
 void big_integer_increment_data( BigIntegerData *pBigIntData, const unsigned int value );
 void big_integer_decrement_data( BigIntegerData *pBigIntData, const unsigned int value );
 
+/* function Lixin adds */
+BigInteger big_integer_deep_copy(const BigInteger other);
+BigIntegerData big_integer_data_deep_copy(const BigIntegerData other);
+void big_integer_destroy(BigInteger* pBigInteger);
+void big_integer_resize( BigIntegerData *pBigIntData, const int new_capacity );
 
 /* PRIVATE FUNCTIONS IMPLEMENTATION */
 BigIntegerData big_integer_empty_data( )
@@ -88,9 +87,16 @@ BigInteger big_integer_create_internal( const char sign, const BigIntegerData da
 	return bigInt;
 };
 
+void big_integer_destroy(BigInteger* pBigInteger) {
+    pBigInteger->sign = 0;
+    pBigInteger->data.capacity = 0;
+    pBigInteger->data.size = 0;
+    free(pBigInteger->data.bits);
+}
+
 void big_integer_resize( BigIntegerData *pBigIntData, const int new_capacity )
 {
-    int i;
+    // int i;
     pBigIntData->capacity = new_capacity;
     unsigned int* bits = (unsigned int*) malloc(pBigIntData->capacity);
     // for (i = 0; i < pBigIntData->size; ++i) {
@@ -176,6 +182,10 @@ BigIntegerData big_integer_add_data( const BigIntegerData left, const BigInteger
 	BigIntegerData result = big_integer_empty_data( );
 
 	int size = MAX( left.size, right.size );
+    int capacity = MAX(left.capacity, right.capacity);
+
+    result.bits = (unsigned int*) malloc(sizeof(capacity)*UINT_NUM_BITS);
+    result.capacity = capacity;
 
 	unsigned long long sum = 0;
 	int i;
@@ -193,6 +203,7 @@ BigIntegerData big_integer_add_data( const BigIntegerData left, const BigInteger
 	}
 
 	result.size = i;
+    big_integer_clear_trash_data(&result);
 
     assert(result.size <= result.capacity);
     if (result.size == result.capacity) {
@@ -210,6 +221,10 @@ BigIntegerData big_integer_subtract_data( const BigIntegerData left, const BigIn
 	BigIntegerData result = big_integer_empty_data( );
 
 	int size = MAX( left.size, right.size );
+    int capacity = MAX(left.capacity, right.capacity);
+
+    result.bits = (unsigned int*) malloc(sizeof(capacity)*UINT_NUM_BITS);
+    result.capacity = capacity;
 
 	unsigned long long borrow = 0;
 	int i;
@@ -277,13 +292,12 @@ void big_integer_decrement_data( BigIntegerData *pBigIntData, const unsigned int
     }
 };
 
-
-
-
 /* PUBLIC FUNCTIONS IMPLEMENTATION */
 BigInteger big_integer_create( long long value )
 {
 	BigInteger bigInt;
+    bigInt.data.bits = (unsigned int*) malloc(sizeof(long long) * 2);
+    bigInt.data.capacity = sizeof(long long) * 2 / UINT_NUM_BYTES;
 	int numBits = UINT_NUM_BITS;
 
 	if ( value == 0 )
@@ -307,8 +321,6 @@ BigInteger big_integer_create( long long value )
 		}
 
 		bigInt.data.size = 0;
-        bigInt.data.bits = malloc(sizeof(long long)*2);
-        bigInt.data.capacity = sizeof(long long)*2 / UINT_NUM_BYTES;
 		while ( uValue > 0 )
 		{
 			bigInt.data.bits[bigInt.data.size++] = (unsigned int) uValue;
@@ -383,12 +395,32 @@ int big_integer_compare( const BigInteger left, const BigInteger right )
 	return sign * big_integer_compare_data( &left.data, &right.data );
 };
 
+BigInteger big_integer_deep_copy(const BigInteger other) {
+    BigInteger this;
+    this.sign = other.sign;
+    this.data.capacity = other.data.capacity;
+    this.data.size = other.data.size;
+    this.data.bits = (unsigned int*) malloc(this.data.capacity*UINT_NUM_BYTES);
+    memcpy(this.data.bits, other.data.bits, this.data.capacity*UINT_NUM_BYTES);
+    return this;
+}
+
+BigIntegerData big_integer_data_deep_copy(const BigIntegerData other) {
+    BigIntegerData this;
+    this.capacity = other.capacity;
+    this.size = other.size;
+    this.bits = (unsigned int*) malloc(this.capacity*UINT_NUM_BYTES);
+    memcpy(this.bits, other.bits, this.capacity*UINT_NUM_BYTES);
+    return this;
+
+}
+
 BigInteger big_integer_add( const BigInteger left, const BigInteger right )
 {
 	if ( left.sign == 0 )
-		return right;
+		return big_integer_deep_copy(right);
 	if ( right.sign == 0 )
-		return left;
+		return big_integer_deep_copy(left);
 
 	if ( left.sign == right.sign )
 		return big_integer_create_internal( left.sign, big_integer_add_data( left.data, right.data ));
@@ -408,9 +440,9 @@ BigInteger big_integer_add( const BigInteger left, const BigInteger right )
 BigInteger big_integer_subtract( const BigInteger left, const BigInteger right )
 {
 	if ( left.sign == 0 )
-		return big_integer_create_internal( -right.sign, right.data );
+		return big_integer_create_internal( -right.sign, big_integer_data_deep_copy(right.data) );
 	if ( right.sign == 0 )
-		return left;
+		return big_integer_deep_copy(left);
 
 	if ( left.sign != right.sign )
 		return big_integer_create_internal( left.sign, big_integer_add_data(left.data, right.data) );

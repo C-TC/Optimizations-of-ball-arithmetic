@@ -24,6 +24,8 @@ typedef struct BigInteger
 /* creates a big integer number */
 BigInteger big_integer_create( long long value );
 
+void big_integer_destroy(BigInteger* pBigInteger);
+
 /* returns the big integer as int */
 int big_integer_to_int( const BigInteger bigInt );
 
