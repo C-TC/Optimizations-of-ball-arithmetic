@@ -22,6 +22,7 @@ typedef struct BigInteger{
 // use the same data representation as BigInteger, however, it always satisfies 1 <= |base| < 10
 typedef BigInteger BigFloatBase;
 
+// always first check is_zero before the base and the exp
 typedef struct BigFloat{
     BigFloatBase *base;
     bool is_zero;

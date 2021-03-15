@@ -139,7 +139,14 @@ BigInteger* biginteger_mul(BigInteger* p_biginteger1, BigInteger* p_biginteger2)
 }
 
 BigFloat *biginteger_div(BigInteger* p_biginteger1, BigInteger* p_biginteger2){
-    return NULL;
+    //TODO: too many tedious manually mallocs, need to be fixed
+    if (biginteger_is_zero(p_biginteger2)) return NULL;
+    BigFloat *result = malloc(sizeof(BigFloat));
+    if (biginteger_is_zero(p_biginteger1)) {
+        result->is_zero = true;
+        return result;
+    }
+    return result;
 }
 
 // https://en.wikipedia.org/wiki/Karatsuba_algorithm

@@ -1,6 +1,7 @@
 #include "base10_helper.h"
 
 int biginteger_delete(BigInteger* p_biginteger){
+    if (p_biginteger)
     SAFE_FREE(p_biginteger->array);
     SAFE_FREE(p_biginteger);
     return 0;
