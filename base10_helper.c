@@ -1,9 +1,15 @@
 #include "base10_helper.h"
 
 int biginteger_delete(BigInteger* p_biginteger){
-    free(p_biginteger->array);
-    free(p_biginteger);
+    SAFE_FREE(p_biginteger->array);
+    SAFE_FREE(p_biginteger);
     return 0;
+}
+
+void bigfloat_delete(BigFloat *p) {
+    if (p && p->base)
+    biginteger_delete((BigInteger*)p->base);
+    SAFE_FREE(p);
 }
 
 int biginteger_print(BigInteger* p_biginteger){
@@ -21,6 +27,19 @@ int biginteger_print(BigInteger* p_biginteger){
     }
     printf("\n");
     return 0;
+}
+
+void bigfloat_print(BigFloat *p) {
+    if (!p) return;
+    if (p->is_zero) {
+        printf("0.");
+        for (int i = 0; i < DIV_PRE; ++i) {
+            printf("0");
+        }
+        printf("\n");
+        return;
+    }
+
 }
 
 BigInteger* biginteger_zero(){

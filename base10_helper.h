@@ -1,6 +1,12 @@
 #ifndef __BASE10_HELPER__
 #define __BASE10_HELPER__
 #include "base10.h"
+//================Helper Macro==================================
+#define SAFE_FREE(P) do {if (P) free(P);} while(0)
+//================Helper Function Configuration=================
+//how many digits after the decimal point
+#define DIV_PRE 4
+//==============================================================
 
 inline bool biginteger_is_one(BigInteger* p_biginteger){
     return p_biginteger->array_size == 1 && p_biginteger->array[0] == 1 && p_biginteger->is_positive;
@@ -28,6 +34,9 @@ int biginteger_abs_comp(BigInteger*, BigInteger*);
 BigInteger* biginteger_from_string(char*, size_t);
 int biginteger_print_debug(BigInteger*);
 //============================================================================
-//=================Helper Function Integer=====================================
+
+//=================Helper Function Float======================================
+void bigfloat_print(BigFloat*);
+void bigfloat_delete(BigFloat*);
 //=============================================================================
 #endif

@@ -19,12 +19,13 @@ typedef struct BigInteger{
     size_t array_size;
 }BigInteger;
 
-// use the same data representation as BigInteger, however, it is always 0 <= base < 10
+// use the same data representation as BigInteger, however, it always satisfies 1 <= |base| < 10
 typedef BigInteger BigFloatBase;
 
 typedef struct BigFloat{
-    BigFloatBase base;
-    int exp;
+    BigFloatBase *base;
+    bool is_zero;
+    long exp;
 }BigFloat;
 //==============================================================
 
