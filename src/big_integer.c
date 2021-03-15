@@ -45,6 +45,11 @@ BigIntegerData big_integer_data_deep_copy(const BigIntegerData other);
 void big_integer_destroy(BigInteger* pBigInteger);
 void big_integer_resize( BigIntegerData *pBigIntData, const int new_capacity );
 
+/*Tiancheng adds*/
+BigIntegerData big_integer_multiply_data( BigIntegerData left,  BigIntegerData right);
+void big_integer_data_digit_shift(BigIntegerData *pBigIntData, int d);
+BigInteger big_integer_multiply(const BigInteger left, const BigInteger right);
+
 /* PRIVATE FUNCTIONS IMPLEMENTATION */
 BigIntegerData big_integer_empty_data( )
 {
@@ -131,6 +136,9 @@ void big_integer_normalize_from( BigIntegerData *pBigIntData, const int from )
 
 void big_integer_clear_trash_data( BigIntegerData *pBigIntData )
 {	
+	if(pBigIntData==NULL)
+	return;
+
 	int i;
 	for ( i = pBigIntData->size; i < pBigIntData->capacity; ++i )
 		pBigIntData->bits[i] = 0;
@@ -249,6 +257,25 @@ BigIntegerData big_integer_subtract_data( const BigIntegerData left, const BigIn
 	return result;
 };
 
+BigIntegerData big_integer_multiply_data( BigIntegerData left,  BigIntegerData right)
+{	
+	BigIntegerData result;
+	result.capacity=2;
+	result.size=1;
+	result.bits=(unsigned int*)calloc(result.capacity,UINT_NUM_BYTES);
+
+	int i,j;
+	for(i=0;i<right.size;i++)
+	{
+		for(j=1;j<=right.bits[i];j++)
+		{
+			result=big_integer_add_data(result,left);
+		}
+		big_integer_data_digit_shift(&left,1);
+	}
+	return result;
+}
+
 void big_integer_increment_data( BigIntegerData *pBigIntData, const unsigned int value )
 {
 	unsigned long long carry = value;
@@ -293,6 +320,25 @@ void big_integer_decrement_data( BigIntegerData *pBigIntData, const unsigned int
         big_integer_resize(pBigIntData, pBigIntData->capacity*2);
     }
 };
+
+void big_integer_data_digit_shift(BigIntegerData *pBigIntData, int d)
+{
+	// only deal with right shift
+	assert(d>0);
+	int i=0;
+	if(pBigIntData->size==1 && pBigIntData->bits[0]==0) return ;
+	if(pBigIntData->size+d>pBigIntData->capacity)
+	big_integer_resize(pBigIntData,2*(pBigIntData->size+d));
+	for(i=pBigIntData->size;i>=0;i--)
+	{
+		pBigIntData->bits[i+d]=pBigIntData->bits[i];
+	}
+	for(i=0;i<d;i++)
+	{
+		pBigIntData->bits[i]=0;
+	}
+	pBigIntData->size+=d;
+}
 
 /* PUBLIC FUNCTIONS IMPLEMENTATION */
 BigInteger big_integer_create( long long value )
@@ -530,6 +576,14 @@ void big_integer_decrement( BigInteger *bigInt, const unsigned int value )
 		}
 	}
 };
+
+
+BigInteger big_integer_multiply(const BigInteger left, const BigInteger right)
+{
+	if(left.sign==0 || right.sign==0)
+		return big_integer_create(0);
+	return big_integer_create_internal(left.sign*right.sign,big_integer_multiply_data(left.data,right.data));
+}
 
 #ifdef DEBUG
 void big_integer_dump( const BigInteger bigInt )

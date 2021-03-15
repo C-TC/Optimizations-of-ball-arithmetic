@@ -487,6 +487,93 @@ void test_subtract()
     big_integer_destroy(&result);
 };
 
+void test_multiply()
+{
+	BigInteger left;
+	BigInteger right;
+	BigInteger result;
+
+	left = big_integer_create( 0 );
+	right = big_integer_create( 12 );
+	result = big_integer_multiply( left, right);
+	assert( big_integer_to_int(result) == 0 );
+    big_integer_destroy(&left);
+    big_integer_destroy(&right);
+    big_integer_destroy(&result);
+
+	left = big_integer_create( 0 );
+	right = big_integer_create( -5 );
+	result = big_integer_multiply( left, right);
+	assert( big_integer_to_int(result) == 0 );
+    big_integer_destroy(&left);
+    big_integer_destroy(&right);
+    big_integer_destroy(&result);
+
+	left = big_integer_create( 12 );
+	right = big_integer_create( 0 );
+	result = big_integer_multiply( left, right);
+	assert( big_integer_to_int(result) == 0 );
+    big_integer_destroy(&left);
+    big_integer_destroy(&right);
+    big_integer_destroy(&result);
+
+	left = big_integer_create( -5 );
+	right = big_integer_create( 0 );
+	result = big_integer_multiply( left, right);
+	assert( big_integer_to_int(result) == 0 );
+    big_integer_destroy(&left);
+    big_integer_destroy(&right);
+    big_integer_destroy(&result);
+
+	left = big_integer_create( 1 );
+	right = big_integer_create( 117 );
+	result = big_integer_multiply( left, right);
+	assert( big_integer_to_int(result) == 117 );
+    big_integer_destroy(&left);
+    big_integer_destroy(&right);
+    big_integer_destroy(&result);
+
+	left = big_integer_create( -1 );
+	right = big_integer_create( 117 );
+	result = big_integer_multiply( left, right);
+	assert( big_integer_to_int(result) == -117 );
+    big_integer_destroy(&left);
+    big_integer_destroy(&right);
+    big_integer_destroy(&result);
+
+	left = big_integer_create( -11 );
+	right = big_integer_create( 15 );
+	result = big_integer_multiply( left, right);
+	assert( big_integer_to_int(result) == -165 );
+    big_integer_destroy(&left);
+    big_integer_destroy(&right);
+    big_integer_destroy(&result);
+
+	left = big_integer_create( 1 );
+	right = big_integer_create( 1 );
+	result = big_integer_multiply( left, right);
+	assert( big_integer_to_int(result) == 1 );
+    big_integer_destroy(&left);
+    big_integer_destroy(&right);
+    big_integer_destroy(&result);
+
+	left = big_integer_create( -1 );
+	right = big_integer_create( -1 );
+	result = big_integer_multiply( left, right);
+	assert( big_integer_to_int(result) == 1 );
+    big_integer_destroy(&left);
+    big_integer_destroy(&right);
+    big_integer_destroy(&result);
+
+	left = big_integer_create( -(long long)UINT_MAX - UINT_MAX );
+	right = big_integer_create( 1 );
+	result = big_integer_multiply( left, right );
+	assert( big_integer_to_long_long(result) == -(long long)UINT_MAX - UINT_MAX );
+    big_integer_destroy(&left);
+    big_integer_destroy(&right);
+    big_integer_destroy(&result);
+}
+
 void test_increment()
 {
 	BigInteger bigInt;
@@ -629,6 +716,43 @@ void test_performance()
 	printf("Double last value was: %f\n", sumDouble);
 };
 
+void test_performance_factorial()
+{
+	int NUM_ITERATIONS = 20;
+
+	clock_t start;
+	clock_t end;
+	double cpuTime;
+
+	long long l;
+	start = clock();
+	BigInteger resBigInt = big_integer_create( 1 );
+	BigInteger facBigInt = big_integer_create( 1 );
+	for ( l = 1; l <= NUM_ITERATIONS; ++l )
+	{
+		resBigInt = big_integer_multiply(resBigInt,facBigInt);		
+		big_integer_increment( &facBigInt, 1 );
+	}
+	end = clock();
+	cpuTime = ((double) (end - start)) / CLOCKS_PER_SEC;
+	printf("BigInteger did factorial(%d) in %f seconds.\n", NUM_ITERATIONS, cpuTime);
+	printf("BigInteger last value was: %lld\n", big_integer_to_long_long(resBigInt));
+    big_integer_destroy(&resBigInt);
+	big_integer_destroy(&facBigInt);
+
+	double d;
+	start = clock();
+	double resDouble = 1;
+	double facDouble = 1;
+	for ( d = 1; d <= NUM_ITERATIONS; ++d ){
+		resDouble *= facDouble;
+		facDouble++;
+	}
+	end = clock();
+	cpuTime = ((double) (end - start)) / CLOCKS_PER_SEC;
+	printf("Double did factorial(%d) in %f seconds.\n", NUM_ITERATIONS, cpuTime);
+	printf("Double last value was: %f\n", resDouble);
+};
 int main(int argc, const char **argv)
 {
 	test_create();
@@ -641,6 +765,8 @@ int main(int argc, const char **argv)
     printf("test_add pass\n");
 	test_subtract();
     printf("test_subtract pass\n");
+	test_multiply();
+    printf("test_multiply pass\n");
 	test_increment();
     printf("test_increment pass\n");
 	test_decrement();
@@ -648,6 +774,8 @@ int main(int argc, const char **argv)
 	
 	test_performance();
     printf("test_performance done\n");
+	test_performance_factorial();
+    printf("test_performance_factorial done\n");
 
 	printf("\nAll tests passed!\n");
 	return EXIT_SUCCESS;

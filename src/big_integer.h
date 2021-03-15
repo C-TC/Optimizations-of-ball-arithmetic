@@ -47,6 +47,8 @@ void big_integer_increment( BigInteger *bigInt, const unsigned int value );
 /* decrements the bigInteger by the amount specified */
 void big_integer_decrement( BigInteger *bigInt, const unsigned int value );
 
+BigInteger big_integer_multiply(const BigInteger left, const BigInteger right);
+
 
 #ifdef DEBUG
 void big_integer_dump( const BigInteger bigInt );
