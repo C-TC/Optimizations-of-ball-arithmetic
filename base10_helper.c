@@ -1,16 +1,23 @@
 #include "base10_helper.h"
 
+bool biginteger_is_one(BigInteger* p_biginteger){
+    return p_biginteger->array_size == 1 && p_biginteger->array[0] == 1 && p_biginteger->is_positive;
+}
+
+bool biginteger_is_negative_one(BigInteger* p_biginteger){
+    return p_biginteger->array_size == 1 && p_biginteger->array[0] == 1 && !p_biginteger->is_positive;
+}
+
+bool biginteger_is_zero(BigInteger* p_biginteger){
+    return p_biginteger->array_size == 1 && p_biginteger->array[0] == 0;
+}
+
+
 int biginteger_delete(BigInteger* p_biginteger){
     if (p_biginteger)
     SAFE_FREE(p_biginteger->array);
     SAFE_FREE(p_biginteger);
     return 0;
-}
-
-void bigfloat_delete(BigFloat *p) {
-    if (p && p->base)
-    biginteger_delete((BigInteger*)p->base);
-    SAFE_FREE(p);
 }
 
 int biginteger_print(BigInteger* p_biginteger){
@@ -30,19 +37,6 @@ int biginteger_print(BigInteger* p_biginteger){
     return 0;
 }
 
-void bigfloat_print(BigFloat *p) {
-    if (!p) return;
-    if (p->is_zero) {
-        printf("0.");
-        for (int i = 0; i < DIV_PRE; ++i) {
-            printf("0");
-        }
-        printf("\n");
-        return;
-    }
-
-}
-
 BigInteger* biginteger_zero(){
     BigInteger* p_biginteger_zero = malloc(sizeof(BigInteger));
     p_biginteger_zero->is_positive = true;
@@ -58,14 +52,18 @@ BigInteger* biginteger_zero(){
 int biginteger_split(BigInteger* p_biginteger, int m, BigInteger* high, BigInteger* low){
     size_t high_size = p_biginteger->array_size - m;
     size_t low_size = m;
-    high->array_size = high_size;
-    low->array_size = low_size;
-    high->array = malloc(sizeof(int) * high_size);
-    low->array = malloc(sizeof(int) * low_size);
-    high->is_positive = p_biginteger->is_positive;    
-    low->is_positive = p_biginteger->is_positive;    
-    memcpy(high->array, p_biginteger->array + low_size, high_size * sizeof(int));
-    memcpy(low->array, p_biginteger->array, low_size * sizeof(int));
+    if (m < p_biginteger->array_size) {
+        high->array_size = high_size;
+        high->array = malloc(sizeof(int) * high_size);
+        high->is_positive = p_biginteger->is_positive;    
+        memcpy(high->array, p_biginteger->array + low_size, high_size * sizeof(int));
+    }
+    if (m > 0) {
+        low->array_size = low_size;
+        low->array = malloc(sizeof(int) * low_size);
+        low->is_positive = p_biginteger->is_positive;    
+        memcpy(low->array, p_biginteger->array, low_size * sizeof(int));
+    }
     return 0;
 }
 
@@ -91,8 +89,8 @@ BigInteger* biginteger_add_leading_zero(BigInteger* p_biginteger, int cnt){
     return p_biginteger_result;
 }
 
-BigInteger* biginteger_copy(BigInteger* p_biginteger){
-    BigInteger* p_biginteger_result = malloc(sizeof(BigInteger));
+BigInteger* biginteger_copy(BigInteger* p_biginteger, BigInteger *p_biginteger_result){
+    if (!p_biginteger_result) p_biginteger_result = malloc(sizeof(BigInteger));
     p_biginteger_result->array_size = p_biginteger->array_size;
     p_biginteger_result->array = malloc(sizeof(int) * p_biginteger->array_size);
     p_biginteger_result->is_positive = p_biginteger->is_positive;
@@ -205,4 +203,11 @@ int biginteger_print_debug(BigInteger* p_biginteger){
     }
     printf("\n");
     return 0;
+}
+
+void biginteger_set_inline(BigInteger *p, int num) {
+    p->array = malloc(sizeof(int));
+    p->array_size = 1;
+    p->is_positive = (num >= 0);
+    p->array[0] = num;
 }

@@ -4,4 +4,4 @@
 ## ./test.sh 3
 ## See test/README.md for test number definition 
 
-gcc -O3 -g -Werror -o bash10.out base10.c main.c base10_helper.c -lm
+gcc -g -Werror -o base10.out main.c base10.c base10_helper.c -lm
