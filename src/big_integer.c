@@ -88,6 +88,21 @@ BigInteger big_integer_create_internal( const char sign, const BigIntegerData da
 	return bigInt;
 };
 
+void big_integer_resize( BigIntegerData *pBigIntData, const int new_capacity )
+{
+    int i;
+    pBigIntData->capacity = new_capacity;
+    unsigned int* bits = (unsigned int*) malloc(pBigIntData->capacity);
+    // for (i = 0; i < pBigIntData->size; ++i) {
+    //     tmp[i] = pBigIntData->bits[i];
+    // }
+    memcpy(bits, pBigIntData->bits, pBigIntData->size * UINT_NUM_BYTES);
+    free(pBigIntData->bits);
+    pBigIntData->bits = bits;
+    big_integer_clear_trash_data(pBigIntData);
+    return;
+}
+
 void big_integer_normalize( BigIntegerData *pBigIntData )
 {
 	big_integer_normalize_from( pBigIntData, pBigIntData->capacity-1 );
@@ -183,6 +198,7 @@ BigIntegerData big_integer_add_data( const BigIntegerData left, const BigInteger
     if (result.size == result.capacity) {
         // TODO: reallocate memory
         // double capacity and deallocate old memory space
+        big_integer_resize(&result, result.capacity*2);
     }
 
 	return result;
@@ -235,6 +251,7 @@ void big_integer_increment_data( BigIntegerData *pBigIntData, const unsigned int
     if (pBigIntData->size == pBigIntData->capacity) {
         // TODO: reallocate memory
         // double capacity and deallocate old memory space
+        big_integer_resize(pBigIntData, pBigIntData->capacity*2);
     }
 };
 
@@ -256,6 +273,7 @@ void big_integer_decrement_data( BigIntegerData *pBigIntData, const unsigned int
     if (pBigIntData->size == pBigIntData->capacity) {
         // TODO: reallocate memory
         // double capacity and deallocate old memory space
+        big_integer_resize(pBigIntData, pBigIntData->capacity*2);
     }
 };
 
