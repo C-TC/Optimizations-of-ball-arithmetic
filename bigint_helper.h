@@ -1,6 +1,6 @@
-#ifndef __BASE10_HELPER__
-#define __BASE10_HELPER__
-#include "base10.h"
+#ifndef __BIGINT_HELPER__
+#define __BIGINT_HELPER__
+#include "bigint.h"
 //================Helper Macro==================================
 #define SAFE_FREE(P) do {if (P) free(P);} while(0)
 //==============================================================

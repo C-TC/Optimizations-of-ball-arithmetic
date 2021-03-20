@@ -1,4 +1,4 @@
-#include "base10_helper.h"
+#include "bigint_helper.h"
 
 bool biginteger_is_one(BigInteger* p_biginteger){
     return p_biginteger->array_size == 1 && p_biginteger->array[0] == 1 && p_biginteger->is_positive;

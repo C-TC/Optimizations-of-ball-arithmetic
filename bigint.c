@@ -3,8 +3,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include "base10.h"
-#include "base10_helper.h"
+#include "bigint.h"
+#include "bigint_helper.h"
 
 BigInteger* biginteger_add(BigInteger* p_biginteger1, BigInteger* p_biginteger2, BigInteger *p_biginteger_result){
     if(p_biginteger1->is_positive == p_biginteger2->is_positive){

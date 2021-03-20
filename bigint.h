@@ -1,5 +1,5 @@
-#ifndef __BBASE10__
-#define __BBASE10__
+#ifndef __BIGINT__
+#define __BIGINT__
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
@@ -19,6 +19,7 @@ typedef struct BigInteger{
     int* array;
     size_t array_size;
 }BigInteger;
+
 //==============================================================
 
 //==========================Compute Function====================
@@ -30,5 +31,5 @@ BigInteger* biginteger_add(BigInteger*, BigInteger*, BigInteger*);
 //==============================================================
 
 //Other Include Files
-#include "base10_helper.h"
+#include "bigint_helper.h"
 #endif
