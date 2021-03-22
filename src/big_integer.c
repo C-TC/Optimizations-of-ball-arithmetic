@@ -30,8 +30,10 @@ BigIntegerData big_integer_empty_data( );
 BigIntegerData big_integer_create_data( const unsigned int bits[], const int size );
 /* create a BigInteger with sign `sign` & data `data` */
 BigInteger big_integer_create_internal( const int sign, const BigIntegerData data );
-/* free the allocated bits array and reset size/capacity to 0 */
+/* free the allocated bits array and set size/sign/capacity to 0 */
 void big_integer_destroy(BigInteger* pBigInteger);
+/* free the allocated bits array and set size/capacity to 0 */
+void big_integer_data_destroy(BigIntegerData* pBigIntegerData);
 /* allocate a new bits array with `new_capacity` and copy the old data into it */
 void big_integer_data_resize( BigIntegerData *pBigIntData, const int new_capacity );
 /* create a deep copy of a bigint/bigintdata */
@@ -63,7 +65,7 @@ void big_integer_decrement_data( BigIntegerData *pBigIntData, const unsigned int
 
 void big_integer_multiply_data_with_uint( const BigIntegerData left, unsigned int right, BigIntegerData* pResult );
 BigIntegerData big_integer_multiply_data( BigIntegerData left,  BigIntegerData right );
-void big_integer_data_shift( BigIntegerData *pBigIntData, int d );
+void big_integer_data_left_shift( BigIntegerData *pBigIntData, int d );
 BigInteger big_integer_multiply( const BigInteger left, const BigInteger right );
 
 /* PRIVATE FUNCTIONS IMPLEMENTATION */
@@ -105,12 +107,21 @@ BigInteger big_integer_create_internal( const int sign, const BigIntegerData dat
     return bigInt;
 };
 
+// TODO: maybe we can just leave sign/size/capacity untouched?
 void big_integer_destroy(BigInteger* pBigInteger)
 {
     pBigInteger->sign = 0;
     pBigInteger->data.capacity = 0;
     pBigInteger->data.size = 0;
     free(pBigInteger->data.bits);
+}
+
+// TODO: maybe we can just leave sign/size/capacity untouched?
+void big_integer_data_destroy( BigIntegerData* pBigIntegerData )
+{
+    pBigIntegerData->capacity = 0;
+    pBigIntegerData->size = 0;
+    free(pBigIntegerData->bits);
 }
 
 void big_integer_data_resize( BigIntegerData *pBigIntData, const int new_capacity )
@@ -253,6 +264,7 @@ BigIntegerData big_integer_add_data( const BigIntegerData left, const BigInteger
     return result;
 };
 
+// left or right can be the same data as *pResult
 void big_integer_add_data_inplace( const BigIntegerData left, const BigIntegerData right, BigIntegerData *pResult )
 {
     // assume pResult's bits is allocated and the capacity is properly set
@@ -264,7 +276,11 @@ void big_integer_add_data_inplace( const BigIntegerData left, const BigIntegerDa
     if (pResult->capacity < size+1) {
         // TODO: this is a design choice: make the result as large as its operands.
         // make sure overflow won't happen
-        assert(capacity > size);
+        // if (capacity < size) {
+        //     printf("%u %u\n", left.bits[0], right.bits[0]);
+        //     printf("%d %d; %d %d\n", left.size, left.capacity, right.size, right.capacity);
+        // }
+        assert(capacity >= size);
         big_integer_data_resize(pResult, capacity);
     }
 
@@ -289,7 +305,7 @@ void big_integer_add_data_inplace( const BigIntegerData left, const BigIntegerDa
     assert(pResult->size <= pResult->capacity);
     if (pResult->size == pResult->capacity) {
         // hope this won't happen much in a addition
-        big_integer_data_resize(pResult, pResult->capacity*2);
+        big_integer_data_resize( pResult, pResult->capacity*2 );
     }
 
     return;
@@ -303,8 +319,6 @@ BigIntegerData big_integer_subtract_data( const BigIntegerData left, const BigIn
     int size = MAX( left.size, right.size );
     int capacity = MAX( left.capacity, right.capacity );
 
-    // result.bits = (unsigned int*) malloc( capacity * UINT_NUM_BYTES );
-    // memset( result.bits, 0, capacity * UINT_NUM_BYTES );
     result.bits = (unsigned int*) calloc( capacity, UINT_NUM_BYTES );
     result.capacity = capacity;
 
@@ -324,10 +338,7 @@ BigIntegerData big_integer_subtract_data( const BigIntegerData left, const BigIn
         borrow = (borrow >> UINT_NUM_BITS) & 1; 
     }
 
-    // need to clean memory before
     big_integer_normalize_from( &result, i );
-    // not sure why I was doing this
-    // big_integer_clear_trash_data(&result);
 
     return result;
 };
@@ -362,70 +373,8 @@ void big_integer_subtract_data_inplace( const BigIntegerData left, const BigInte
 
     // assume bits[size] to bits[capacity-1] is clean (set to 0)
     big_integer_normalize_from( pResult, i );
-    // big_integer_clear_trash_data(pResult);
 
     return;
-}
-
-void big_integer_multiply_data_with_uint( const BigIntegerData left, unsigned int right, BigIntegerData* pResult ) {
-    // use ulong to store the value to avoid implicit conversion 
-    unsigned long ulright = right, product = 0;
-    int i;
-
-    // make sure pResult have enough space to store the result
-    if (pResult->capacity < left.size+1) {
-        // avoid copy
-        pResult->size = 0;
-        big_integer_data_resize(pResult, left.size*2);
-    }
-
-    for (i = 0; i < left.size; ++i) {
-        product += ulright * left.bits[i];
-        // TODO: not sure if this is correct and the most efficient way to extract the lower 32 bits
-        // pResult->bits[i] = product & 0x00000000ffffffff;
-        pResult->bits[i] = (unsigned int)product;
-        // get upper 32 bits
-        product >>= UINT_NUM_BITS;
-    }
-
-    // i is just left.size
-    if (product > 0) {
-        pResult->bits[i] = (unsigned int)product;
-        pResult->size = i+1;
-    }
-    else {
-        pResult->size = i;
-    }
-
-    return;
-}
-
-BigIntegerData big_integer_multiply_data( const BigIntegerData left, const BigIntegerData right)
-{	
-    BigIntegerData result;
-    BigIntegerData left_copy = big_integer_data_deepcopy(left);
-    // result.capacity=2;
-    // result.size=1;
-    int capacity = MAX(left.capacity, right.capacity);
-    // calloc is fater than malloc+memset
-    // good for initialization
-    // TODO: properly need to change certain initialization method and stop calling clear_trash_data
-    result.bits = (unsigned int*)calloc(capacity*2, UINT_NUM_BYTES);
-
-    int i, j;
-    for(i=0;i<right.size;i++)
-    {
-        big_integer_multiply_data_with_uint(left_copy, right.bits[i], &result);
-        // TODO: remove this stupid loop
-        for(j=1;j<=right.bits[i];j++)
-        {
-            result=big_integer_add_data(result,left);
-            // big_integer_add_data_inplace(result, left_copy, &result);
-        }
-        // TODO: left & right should be const! need to create a copy of left to shift
-        big_integer_data_shift(&left_copy, 1);
-    }
-    return result;
 }
 
 void big_integer_increment_data( BigIntegerData *pBigIntData, const unsigned int value )
@@ -445,9 +394,7 @@ void big_integer_increment_data( BigIntegerData *pBigIntData, const unsigned int
 
     assert(pBigIntData->size <= pBigIntData->capacity);
     if (pBigIntData->size == pBigIntData->capacity) {
-        // TODO: reallocate memory
-        // double capacity and deallocate old memory space
-        big_integer_data_resize(pBigIntData, pBigIntData->capacity*2);
+        big_integer_data_resize( pBigIntData, pBigIntData->capacity*2 );
     }
 };
 
@@ -467,27 +414,89 @@ void big_integer_decrement_data( BigIntegerData *pBigIntData, const unsigned int
     big_integer_normalize_from( pBigIntData, i );
     assert(pBigIntData->size <= pBigIntData->capacity);
     if (pBigIntData->size == pBigIntData->capacity) {
-        // TODO: reallocate memory
-        // double capacity and deallocate old memory space
-        big_integer_data_resize(pBigIntData, pBigIntData->capacity*2);
+        big_integer_data_resize( pBigIntData, pBigIntData->capacity*2 );
     }
 };
 
-void big_integer_data_shift(BigIntegerData *pBigIntData, int d)
-{
-    // only deal with right shift
-    assert(d>0);
-    int i=0;
-    if(pBigIntData->size==1 && pBigIntData->bits[0]==0) return ;
-    if(pBigIntData->size+d>pBigIntData->capacity)
-    big_integer_data_resize(pBigIntData,2*(pBigIntData->size+d));
-    for(i=pBigIntData->size;i>=0;i--)
-    {
-        pBigIntData->bits[i+d]=pBigIntData->bits[i];
+void big_integer_multiply_data_with_uint( const BigIntegerData left, unsigned int right, BigIntegerData* pResult ) {
+    // use ulong to store the value to avoid implicit conversion 
+    unsigned long ulright = right, product = 0;
+    int i;
+
+    // make sure pResult have enough space to store the result
+    if (pResult->capacity < left.size+1) {
+        // avoid copy
+        pResult->size = 0;
+        big_integer_data_resize( pResult, left.size*2 );
     }
-    for(i=0;i<d;i++)
+
+    for (i = 0; i < left.size; ++i) {
+        product += ulright * left.bits[i];
+        // TODO: not sure if this is correct and the most efficient way to extract the lower 32 bits
+        // pResult->bits[i] = product & 0x00000000ffffffff;
+        pResult->bits[i] = (unsigned int) product;
+        // get upper 32 bits
+        product >>= UINT_NUM_BITS;
+    }
+
+    // i is just left.size
+    if (product > 0) {
+        pResult->bits[i] = (unsigned int) product;
+        pResult->size = i + 1;
+    }
+    else {
+        pResult->size = i;
+    }
+
+    return;
+}
+
+BigIntegerData big_integer_multiply_data( const BigIntegerData left, const BigIntegerData right)
+{	
+    BigIntegerData result;
+    BigIntegerData left_copy = big_integer_data_deepcopy( left );
+    int capacity = MAX( left.capacity, right.capacity );
+    // calloc is fater than malloc+memset
+    // good for initialization
+    result.bits = (unsigned int*) calloc( capacity*2, UINT_NUM_BYTES );
+    result.capacity = capacity * 2;
+    result.size = 0;
+
+    int i, j;
+    for( i = 0; i < right.size; i++ )
     {
-        pBigIntData->bits[i]=0;
+        // big_integer_multiply_data_with_uint(left_copy, right.bits[i], &result);
+        // TODO: remove this stupid loop
+        // printf("%d %d\n", left_copy.size, left_copy.capacity);
+        // printf("\t%d %d\n", right.size, right.capacity);
+        for(j=1;j<=right.bits[i];j++)
+        {
+            // this is memory leaking!
+            // result=big_integer_add_data(result,left);
+            big_integer_add_data_inplace(result, left_copy, &result);
+        }
+        big_integer_data_left_shift(&left_copy, 1);
+    }
+    big_integer_data_destroy(&left_copy);
+    return result;
+}
+
+void big_integer_data_left_shift(BigIntegerData *pBigIntData, int d)
+{
+    assert( d > 0 );
+    int i;
+    // if( pBigIntData->size == 1 && pBigIntData -> bits[0] == 0) return ;
+    // 0 has the size of 0
+    if ( pBigIntData->size == 0 ) return;
+    if ( pBigIntData->size + d > pBigIntData->capacity )
+        big_integer_data_resize( pBigIntData, 2*(pBigIntData->size+d) );
+    for ( i = pBigIntData->size ; i >= 0 ; i-- )
+    {
+        pBigIntData->bits[i+d] = pBigIntData->bits[i];
+    }
+    for( i = 0; i < d; i++ )
+    {
+        pBigIntData->bits[i] = 0;
     }
     pBigIntData->size+=d;
 }
@@ -737,6 +746,7 @@ BigInteger big_integer_multiply(const BigInteger left, const BigInteger right)
 {
     if(left.sign==0 || right.sign==0)
         return big_integer_create(0);
+    // printf("mul: %d %d %d %d\n", left.data.size, left.data.capacity, right.data.size, right.data.capacity);
     return big_integer_create_internal(left.sign*right.sign, big_integer_multiply_data(left.data, right.data));
 }
 
