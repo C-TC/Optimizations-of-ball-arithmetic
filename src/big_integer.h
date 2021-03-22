@@ -17,7 +17,7 @@ typedef struct BigIntegerData
 
 typedef struct BigInteger 
 {
-	char sign;
+	int sign;
 	BigIntegerData data;
 } BigInteger;
 

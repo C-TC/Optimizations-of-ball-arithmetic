@@ -27,7 +27,7 @@ const int UINT_NUM_BITS =	(sizeof(unsigned int) * 8);
 /* PRIVATE FUNCTIONS DECLARATIONS */
 BigIntegerData big_integer_empty_data( );
 BigIntegerData big_integer_create_data( const unsigned int bits[], const int length );
-BigInteger big_integer_create_internal( const char sign, const BigIntegerData data );
+BigInteger big_integer_create_internal( const int sign, const BigIntegerData data );
 void big_integer_normalize( BigIntegerData *pBigIntData );
 void big_integer_normalize_from( BigIntegerData *pBigIntData, const int from );
 void big_integer_clear_trash_data( BigIntegerData *pBigIntData );
@@ -48,7 +48,8 @@ void big_integer_data_resize( BigIntegerData *pBigIntData, const int new_capacit
 void big_integer_add_data_inplace(const BigIntegerData left, const BigIntegerData right, BigIntegerData *pResult);
 void big_integer_subtract_data_inplace(const BigIntegerData left, const BigIntegerData right, BigIntegerData *pResult);
 void big_integer_multiply_data_with_uint( const BigIntegerData left, unsigned int right, BigIntegerData* pResult );
-
+// read from file to initialize a large bigint
+BigInteger big_integer_create_from_file( FILE** ppFile );
 
 /*Tiancheng adds*/
 BigIntegerData big_integer_multiply_data( BigIntegerData left,  BigIntegerData right);
@@ -90,7 +91,30 @@ BigIntegerData big_integer_create_data( const unsigned int bits[], const int siz
 	return bigIntData;
 };
 
-BigInteger big_integer_create_internal( const char sign, const BigIntegerData data )
+BigInteger big_integer_create_from_file( FILE** ppFile ) {
+    BigInteger bigInt;
+    int sign, size;
+    int ret;
+    int i;
+    ret = fscanf(*ppFile, "%d %d", &sign, &size);
+    if (ret != 2) {
+        printf("Error during reading a bigint's sign & size!");
+        exit(1);
+    }
+    assert(size > 0);
+    bigInt.sign = sign;
+    bigInt.data.size = size;
+    bigInt.data.capacity = 2 * size;
+    bigInt.data.bits = (unsigned int*)malloc(2*size*UINT_NUM_BYTES);
+    for (i = 0; i < size; ++i) {
+        ret = fscanf(*ppFile, "%u", &(bigInt.data.bits[i]));
+        assert(ret == 1);
+    }
+    big_integer_clear_trash_data(&(bigInt.data));
+    return bigInt;
+}
+
+BigInteger big_integer_create_internal( const int sign, const BigIntegerData data )
 {
 	BigInteger bigInt;
 	bigInt.sign = sign;
@@ -566,7 +590,7 @@ int big_integer_compare( const BigInteger left, const BigInteger right )
 		return -1;
 	
 	/* if they have the same sign */
-	char sign = left.sign;
+	int sign = left.sign;
 	return sign * big_integer_compare_data( &left.data, &right.data );
 };
 
