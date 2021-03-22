@@ -25,6 +25,10 @@ int biginteger_abs_comp(BigInteger*, BigInteger*);
 BigInteger* biginteger_from_string(char*, size_t);
 void biginteger_set_inline(BigInteger*, int);
 int biginteger_print_debug(BigInteger*);
+
+int biginteger_num_valid_digits(BigInteger*);// 0 has 0 valid bits
+void biginteger_set_exact_size(BigInteger*);
+BigInteger* biginteger_left_shift_digits(BigInteger*,int);//1 digit is 1 zero, different from biginteger_add_leading_zero
 //============================================================================
 
 #endif

@@ -1,6 +1,12 @@
-all: test
+all: test test2
 test: bigint.o bigint_helper.o main.o bigfloat_helper.o bigfloat.o
 	gcc -o prog main.o bigint.o bigint_helper.o bigfloat_helper.o bigfloat.o -lm
+
+test2: bigint.o bigint_helper.o test2.o bigfloat_helper.o bigfloat.o
+	gcc -o test2 test2.o bigint.o bigint_helper.o bigfloat_helper.o bigfloat.o -lm
+
+test2.o: test2.c
+	gcc -c test2.c
 
 main.o: main.c
 	gcc -c main.c
