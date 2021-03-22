@@ -44,6 +44,10 @@ BigInteger big_integer_deep_copy(const BigInteger other);
 BigIntegerData big_integer_data_deep_copy(const BigIntegerData other);
 void big_integer_destroy(BigInteger* pBigInteger);
 void big_integer_resize( BigIntegerData *pBigIntData, const int new_capacity );
+// version for funcs with allocated memory
+void big_integer_add_data_inplace(const BigIntegerData left, const BigIntegerData right, BigIntegerData *pResult);
+void big_integer_subtract_data_inplace(const BigIntegerData left, const BigIntegerData right, BigIntegerData *pResult);
+
 
 /*Tiancheng adds*/
 BigIntegerData big_integer_multiply_data( BigIntegerData left,  BigIntegerData right);
@@ -187,8 +191,6 @@ int big_integer_compare_data_uint( const BigIntegerData *pBigIntData, unsigned i
 
 BigIntegerData big_integer_add_data( const BigIntegerData left, const BigIntegerData right )
 {
-	int uIntNumBits = UINT_NUM_BITS;
-
 	BigIntegerData result = big_integer_empty_data( );
 
 	int size = MAX( left.size, right.size );
@@ -203,7 +205,7 @@ BigIntegerData big_integer_add_data( const BigIntegerData left, const BigInteger
 	{
 		sum += (unsigned long long) left.bits[i] + right.bits[i];
 		result.bits[i] = (unsigned int) sum;
-		sum >>= uIntNumBits;
+		sum >>= UINT_NUM_BITS;
 	}
 
 	if ( sum > 0 )
@@ -224,6 +226,10 @@ BigIntegerData big_integer_add_data( const BigIntegerData left, const BigInteger
 
 	return result;
 };
+
+void big_integer_add_data_inplace(const BigIntegerData left, const BigIntegerData right, BigIntegerData *pResult) {
+
+}
 
 /* left > right always */
 BigIntegerData big_integer_subtract_data( const BigIntegerData left, const BigIntegerData right )
@@ -257,6 +263,7 @@ BigIntegerData big_integer_subtract_data( const BigIntegerData left, const BigIn
 
 	return result;
 };
+void big_integer_subtract_data_inplace(const BigIntegerData left, const BigIntegerData right, BigIntegerData *pResult);
 
 BigIntegerData big_integer_multiply_data( BigIntegerData left,  BigIntegerData right)
 {	
