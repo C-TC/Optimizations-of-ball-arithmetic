@@ -227,8 +227,46 @@ BigIntegerData big_integer_add_data( const BigIntegerData left, const BigInteger
 	return result;
 };
 
-void big_integer_add_data_inplace(const BigIntegerData left, const BigIntegerData right, BigIntegerData *pResult) {
+void big_integer_add_data_inplace( const BigIntegerData left, const BigIntegerData right, BigIntegerData *pResult )
+{
+    // assume pResult's bits is allocated and the capacity is properly set
+    // the contents in bits & size won't matter as they will be written again.
 
+	int size = MAX( left.size, right.size );
+    int capacity = MAX(left.capacity, right.capacity);
+    
+    if (pResult->capacity < size+1) {
+        // TODO: this is a design choice: make the result as large as its operands.
+        // make sure overflow won't happen
+        assert(capacity > size);
+        big_integer_resize(pResult, capacity);
+    }
+
+	unsigned long long sum = 0;
+	int i;
+	for ( i = 0; i < size; ++i )
+	{
+		sum += (unsigned long long) left.bits[i] + right.bits[i];
+		pResult->bits[i] = (unsigned int) sum;
+		sum >>= UINT_NUM_BITS;
+	}
+
+	if ( sum > 0 )
+	{
+		pResult->bits[i] = (unsigned int) sum;
+		i++;
+	}
+
+	pResult->size = i;
+    big_integer_clear_trash_data(pResult);
+
+    assert(pResult->size <= pResult->capacity);
+    if (pResult->size == pResult->capacity) {
+        // hope this won't happen much in a addition
+        big_integer_resize(pResult, pResult->capacity*2);
+    }
+
+    return;
 }
 
 /* left > right always */
@@ -240,6 +278,8 @@ BigIntegerData big_integer_subtract_data( const BigIntegerData left, const BigIn
     int capacity = MAX(left.capacity, right.capacity);
 
     result.bits = (unsigned int*) malloc(capacity*UINT_NUM_BYTES);
+    // TODO: check if valgrind is warning this
+    // memset(result.bits, 0, capacity*UINT_NUM_BYTES);
     result.capacity = capacity;
 
 	unsigned long long borrow = 0;
@@ -258,12 +298,47 @@ BigIntegerData big_integer_subtract_data( const BigIntegerData left, const BigIn
 		borrow = (borrow >> UINT_NUM_BITS) & 1; 
 	}
 
+    // need to clean memory before
 	big_integer_normalize_from( &result, i );
-    big_integer_clear_trash_data(&result);
+    // not sure why I was doing this
+    // big_integer_clear_trash_data(&result);
 
 	return result;
 };
-void big_integer_subtract_data_inplace(const BigIntegerData left, const BigIntegerData right, BigIntegerData *pResult);
+void big_integer_subtract_data_inplace( const BigIntegerData left, const BigIntegerData right, BigIntegerData *pResult )
+{
+	int size = MAX( left.size, right.size );
+    int capacity = MAX(left.capacity, right.capacity);
+    
+    if (pResult->capacity < size+1) {
+        // TODO: this is a design choice: make the result as large as its operands.
+        // make sure overflow won't happen
+        assert(capacity > size);
+        big_integer_resize(pResult, capacity);
+    }
+
+	unsigned long long borrow = 0;
+	int i;
+	for ( i = 0; i < size; ++i )
+	{
+		/* what happens here is that, if left is less than right, borrow will become 
+		   "negative" (not really because it is unsigned), and the bit pattern for that is 
+		   the 1's complement (complementing it to get to 0), which is exactly the remainder
+		   of this term in the subtraction. */
+		borrow = (unsigned long long) left.bits[i] - right.bits[i] - borrow;
+
+		pResult->bits[i] = (unsigned int) borrow;
+
+		/* here we just want the first 1 after removing the lower order term */
+		borrow = (borrow >> UINT_NUM_BITS) & 1; 
+	}
+
+    // assume bits[size] to bits[capacity-1] is clean (set to 0)
+	big_integer_normalize_from( pResult, i );
+    // big_integer_clear_trash_data(pResult);
+
+	return;
+}
 
 BigIntegerData big_integer_multiply_data( BigIntegerData left,  BigIntegerData right)
 {	
@@ -277,8 +352,10 @@ BigIntegerData big_integer_multiply_data( BigIntegerData left,  BigIntegerData r
 	{
 		for(j=1;j<=right.bits[i];j++)
 		{
-			result=big_integer_add_data(result,left);
+			// result=big_integer_add_data(result,left);
+            big_integer_add_data_inplace(left, right, &result);
 		}
+        // TODO: left & right should be const! need to create a copy of left to shift
 		big_integer_data_digit_shift(&left,1);
 	}
 	return result;
