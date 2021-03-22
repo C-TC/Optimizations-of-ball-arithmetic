@@ -47,7 +47,7 @@ void big_integer_data_resize( BigIntegerData *pBigIntData, const int new_capacit
 // version for funcs with allocated memory
 void big_integer_add_data_inplace(const BigIntegerData left, const BigIntegerData right, BigIntegerData *pResult);
 void big_integer_subtract_data_inplace(const BigIntegerData left, const BigIntegerData right, BigIntegerData *pResult);
-void big_integer_multiply_data_with_uint( unsigned int left, const BigIntegerData right, BigIntegerData* pResult );
+void big_integer_multiply_data_with_uint( const BigIntegerData left, unsigned int right, BigIntegerData* pResult );
 
 
 /*Tiancheng adds*/
@@ -345,7 +345,6 @@ void big_integer_subtract_data_inplace( const BigIntegerData left, const BigInte
 void big_integer_multiply_data_with_uint( const BigIntegerData left, unsigned int right, BigIntegerData* pResult ) {
     // use ulong to store the value to avoid implicit conversion 
     unsigned long ulright = right, product = 0;
-    unsigned int lower;
     int i;
 
     // make sure pResult have enough space to store the result
@@ -388,7 +387,7 @@ BigIntegerData big_integer_multiply_data( const BigIntegerData left, const BigIn
     // TODO: properly need to change certain initialization method and stop calling clear_trash_data
 	result.bits = (unsigned int*)calloc(capacity*2, UINT_NUM_BYTES);
 
-	int i,j;
+	int i;
 	for(i=0;i<right.size;i++)
 	{
         big_integer_multiply_data_with_uint(left_copy, right.bits[i], &result);
