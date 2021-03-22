@@ -43,10 +43,11 @@ void big_integer_decrement_data( BigIntegerData *pBigIntData, const unsigned int
 BigInteger big_integer_deepcopy(const BigInteger other);
 BigIntegerData big_integer_data_deepcopy(const BigIntegerData other);
 void big_integer_destroy(BigInteger* pBigInteger);
-void big_integer_resize( BigIntegerData *pBigIntData, const int new_capacity );
+void big_integer_data_resize( BigIntegerData *pBigIntData, const int new_capacity );
 // version for funcs with allocated memory
 void big_integer_add_data_inplace(const BigIntegerData left, const BigIntegerData right, BigIntegerData *pResult);
 void big_integer_subtract_data_inplace(const BigIntegerData left, const BigIntegerData right, BigIntegerData *pResult);
+void big_integer_multiply_data_with_uint( unsigned int left, const BigIntegerData right, BigIntegerData* pResult );
 
 
 /*Tiancheng adds*/
@@ -105,7 +106,8 @@ void big_integer_destroy(BigInteger* pBigInteger) {
     free(pBigInteger->data.bits);
 }
 
-void big_integer_resize( BigIntegerData *pBigIntData, const int new_capacity )
+// TODO: use calloc in resize?
+void big_integer_data_resize( BigIntegerData *pBigIntData, const int new_capacity )
 {
     // int i;
     pBigIntData->capacity = new_capacity;
@@ -221,7 +223,7 @@ BigIntegerData big_integer_add_data( const BigIntegerData left, const BigInteger
     if (result.size == result.capacity) {
         // TODO: reallocate memory
         // double capacity and deallocate old memory space
-        big_integer_resize(&result, result.capacity*2);
+        big_integer_data_resize(&result, result.capacity*2);
     }
 
 	return result;
@@ -239,7 +241,7 @@ void big_integer_add_data_inplace( const BigIntegerData left, const BigIntegerDa
         // TODO: this is a design choice: make the result as large as its operands.
         // make sure overflow won't happen
         assert(capacity > size);
-        big_integer_resize(pResult, capacity);
+        big_integer_data_resize(pResult, capacity);
     }
 
 	unsigned long long sum = 0;
@@ -263,7 +265,7 @@ void big_integer_add_data_inplace( const BigIntegerData left, const BigIntegerDa
     assert(pResult->size <= pResult->capacity);
     if (pResult->size == pResult->capacity) {
         // hope this won't happen much in a addition
-        big_integer_resize(pResult, pResult->capacity*2);
+        big_integer_data_resize(pResult, pResult->capacity*2);
     }
 
     return;
@@ -314,7 +316,7 @@ void big_integer_subtract_data_inplace( const BigIntegerData left, const BigInte
         // TODO: this is a design choice: make the result as large as its operands.
         // make sure overflow won't happen
         assert(capacity > size);
-        big_integer_resize(pResult, capacity);
+        big_integer_data_resize(pResult, capacity);
     }
 
 	unsigned long long borrow = 0;
@@ -340,6 +342,40 @@ void big_integer_subtract_data_inplace( const BigIntegerData left, const BigInte
 	return;
 }
 
+void big_integer_multiply_data_with_uint( const BigIntegerData left, unsigned int right, BigIntegerData* pResult ) {
+    // use ulong to store the value to avoid implicit conversion 
+    unsigned long ulright = right, product = 0;
+    unsigned int lower;
+    int i;
+
+    // make sure pResult have enough space to store the result
+    if (pResult->capacity < left.size+1) {
+        // avoid copy
+        pResult->size = 0;
+        big_integer_data_resize(pResult, left.size*2);
+    }
+
+    for (i = 0; i < left.size; ++i) {
+        product += ulright * left.bits[i];
+        // TODO: not sure if this is correct and the most efficient way to extract the lower 32 bits
+        // pResult->bits[i] = product & 0x00000000ffffffff;
+        pResult->bits[i] = (unsigned int)product;
+        // get upper 32 bits
+        product >>= UINT_NUM_BITS;
+    }
+
+    // i is just left.size
+    if (product > 0) {
+        pResult->bits[i] = (unsigned int)product;
+        pResult->size = i+1;
+    }
+    else {
+        pResult->size = i;
+    }
+
+    return;
+}
+
 BigIntegerData big_integer_multiply_data( const BigIntegerData left, const BigIntegerData right)
 {	
 	BigIntegerData result;
@@ -355,11 +391,13 @@ BigIntegerData big_integer_multiply_data( const BigIntegerData left, const BigIn
 	int i,j;
 	for(i=0;i<right.size;i++)
 	{
-		for(j=1;j<=right.bits[i];j++)
-		{
-			// result=big_integer_add_data(result,left);
-            big_integer_add_data_inplace(result, left_copy, &result);
-		}
+        big_integer_multiply_data_with_uint(left_copy, right.bits[i], &result);
+        // TODO: remove this stupid loop
+		// for(j=1;j<=right.bits[i];j++)
+		// {
+		// 	// result=big_integer_add_data(result,left);
+        // big_integer_add_data_inplace(result, left_copy, &result);
+		// }
         // TODO: left & right should be const! need to create a copy of left to shift
 		big_integer_data_digit_shift(&left_copy, 1);
 	}
@@ -385,7 +423,7 @@ void big_integer_increment_data( BigIntegerData *pBigIntData, const unsigned int
     if (pBigIntData->size == pBigIntData->capacity) {
         // TODO: reallocate memory
         // double capacity and deallocate old memory space
-        big_integer_resize(pBigIntData, pBigIntData->capacity*2);
+        big_integer_data_resize(pBigIntData, pBigIntData->capacity*2);
     }
 };
 
@@ -407,7 +445,7 @@ void big_integer_decrement_data( BigIntegerData *pBigIntData, const unsigned int
     if (pBigIntData->size == pBigIntData->capacity) {
         // TODO: reallocate memory
         // double capacity and deallocate old memory space
-        big_integer_resize(pBigIntData, pBigIntData->capacity*2);
+        big_integer_data_resize(pBigIntData, pBigIntData->capacity*2);
     }
 };
 
@@ -418,7 +456,7 @@ void big_integer_data_digit_shift(BigIntegerData *pBigIntData, int d)
 	int i=0;
 	if(pBigIntData->size==1 && pBigIntData->bits[0]==0) return ;
 	if(pBigIntData->size+d>pBigIntData->capacity)
-	big_integer_resize(pBigIntData,2*(pBigIntData->size+d));
+	big_integer_data_resize(pBigIntData,2*(pBigIntData->size+d));
 	for(i=pBigIntData->size;i>=0;i--)
 	{
 		pBigIntData->bits[i+d]=pBigIntData->bits[i];
