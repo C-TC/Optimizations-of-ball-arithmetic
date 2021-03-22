@@ -40,8 +40,8 @@ void big_integer_increment_data( BigIntegerData *pBigIntData, const unsigned int
 void big_integer_decrement_data( BigIntegerData *pBigIntData, const unsigned int value );
 
 /* function Lixin adds */
-BigInteger big_integer_deep_copy(const BigInteger other);
-BigIntegerData big_integer_data_deep_copy(const BigIntegerData other);
+BigInteger big_integer_deepcopy(const BigInteger other);
+BigIntegerData big_integer_data_deepcopy(const BigIntegerData other);
 void big_integer_destroy(BigInteger* pBigInteger);
 void big_integer_resize( BigIntegerData *pBigIntData, const int new_capacity );
 // version for funcs with allocated memory
@@ -340,12 +340,17 @@ void big_integer_subtract_data_inplace( const BigIntegerData left, const BigInte
 	return;
 }
 
-BigIntegerData big_integer_multiply_data( BigIntegerData left,  BigIntegerData right)
+BigIntegerData big_integer_multiply_data( const BigIntegerData left, const BigIntegerData right)
 {	
 	BigIntegerData result;
-	result.capacity=2;
-	result.size=1;
-	result.bits=(unsigned int*)calloc(result.capacity,UINT_NUM_BYTES);
+    BigIntegerData left_copy = big_integer_data_deepcopy(left);
+	// result.capacity=2;
+	// result.size=1;
+    int capacity = MAX(left.capacity, right.capacity);
+    // calloc is fater than malloc+memset
+    // good for initialization
+    // TODO: properly need to change certain initialization method and stop calling clear_trash_data
+	result.bits = (unsigned int*)calloc(capacity*2, UINT_NUM_BYTES);
 
 	int i,j;
 	for(i=0;i<right.size;i++)
@@ -353,10 +358,10 @@ BigIntegerData big_integer_multiply_data( BigIntegerData left,  BigIntegerData r
 		for(j=1;j<=right.bits[i];j++)
 		{
 			// result=big_integer_add_data(result,left);
-            big_integer_add_data_inplace(left, right, &result);
+            big_integer_add_data_inplace(result, left_copy, &result);
 		}
         // TODO: left & right should be const! need to create a copy of left to shift
-		big_integer_data_digit_shift(&left,1);
+		big_integer_data_digit_shift(&left_copy, 1);
 	}
 	return result;
 }
@@ -528,7 +533,7 @@ int big_integer_compare( const BigInteger left, const BigInteger right )
 	return sign * big_integer_compare_data( &left.data, &right.data );
 };
 
-BigInteger big_integer_deep_copy(const BigInteger other) {
+BigInteger big_integer_deepcopy(const BigInteger other) {
     BigInteger this;
     this.sign = other.sign;
     this.data.capacity = other.data.capacity;
@@ -538,7 +543,7 @@ BigInteger big_integer_deep_copy(const BigInteger other) {
     return this;
 }
 
-BigIntegerData big_integer_data_deep_copy(const BigIntegerData other) {
+BigIntegerData big_integer_data_deepcopy(const BigIntegerData other) {
     BigIntegerData this;
     this.capacity = other.capacity;
     this.size = other.size;
@@ -551,9 +556,9 @@ BigIntegerData big_integer_data_deep_copy(const BigIntegerData other) {
 BigInteger big_integer_add( const BigInteger left, const BigInteger right )
 {
 	if ( left.sign == 0 )
-		return big_integer_deep_copy(right);
+		return big_integer_deepcopy(right);
 	if ( right.sign == 0 )
-		return big_integer_deep_copy(left);
+		return big_integer_deepcopy(left);
 
 	if ( left.sign == right.sign )
 		return big_integer_create_internal( left.sign, big_integer_add_data( left.data, right.data ));
@@ -573,9 +578,9 @@ BigInteger big_integer_add( const BigInteger left, const BigInteger right )
 BigInteger big_integer_subtract( const BigInteger left, const BigInteger right )
 {
 	if ( left.sign == 0 )
-		return big_integer_create_internal( -right.sign, big_integer_data_deep_copy(right.data) );
+		return big_integer_create_internal( -right.sign, big_integer_data_deepcopy(right.data) );
 	if ( right.sign == 0 )
-		return big_integer_deep_copy(left);
+		return big_integer_deepcopy(left);
 
 	if ( left.sign != right.sign )
 		return big_integer_create_internal( left.sign, big_integer_add_data(left.data, right.data) );
@@ -667,7 +672,7 @@ BigInteger big_integer_multiply(const BigInteger left, const BigInteger right)
 {
 	if(left.sign==0 || right.sign==0)
 		return big_integer_create(0);
-	return big_integer_create_internal(left.sign*right.sign,big_integer_multiply_data(left.data,right.data));
+	return big_integer_create_internal(left.sign*right.sign, big_integer_multiply_data(left.data, right.data));
 }
 
 #ifdef DEBUG
