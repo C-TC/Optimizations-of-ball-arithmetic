@@ -730,6 +730,7 @@ void test_performance_factorial()
     BigInteger facBigInt = big_integer_create( 1 );
     for ( l = 1; l <= NUM_ITERATIONS; ++l )
     {
+        // this is memory leaking!
         resBigInt = big_integer_multiply(resBigInt,facBigInt);		
         big_integer_increment( &facBigInt, 1 );
     }
