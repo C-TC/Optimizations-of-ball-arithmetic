@@ -1,27 +1,29 @@
-all: test test2
-test: bigint.o bigint_helper.o main.o bigfloat_helper.o bigfloat.o
-	gcc -o prog main.o bigint.o bigint_helper.o bigfloat_helper.o bigfloat.o -lm
+CC := gcc
+CFLAGS := -Wall -O3
+ifeq ($(MAKECMDGOALS),debug)
+	CFLAGS := -Wall -g -ggdb -DDEBUG
+else 
+	ifeq ($(MAKECMDGOALS),profile)
+		CFLAGS := -Wall -g -pg
+    endif
+endif
+BUILD_DIR := ./build
+SRC_DIR := ./src
+INCLUDES := 
+LFLAGS :=
+LIBS := -lm
+SRCS := $(wildcard $(SRC_DIR)/*.c)
+OBJS := $(SRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
+MAIN := prog
 
-test2: bigint.o bigint_helper.o test2.o bigfloat_helper.o bigfloat.o
-	gcc -o test2 test2.o bigint.o bigint_helper.o bigfloat_helper.o bigfloat.o -lm
+.PHONY: all clean debug profile
+$(MAIN): $(OBJS)
+	$(CC) $(CFLAGS) $(INCLUDES) -o $(MAIN) $(OBJS) $(LFLAGS) $(LIBS)
 
-test2.o: test2.c
-	gcc -c test2.c
-
-main.o: main.c
-	gcc -c main.c
-
-bigint.o: bigint.c
-	gcc -c bigint.c
-
-bigint_helper.o: bigint_helper.c
-	gcc -c bigint_helper.c
-
-bigfloat.o: bigfloat.c
-	gcc -c bigfloat.c
-
-bigfloat_helper.o: bigfloat_helper.c
-	gcc -c bigfloat_helper.c
-
-clean: 
-	rm -f *.o prog
+all debug profile: $(MAIN)
+$(BUILD_DIR)/%.o : $(SRC_DIR)/%.c
+	mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
+clean:
+	$(RM) -r build/
+	$(RM) $(MAIN)
