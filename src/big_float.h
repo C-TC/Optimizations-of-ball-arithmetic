@@ -4,7 +4,7 @@
 
 typedef struct BigFloat
 {
-    BigInteger *mantissa;
+    BigInteger mantissa;
     long long power;
 } BigFloat;
 
