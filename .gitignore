@@ -1,5 +1,8 @@
 *.input
 *.output
 *.out
-*.o
 prog
+*.o
+bigint
+.vscode
+test2

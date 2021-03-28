@@ -1,4 +1,4 @@
-#include "base10_helper.h"
+#include "bigint_helper.h"
 
 bool biginteger_is_one(BigInteger* p_biginteger){
     return p_biginteger->array_size == 1 && p_biginteger->array[0] == 1 && p_biginteger->is_positive;
@@ -140,6 +140,8 @@ BigInteger* biginteger_right_shift(BigInteger* p_biginteger, int cnt){
 // return -1 if p_biginteger2 is larger
 // return 0 otherwise
 int biginteger_abs_comp(BigInteger* p_biginteger1, BigInteger* p_biginteger2){
+    biginteger_set_exact_size(p_biginteger1);
+    biginteger_set_exact_size(p_biginteger2);
     if(p_biginteger1->array_size > p_biginteger2->array_size){
         return 1;
     }else if(p_biginteger1->array_size < p_biginteger2->array_size){
@@ -210,4 +212,30 @@ void biginteger_set_inline(BigInteger *p, int num) {
     p->array_size = 1;
     p->is_positive = (num >= 0);
     p->array[0] = num;
+}
+
+int biginteger_num_valid_digits(BigInteger *p){
+    int res=UNIT_LEN*(p->array_size-1);
+    for(int i=0,digits=p->array[p->array_size-1];digits>0;i++){
+        digits/=10;
+        res++;
+    }
+    return res;
+}
+
+//assume num<UNIT_LEN
+BigInteger* biginteger_left_shift_digits(BigInteger *a, int num){
+    BigInteger *res=biginteger_mul_scalar(a,(int)pow(10,num)+0.5);
+    return res;
+
+}
+
+void biginteger_set_exact_size(BigInteger *a){
+    for(int i=a->array_size-1;i>=0;i--){
+        if(a->array[i]!=0) break;
+        a->array_size--;
+    }
+    if(a->array_size==0){
+        a->array_size=1;
+    }
 }
