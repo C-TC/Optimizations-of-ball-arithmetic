@@ -535,7 +535,7 @@ void big_integer_increment( BigInteger *bigInt, const unsigned int value )
 #ifdef DEBUG
 			/* |bigInt| < |value| implies that bigInt has length 1
 			   because value, if expressed as a BigInteger, would have length 1. */
-			assert( bigInt->data.length == 1 );
+			assert( bigInt->data.size == 1 );
 #endif
 			bigInt->sign = 1;
 			bigInt->data.bits[0] = value - bigInt->data.bits[0];
@@ -570,7 +570,7 @@ void big_integer_decrement( BigInteger *bigInt, const unsigned int value )
 #ifdef DEBUG
 			/* |bigInt| < |value| implies that bigInt has length 1 or less 
 			   because value, if expressed as a BigInteger, would have length 1. */
-			assert( bigInt->data.length == 1 );
+			assert( bigInt->data.size == 1 );
 #endif
 			bigInt->sign = -1;
 			bigInt->data.bits[0] = value - bigInt->data.bits[0];
@@ -592,14 +592,14 @@ void big_integer_dump( const BigInteger bigInt )
 	printf("BigInteger:\n");
 	printf("Sign: %d\n", (int)bigInt.sign);
 	printf("Data: { ");
-	if ( bigInt.data.length > 0 )
+	if ( bigInt.data.size > 0 )
 	{
 		int i;
-		for ( i = 0; i < (bigInt.data.length - 1); i++ )
+		for ( i = 0; i < (bigInt.data.size - 1); i++ )
 			printf("%u, ", bigInt.data.bits[i]);
-		printf("%u ", bigInt.data.bits[bigInt.data.length-1]);
+		printf("%u ", bigInt.data.bits[bigInt.data.size-1]);
 	}
 	printf("}\n");
-	printf("Length: %d\n", bigInt.data.length);
+	printf("Length: %d\n", bigInt.data.size);
 }
 #endif
