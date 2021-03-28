@@ -2,6 +2,6 @@
 #define BIG_FLOAT_HELPER
 #include "big_float.h"
 #include "big_integer.h"
-BigFloat big_float_create(BigInteger);
+BigFloat big_float_create(BigInteger, long long);
 void big_float_destroy(BigFloat *);
 #endif

@@ -1,8 +1,9 @@
 #include "big_float_helper.h"
 
-BigFloat big_float_create(BigInteger bi) {
+BigFloat big_float_create(BigInteger bi, long long power) {
     BigFloat bf;
     bf.mantissa = bi;
+    bf.power = power;
     return bf;
 }
 
