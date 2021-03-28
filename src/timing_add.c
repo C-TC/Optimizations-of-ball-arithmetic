@@ -58,7 +58,6 @@ int main(){
         // setup data
         BigInteger left;
         BigInteger right;
-        BigInteger result;
         left = big_integer_create(32423534632457656L);
         right = big_integer_create(34324556445654634L);
         double cycles = 0;
