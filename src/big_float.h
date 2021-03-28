@@ -8,4 +8,7 @@ typedef struct BigFloat
     long long power;
 } BigFloat;
 
+BigFloat big_float_multiply(BigFloat, BigFloat);
+BigFloat big_float_div(BigFloat, BigFloat);
+
 #endif /* BIG_FLOAT_H */
