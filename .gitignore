@@ -3,6 +3,4 @@
 *.out
 prog
 *.o
-bigint
 .vscode
-test2

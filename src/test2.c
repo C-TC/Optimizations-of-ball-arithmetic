@@ -166,15 +166,15 @@ void test_multiply(){
 }
 
 
-int main(int argc, const char **argv)
-{
+// int main(int argc, const char **argv)
+// {
 
-    //test_print();
-	test_add();
-    printf("test_add pass\n");
-	test_multiply();
-    printf("test_multiply pass\n");
+//     //test_print();
+// 	test_add();
+//     printf("test_add pass\n");
+// 	test_multiply();
+//     printf("test_multiply pass\n");
 
-	printf("\nAll tests passed!\n");
-	return EXIT_SUCCESS;
-};
+// 	printf("\nAll tests passed!\n");
+// 	return EXIT_SUCCESS;
+// };
