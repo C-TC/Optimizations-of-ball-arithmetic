@@ -52,13 +52,13 @@ BigInteger* biginteger_zero(){
 int biginteger_split(BigInteger* p_biginteger, int m, BigInteger* high, BigInteger* low){
     size_t high_size = p_biginteger->array_size - m;
     size_t low_size = m;
-    if (m < p_biginteger->array_size) {
+    if (m < p_biginteger->array_size && high) {
         high->array_size = high_size;
         high->array = malloc(sizeof(int) * high_size);
         high->is_positive = p_biginteger->is_positive;    
         memcpy(high->array, p_biginteger->array + low_size, high_size * sizeof(int));
     }
-    if (m > 0) {
+    if (m > 0 && low) {
         low->array_size = low_size;
         low->array = malloc(sizeof(int) * low_size);
         low->is_positive = p_biginteger->is_positive;    

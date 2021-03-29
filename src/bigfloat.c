@@ -78,12 +78,53 @@ BigFloat *bigfloat_mul(BigFloat *a, BigFloat *b, BigFloat *res) {
     }
     return res;
 }
-BigFloat *bigfloat_div(BigFloat *a, BigFloat *b, BigFloat *res) {
+BigFloat *bigfloat_div(BigFloat *lo, BigFloat *rotemp, BigFloat *res) {
     if (!res) res = malloc(sizeof(BigFloat));
-    // do something here
-    // don't forget to do garbage collection outside if used malloc
-    // use macro SAFE_FREE instead of free, see bigint_helper.h
-    SAFE_FREE(res);
-    res = NULL; 
+    BigFloat *ro = bigfloat_copy(rotemp);
+    if (biginteger_is_zero(ro->mantissa)) {
+        exit(-1);
+    }
+    if (biginteger_is_zero(lo->mantissa)) {
+        res->exponent = 0;
+        res->mantissa = biginteger_zero();
+        return res;
+    }
+    //x initialization
+    BigFloat *x = malloc(sizeof(BigFloat));
+    x->exponent = -1;
+    ro->exponent = -1;
+    BigFloat *x1, *x2, *x3, *x4;
+    BigFloat *fone = malloc(sizeof(BigFloat));
+    fone->exponent = 0;
+    fone->mantissa = biginteger_from_number(1);
+    res->exponent = lo->exponent - ro->exponent;
+    for (int i = 0; i < DIV_STEP; ++i) {
+        x1 = bigfloat_mul(ro, x, NULL);
+        x1->mantissa->is_positive = -x1->mantissa->is_positive;
+        x2 = bigfloat_add(fone, x1, NULL);
+        x3 = bigfloat_mul(x, x2, NULL);
+        x4 = bigfloat_add(x, x3, NULL);
+        bigfloat_delete(x);
+        x = bigfloat_copy(x4);
+    }
+    bigfloat_delete(x1);
+    bigfloat_delete(x2);
+    bigfloat_delete(x3);
+    bigfloat_delete(x4);
+    bigfloat_delete(fone);
+    res->mantissa = (bigfloat_mul(x, lo, NULL))->mantissa;
+    size_t rel_lo_size = lo->mantissa->array_size;
+    size_t rel_ro_size = ro->mantissa->array_size;
+    while(lo->mantissa->array[lo->mantissa->array_size - (rel_lo_size--)] == 0) {}
+    while(ro->mantissa->array[ro->mantissa->array_size - (rel_ro_size--)] == 0) {}
+    BigFloat *temp1 = malloc(sizeof(BigFloat));
+    biginteger_split(lo->mantissa, lo->mantissa->array_size - rel_lo_size, temp1->mantissa, NULL);
+    BigFloat *temp2 = malloc(sizeof(BigFloat));
+    biginteger_split(ro->mantissa, ro->mantissa->array_size - rel_ro_size, temp2->mantissa, NULL);
+    if (biginteger_abs_comp(lo->mantissa, ro->mantissa) == -1) --res->exponent;
+    bigfloat_delete(x);
+    bigfloat_delete(ro);
+    bigfloat_delete(temp1);
+    bigfloat_delete(temp2);
     return res;
 }
