@@ -377,13 +377,13 @@ void big_integer_add_data_inplace(const BigIntegerData left,
   int i;
   for (i = 0; i < size; ++i) {
     if (i < left.size) {
-        sum += (unsigned long long)left.bits[i];
+      sum += (unsigned long long)left.bits[i];
     }
     if (i < right.size) {
-        sum += (unsigned long long)right.bits[i];
+      sum += (unsigned long long)right.bits[i];
     }
-    // printf("left: %u, right: %u, sum: %llu\n", left.bits[i], right.bits[i], sum);
-    // sum += (unsigned long long)left.bits[i] + right.bits[i];
+    // printf("left: %u, right: %u, sum: %llu\n", left.bits[i], right.bits[i],
+    // sum); sum += (unsigned long long)left.bits[i] + right.bits[i];
     pResult->bits[i] = (unsigned int)sum;
     sum >>= UINT_NUM_BITS;
   }
@@ -601,10 +601,10 @@ void big_integer_multiply_data_inplace(const BigIntegerData left,
   big_integer_clear_trash_data(pResult);
 
   BigIntegerData tmpResult, mulResult;
-  tmpResult.bits = (unsigned int *)calloc(capacity*2, UINT_NUM_BYTES);
+  tmpResult.bits = (unsigned int *)calloc(capacity * 2, UINT_NUM_BYTES);
   tmpResult.capacity = left.size + 1;
   tmpResult.size = 1;
-  mulResult.bits = (unsigned int *)calloc(capacity*2, UINT_NUM_BYTES);
+  mulResult.bits = (unsigned int *)calloc(capacity * 2, UINT_NUM_BYTES);
   mulResult.capacity = left.size + 1;
   mulResult.size = 0;
 
@@ -637,7 +637,8 @@ void big_integer_left_shift_data(BigIntegerData *pBigIntData, int d) {
     return;
   // TODO: understand why valgrind prompts bug here
   // bug: we need to make sure capacity > size always holds
-  // printf("left_copy size: %d, capacity: %d\n", pBigIntData->size, pBigIntData->capacity);
+  // printf("left_copy size: %d, capacity: %d\n", pBigIntData->size,
+  // pBigIntData->capacity);
   if (pBigIntData->size + d >= pBigIntData->capacity)
     big_integer_resize_data(pBigIntData, 2 * (pBigIntData->size + d));
   for (i = pBigIntData->size; i >= 0; i--) {
