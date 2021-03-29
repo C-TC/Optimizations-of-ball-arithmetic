@@ -1117,7 +1117,6 @@ void test_multiply_inplace() {
   answer.data.capacity = 0;
   answer.data.bits = NULL;
 
-/*
   left = big_integer_create(0);
   right = big_integer_create(12);
   big_integer_multiply_inplace(left, right, &result);
@@ -1187,20 +1186,20 @@ void test_multiply_inplace() {
   assert(big_integer_to_long_long(result) == -(long long)UINT_MAX - UINT_MAX);
   big_integer_destroy(&left);
   big_integer_destroy(&right);
-*/
+
   FILE *in = fopen("data/simple_mul.txt", "r");
-  for (int i = 0; i < 2; ++i) {
+  for (int i = 0; i < 6; ++i) {
     left = big_integer_create_from_file(&in);
     right = big_integer_create_from_file(&in);
     answer = big_integer_create_from_file(&in);
     big_integer_multiply_inplace(left, right, &result);
-    big_integer_print(result, "result: ");
-    big_integer_print(answer, "answer: ");
+    // big_integer_print(result, "result: ");
+    // big_integer_print(answer, "answer: ");
     assert(big_integer_compare(result, answer) == 0);
     big_integer_destroy(&left);
     big_integer_destroy(&right);
     big_integer_destroy(&answer);
-    printf("mul done [%d/6]\n", i + 1);
+    // printf("mul done [%d/6]\n", i + 1);
   }
   big_integer_destroy(&result);
   fclose(in);
@@ -1254,6 +1253,47 @@ void test_increment() {
   big_integer_increment(&bigInt, 15);
   assert(big_integer_to_long_long(bigInt) == -(long long)UINT_MAX);
   big_integer_destroy(&bigInt);
+
+  FILE *in = fopen("data/simple_add.txt", "r");
+
+  long long result;
+  bigInt = big_integer_create_from_file(&in);
+  big_integer_increment(&bigInt, 123456);
+  result = big_integer_to_long_long(bigInt);
+  assert(result == 3626764237 + 123456);
+  big_integer_destroy(&bigInt);
+
+  bigInt = big_integer_create_from_file(&in);
+  big_integer_increment(&bigInt, 789101112);
+  result = big_integer_to_long_long(bigInt);
+  assert(result == -2488626091 + 789101112);
+  big_integer_destroy(&bigInt);
+
+  bigInt = big_integer_create_from_file(&in);
+  big_integer_increment(&bigInt, 1357911);
+  result = big_integer_to_long_long(bigInt);
+  assert(result == 1138138146 + 1357911);
+  big_integer_destroy(&bigInt);
+
+  bigInt = big_integer_create_from_file(&in);
+  // overflow...
+  // result = big_integer_to_long_long(bigInt);
+  // assert(result == -10688567668993751422);
+  big_integer_destroy(&bigInt);
+
+  bigInt = big_integer_create_from_file(&in);
+  // overflow...
+  // result = big_integer_to_long_long(bigInt);
+  // assert(result == 15308084094301570617);
+  big_integer_destroy(&bigInt);
+
+  bigInt = big_integer_create_from_file(&in);
+  big_integer_increment(&bigInt, 24681012);
+  result = big_integer_to_long_long(bigInt);
+  assert(result == 4619516425307819195 + 24681012);
+  big_integer_destroy(&bigInt);
+
+  fclose(in);
 };
 
 void test_decrement() {
@@ -1314,87 +1354,131 @@ void test_decrement() {
   big_integer_decrement(&bigInt, 15);
   assert(big_integer_to_long_long(bigInt) == -(long long)UINT_MAX);
   big_integer_destroy(&bigInt);
+
+  FILE *in = fopen("data/simple_add.txt", "r");
+
+  long long result;
+  bigInt = big_integer_create_from_file(&in);
+  big_integer_decrement(&bigInt, 123456);
+  result = big_integer_to_long_long(bigInt);
+  assert(result == 3626764237 - 123456);
+  big_integer_destroy(&bigInt);
+
+  bigInt = big_integer_create_from_file(&in);
+  big_integer_decrement(&bigInt, 789101112);
+  result = big_integer_to_long_long(bigInt);
+  assert(result == -2488626091 - 789101112);
+  big_integer_destroy(&bigInt);
+
+  bigInt = big_integer_create_from_file(&in);
+  big_integer_decrement(&bigInt, 1357911);
+  result = big_integer_to_long_long(bigInt);
+  assert(result == 1138138146 - 1357911);
+  big_integer_destroy(&bigInt);
+
+  bigInt = big_integer_create_from_file(&in);
+  // overflow...
+  // result = big_integer_to_long_long(bigInt);
+  // assert(result == -10688567668993751422);
+  big_integer_destroy(&bigInt);
+
+  bigInt = big_integer_create_from_file(&in);
+  // overflow...
+  // result = big_integer_to_long_long(bigInt);
+  // assert(result == 15308084094301570617);
+  big_integer_destroy(&bigInt);
+
+  bigInt = big_integer_create_from_file(&in);
+  big_integer_decrement(&bigInt, 24681012);
+  result = big_integer_to_long_long(bigInt);
+  assert(result == 4619516425307819195 - 24681012);
+  big_integer_destroy(&bigInt);
+
+  fclose(in);
 };
 
-void test_performance() {
-  int NUM_ITERATIONS = 10000000;
+// void test_performance() {
+//   int NUM_ITERATIONS = 10000000;
+//
+//   clock_t start;
+//   clock_t end;
+//   double cpuTime;
+//
+//   long long l;
+//   start = clock();
+//   BigInteger sumBigInt = big_integer_create(0);
+//   for (l = 1; l <= NUM_ITERATIONS; ++l) {
+//     big_integer_increment(&sumBigInt, (unsigned int)l);
+//   }
+//   end = clock();
+//   cpuTime = ((double)(end - start)) / CLOCKS_PER_SEC;
+//   printf("BigInteger made %d increment operations in %f seconds.\n",
+//          NUM_ITERATIONS, cpuTime);
+//   printf("BigInteger last value was: %lld\n",
+//          big_integer_to_long_long(sumBigInt));
+//   big_integer_destroy(&sumBigInt);
+//
+//   double d;
+//   start = clock();
+//   double sumDouble = 0;
+//   for (d = 1; d <= NUM_ITERATIONS; ++d)
+//     sumDouble += d;
+//   end = clock();
+//   cpuTime = ((double)(end - start)) / CLOCKS_PER_SEC;
+//   printf("Double made %d increment operations in %f seconds.\n",
+//   NUM_ITERATIONS,
+//          cpuTime);
+//   printf("Double last value was: %f\n", sumDouble);
+// };
+//
+// void test_performance_factorial() {
+//   int NUM_ITERATIONS = 20;
+//
+//   clock_t start;
+//   clock_t end;
+//   double cpuTime;
+//
+//   long long l;
+//   start = clock();
+//   BigInteger resBigInt = big_integer_create(1);
+//   BigInteger facBigInt = big_integer_create(1);
+//   for (l = 1; l <= NUM_ITERATIONS; ++l) {
+//     // this is memory leaking!
+//     resBigInt = big_integer_multiply(resBigInt, facBigInt);
+//     big_integer_increment(&facBigInt, 1);
+//   }
+//   end = clock();
+//   cpuTime = ((double)(end - start)) / CLOCKS_PER_SEC;
+//   printf("BigInteger did factorial(%d) in %f seconds.\n", NUM_ITERATIONS,
+//          cpuTime);
+//   printf("BigInteger last value was: %lld\n",
+//          big_integer_to_long_long(resBigInt));
+//   big_integer_destroy(&resBigInt);
+//   big_integer_destroy(&facBigInt);
+//
+//   double d;
+//   start = clock();
+//   double resDouble = 1;
+//   double facDouble = 1;
+//   for (d = 1; d <= NUM_ITERATIONS; ++d) {
+//     resDouble *= facDouble;
+//     facDouble++;
+//   }
+//   end = clock();
+//   cpuTime = ((double)(end - start)) / CLOCKS_PER_SEC;
+//   printf("Double did factorial(%d) in %f seconds.\n", NUM_ITERATIONS,
+//   cpuTime); printf("Double last value was: %f\n", resDouble);
+// };
 
-  clock_t start;
-  clock_t end;
-  double cpuTime;
-
-  long long l;
-  start = clock();
-  BigInteger sumBigInt = big_integer_create(0);
-  for (l = 1; l <= NUM_ITERATIONS; ++l) {
-    big_integer_increment(&sumBigInt, (unsigned int)l);
-  }
-  end = clock();
-  cpuTime = ((double)(end - start)) / CLOCKS_PER_SEC;
-  printf("BigInteger made %d increment operations in %f seconds.\n",
-         NUM_ITERATIONS, cpuTime);
-  printf("BigInteger last value was: %lld\n",
-         big_integer_to_long_long(sumBigInt));
-  big_integer_destroy(&sumBigInt);
-
-  double d;
-  start = clock();
-  double sumDouble = 0;
-  for (d = 1; d <= NUM_ITERATIONS; ++d)
-    sumDouble += d;
-  end = clock();
-  cpuTime = ((double)(end - start)) / CLOCKS_PER_SEC;
-  printf("Double made %d increment operations in %f seconds.\n", NUM_ITERATIONS,
-         cpuTime);
-  printf("Double last value was: %f\n", sumDouble);
-};
-
-void test_performance_factorial() {
-  int NUM_ITERATIONS = 20;
-
-  clock_t start;
-  clock_t end;
-  double cpuTime;
-
-  long long l;
-  start = clock();
-  BigInteger resBigInt = big_integer_create(1);
-  BigInteger facBigInt = big_integer_create(1);
-  for (l = 1; l <= NUM_ITERATIONS; ++l) {
-    // this is memory leaking!
-    resBigInt = big_integer_multiply(resBigInt, facBigInt);
-    big_integer_increment(&facBigInt, 1);
-  }
-  end = clock();
-  cpuTime = ((double)(end - start)) / CLOCKS_PER_SEC;
-  printf("BigInteger did factorial(%d) in %f seconds.\n", NUM_ITERATIONS,
-         cpuTime);
-  printf("BigInteger last value was: %lld\n",
-         big_integer_to_long_long(resBigInt));
-  big_integer_destroy(&resBigInt);
-  big_integer_destroy(&facBigInt);
-
-  double d;
-  start = clock();
-  double resDouble = 1;
-  double facDouble = 1;
-  for (d = 1; d <= NUM_ITERATIONS; ++d) {
-    resDouble *= facDouble;
-    facDouble++;
-  }
-  end = clock();
-  cpuTime = ((double)(end - start)) / CLOCKS_PER_SEC;
-  printf("Double did factorial(%d) in %f seconds.\n", NUM_ITERATIONS, cpuTime);
-  printf("Double last value was: %f\n", resDouble);
-};
 int main(int argc, const char **argv) {
   test_create();
   printf("test_create pass\n");
   test_set();
   printf("test_set pass\n");
   test_input_output();
-  printf(
-      "test input & output with file finished. need to verify with diff -bB\n");
+  printf("test input & output with file finished\n");
+  printf("need to verify with diff -bB data/simple_add.txt "
+         "data/copy_simple_add.txt \n");
   test_to_int();
   printf("test_to_int pass\n");
   test_to_long_long();
@@ -1413,16 +1497,16 @@ int main(int argc, const char **argv) {
   printf("test_multiply pass\n");
   test_multiply_inplace();
   printf("test_multiply_inplace pass\n");
-  // test_increment();
-  // printf("test_increment pass\n");
-  // test_decrement();
-  // printf("test_decrement pass\n");
+  test_increment();
+  printf("test_increment pass\n");
+  test_decrement();
+  printf("test_decrement pass\n");
 
   // test_performance();
   // printf("test_performance done\n");
   // test_performance_factorial();
   // printf("test_performance_factorial done\n");
 
-  // printf("\nAll tests passed!\n");
+  printf("\nAll tests passed!\n");
   return EXIT_SUCCESS;
 };
