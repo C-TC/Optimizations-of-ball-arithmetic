@@ -35,7 +35,7 @@ BigFloat big_float_div(BigFloat lo, BigFloat ro) {
     ans.power = lo.power - ro.power;
     ro.power = -1;
     BigFloat x, x1, x2, x3, x4;
-    //x initialization
+    //x initialization的表示问题，2.12345加函数，用数组来create
     BigFloat fone = big_float_create(big_integer_create(1), 0);
     for (int i = 0; i < DIV_STEP; ++i) {
         x1 = big_float_multiply(ro, x);
@@ -52,7 +52,15 @@ BigFloat big_float_div(BigFloat lo, BigFloat ro) {
     big_float_destroy(&x4);
     big_float_destroy(&fone);
     ans.mantissa = (big_float_multiply(x, lo)).mantissa;
-    // if (lo < ro) --ans.power;
+    while(*lo.mantissa.data.bits == 0) {
+        --lo.mantissa.data.size;
+        ++lo.mantissa.data.bits;
+    }
+    while(*ro.mantissa.data.bits == 0) {
+        --ro.mantissa.data.size;
+        ++ro.mantissa.data.bits;
+    };
+    if (big_integer_compare_data(&lo.mantissa.data, &ro.mantissa.data) == -1) --ans.power;
     big_float_destroy(&x);
     return ans;
 }

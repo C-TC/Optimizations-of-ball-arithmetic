@@ -1,5 +1,5 @@
 #include "big_float_helper.h"
-
+#include "big_integer.h"
 BigFloat big_float_create(BigInteger bi, long long power) {
     BigFloat bf;
     bf.mantissa = bi;

@@ -34,6 +34,7 @@ long long big_integer_to_long_long( const BigInteger bigInt );
 
 /* compare big integers */
 int big_integer_compare( const BigInteger left, const BigInteger right );
+int big_integer_compare_data( const BigIntegerData *, const BigIntegerData * );
 
 /* adds two big integers together ( left + right ) */
 BigInteger big_integer_add( const BigInteger left, const BigInteger right );

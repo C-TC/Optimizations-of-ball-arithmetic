@@ -32,7 +32,6 @@ void big_integer_normalize( BigIntegerData *pBigIntData );
 void big_integer_normalize_from( BigIntegerData *pBigIntData, const int from );
 void big_integer_clear_trash_data( BigIntegerData *pBigIntData );
 void big_integer_report_overflow();
-int big_integer_compare_data( const BigIntegerData *pLeft, const BigIntegerData *pRight );
 int big_integer_compare_data_uint( const BigIntegerData *pBigIntData, unsigned int value );
 BigIntegerData big_integer_add_data( const BigIntegerData left, const BigIntegerData right );
 BigIntegerData big_integer_subtract_data( const BigIntegerData left, const BigIntegerData right );
