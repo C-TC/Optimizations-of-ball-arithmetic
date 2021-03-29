@@ -13,7 +13,7 @@ endif
 
 # define any directories containing header files other than /usr/include
 #
-INCLUDES = 
+INCLUDES = -I ./src/ 
 
 # define library paths in addition to /usr/lib
 #   if I wanted to include libraries not in /usr/lib I'd specify
@@ -26,7 +26,7 @@ INCLUDES =
 #LIBS = -lmylib -lm
 
 # define the C source files
-SRCS = src/test.c src/big_integer.c
+SRCS = test/test.c src/big_integer.c
 
 # define the C object files 
 #

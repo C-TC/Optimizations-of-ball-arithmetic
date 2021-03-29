@@ -596,8 +596,8 @@ void big_integer_data_left_shift(BigIntegerData *pBigIntData, int d) {
 /* PUBLIC FUNCTIONS IMPLEMENTATION */
 BigInteger big_integer_create(long long value) {
   BigInteger bigInt;
-  bigInt.data.bits = (unsigned int *)malloc(sizeof(unsigned int) * 2);
-  bigInt.data.capacity = 2;
+  bigInt.data.bits = (unsigned int *)malloc(sizeof(unsigned int) * 4);
+  bigInt.data.capacity = 4;
 
   if (value == 0) {
     bigInt.sign = 0;
@@ -627,7 +627,7 @@ BigInteger big_integer_create(long long value) {
 
 void big_integer_set(long long value, BigInteger *pBigInt) {
   // TODO: by default 128 bits?
-  if (pBigInt->data.size < 4) {
+  if (pBigInt->data.capacity < 4) {
     big_integer_data_resize(&pBigInt->data, 4);
   }
 
