@@ -35,7 +35,7 @@ BigFloat big_float_div(BigFloat lo, BigFloat ro) {
     ans.power = lo.power - ro.power;
     ro.power = -1;
     BigFloat x, x1, x2, x3, x4;
-    //x initialization的表示问题，2.12345加函数，用数组来create
+    // x initialization, e.g., how to represent 2.12345678, create function with array
     BigFloat fone = big_float_create(big_integer_create(1), 0);
     for (int i = 0; i < DIV_STEP; ++i) {
         x1 = big_float_multiply(ro, x);
