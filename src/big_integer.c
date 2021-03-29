@@ -155,6 +155,7 @@ BigInteger big_integer_create_internal(const int sign,
 }
 
 // TODO: maybe we can just leave sign/size/capacity untouched?
+// TODO: should we design an INVALID_SIGN symbol?
 void big_integer_destroy(BigInteger *pBigInt) {
   pBigInt->sign = 0;
   pBigInt->data.capacity = 0;
@@ -682,18 +683,18 @@ BigInteger big_integer_create_from_file(FILE **ppFile) {
 }
 
 void big_integer_output_to_file(const BigInteger bigInt, FILE **ppFile) {
-    if (bigInt.sign == 0) {
-        assert(bigInt.data.size == 1);
-        assert(bigInt.data.bits[0] == 0);
-    }
+  if (bigInt.sign == 0) {
+    assert(bigInt.data.size == 1);
+    assert(bigInt.data.bits[0] == 0);
+  }
 
-    fprintf(*ppFile, "%d\t%d\t", bigInt.sign, bigInt.data.size);
-    int i;
-    for (i = 0; i < bigInt.data.size; ++i) {
-        fprintf(*ppFile, "%u\t\t\t", bigInt.data.bits[i]);
-    }
-    fprintf(*ppFile, "\n");
-    return;
+  fprintf(*ppFile, "%d\t%d\t", bigInt.sign, bigInt.data.size);
+  int i;
+  for (i = 0; i < bigInt.data.size; ++i) {
+    fprintf(*ppFile, "%u\t\t\t", bigInt.data.bits[i]);
+  }
+  fprintf(*ppFile, "\n");
+  return;
 }
 
 int big_integer_to_int(const BigInteger bigInt) {
@@ -704,7 +705,10 @@ int big_integer_to_int(const BigInteger bigInt) {
   if (bigInt.data.size > 1 ||
       (bigInt.sign == 1 && bigInt.data.bits[0] > INT_MAX) ||
       (bigInt.sign == -1 && -(bigInt.data.bits[0]) < INT_MIN)) {
-    printf("cannot convert this bigint to an int: not in the range of an int");
+    printf("sign: %d; size: %d, bits[0]: %u\n", bigInt.sign, bigInt.data.size,
+           bigInt.data.bits[0]);
+    printf(
+        "cannot convert this bigint to an int: not in the range of an int\n");
     exit(EXIT_FAILURE);
   }
 

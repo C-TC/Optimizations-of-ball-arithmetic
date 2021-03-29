@@ -96,6 +96,58 @@ void test_input_output() {
   fclose(out);
 }
 
+// test for big_integer_destroy is done via valgrind for memory leak
+void test_to_int() {
+  BigInteger bigInt;
+  long result;
+
+  bigInt = big_integer_create(0);
+  result = big_integer_to_int(bigInt);
+  assert(result == 0);
+  big_integer_destroy(&bigInt);
+
+  bigInt = big_integer_create(35);
+  result = big_integer_to_int(bigInt);
+  assert(result == 35);
+  big_integer_destroy(&bigInt);
+
+  bigInt = big_integer_create(-26);
+  result = big_integer_to_int(bigInt);
+  assert(result == -26);
+  big_integer_destroy(&bigInt);
+
+  bigInt = big_integer_create(INT_MAX);
+  result = big_integer_to_int(bigInt);
+  assert(result == INT_MAX);
+  big_integer_destroy(&bigInt);
+
+  bigInt = big_integer_create(INT_MIN);
+  result = big_integer_to_int(bigInt);
+  assert(result == INT_MIN);
+  big_integer_destroy(&bigInt);
+
+  FILE *in = fopen("data/simple_add.txt", "r");
+
+  bigInt = big_integer_create_from_file(&in);
+  // overflow...
+  // result = big_integer_to_int(bigInt);
+  // assert(result == 3626764237);
+  big_integer_destroy(&bigInt);
+
+  bigInt = big_integer_create_from_file(&in);
+  // overflow...
+  // result = big_integer_to_int(bigInt);
+  // assert(result == -2488626091);
+  big_integer_destroy(&bigInt);
+
+  bigInt = big_integer_create_from_file(&in);
+  result = big_integer_to_int(bigInt);
+  assert(result == 1138138146);
+  big_integer_destroy(&bigInt);
+
+  fclose(in);
+}
+
 void test_to_long_long() {
   BigInteger bigInt;
   long long result;
@@ -124,6 +176,42 @@ void test_to_long_long() {
   result = big_integer_to_long_long(bigInt);
   assert(result == LLONG_MIN);
   big_integer_destroy(&bigInt);
+
+  FILE *in = fopen("data/simple_add.txt", "r");
+
+  bigInt = big_integer_create_from_file(&in);
+  result = big_integer_to_long_long(bigInt);
+  assert(result == 3626764237);
+  big_integer_destroy(&bigInt);
+
+  bigInt = big_integer_create_from_file(&in);
+  result = big_integer_to_long_long(bigInt);
+  assert(result == -2488626091);
+  big_integer_destroy(&bigInt);
+
+  bigInt = big_integer_create_from_file(&in);
+  result = big_integer_to_long_long(bigInt);
+  assert(result == 1138138146);
+  big_integer_destroy(&bigInt);
+
+  bigInt = big_integer_create_from_file(&in);
+  // overflow...
+  // result = big_integer_to_long_long(bigInt);
+  // assert(result == -10688567668993751422);
+  big_integer_destroy(&bigInt);
+
+  bigInt = big_integer_create_from_file(&in);
+  // overflow...
+  // result = big_integer_to_long_long(bigInt);
+  // assert(result == 15308084094301570617);
+  big_integer_destroy(&bigInt);
+
+  bigInt = big_integer_create_from_file(&in);
+  result = big_integer_to_long_long(bigInt);
+  assert(result == 4619516425307819195);
+  big_integer_destroy(&bigInt);
+
+  fclose(in);
 }
 
 void test_compare() {
@@ -806,9 +894,12 @@ int main(int argc, const char **argv) {
   test_set();
   printf("test_set pass\n");
   test_input_output();
-  printf("test input & output with file finished. need to verify with diff -w\n");
-  // test_to_long_long();
-  // printf("test_to_long_long pass\n");
+  printf(
+      "test input & output with file finished. need to verify with diff -bB\n");
+  test_to_int();
+  printf("test_to_int pass\n");
+  test_to_long_long();
+  printf("test_to_long_long pass\n");
   // test_compare();
   // printf("test_compare pass\n");
   // test_add();
