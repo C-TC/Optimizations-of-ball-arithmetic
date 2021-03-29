@@ -283,12 +283,24 @@ void test_compare() {
   assert(big_integer_compare(left, right) == 0);
   big_integer_destroy(&left);
   big_integer_destroy(&right);
+
+  FILE *in = fopen("data/simple_add.txt", "r");
+  int results[9] = {1, 1, 1, 1, -1, -1, 1, 1, 1};
+  for (int i = 0; i < 9; ++i) {
+    left = big_integer_create_from_file(&in);
+    right = big_integer_create_from_file(&in);
+    assert(big_integer_compare(left, right) == results[i]);
+    big_integer_destroy(&left);
+    big_integer_destroy(&right);
+  }
+  fclose(in);
 };
 
 void test_add() {
   BigInteger left;
   BigInteger right;
   BigInteger result;
+  BigInteger answer;
 
   left = big_integer_create(17);
   right = big_integer_create(3);
@@ -451,12 +463,197 @@ void test_add() {
   big_integer_destroy(&left);
   big_integer_destroy(&right);
   big_integer_destroy(&result);
+
+  FILE *in = fopen("data/simple_add.txt", "r");
+  for (int i = 0; i < 6; ++i) {
+    left = big_integer_create_from_file(&in);
+    right = big_integer_create_from_file(&in);
+    answer = big_integer_create_from_file(&in);
+    result = big_integer_add(left, right);
+    assert(big_integer_compare(result, answer) == 0);
+    big_integer_destroy(&left);
+    big_integer_destroy(&right);
+    big_integer_destroy(&result);
+    big_integer_destroy(&answer);
+  }
+  fclose(in);
+};
+
+void test_add_inplace() {
+  BigInteger left;
+  BigInteger right;
+  BigInteger result;
+  BigInteger answer;
+  result.data.size = 0;
+  result.data.bits = NULL;
+  result.data.capacity = 0;
+  answer.data.size = 0;
+  answer.data.bits = NULL;
+  answer.data.capacity = 0;
+
+  left = big_integer_create(17);
+  right = big_integer_create(3);
+  big_integer_add_inplace(left, right, &result);
+  assert(big_integer_to_int(result) == 20);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(INT_MAX);
+  right = big_integer_create(5);
+  big_integer_add_inplace(left, right, &result);
+  assert(big_integer_to_long_long(result) == ((long long)INT_MAX + 5));
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(UINT_MAX);
+  right = big_integer_create(1);
+  big_integer_add_inplace(left, right, &result);
+  assert(big_integer_to_long_long(result) == ((long long)UINT_MAX + 1));
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(UINT_MAX);
+  right = big_integer_create(5);
+  big_integer_add_inplace(left, right, &result);
+  assert(big_integer_to_long_long(result) == ((long long)UINT_MAX + 5));
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(UINT_MAX);
+  right = big_integer_create(UINT_MAX);
+  big_integer_add_inplace(left, right, &result);
+  assert(big_integer_to_long_long(result) == ((long long)UINT_MAX + UINT_MAX));
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create((long long)UINT_MAX + UINT_MAX);
+  right = big_integer_create(UINT_MAX);
+  big_integer_add_inplace(left, right, &result);
+  assert(big_integer_to_long_long(result) ==
+         ((long long)UINT_MAX + UINT_MAX + UINT_MAX));
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(-17);
+  right = big_integer_create(-3);
+  big_integer_add_inplace(left, right, &result);
+  assert(big_integer_to_int(result) == -20);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(-(long long)UINT_MAX);
+  right = big_integer_create(-1);
+  big_integer_add_inplace(left, right, &result);
+  assert(big_integer_to_long_long(result) == (-(long long)UINT_MAX - 1));
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(-(long long)UINT_MAX);
+  right = big_integer_create(-5);
+  big_integer_add_inplace(left, right, &result);
+  assert(big_integer_to_long_long(result) == (-(long long)UINT_MAX - 5));
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(-(long long)UINT_MAX);
+  right = big_integer_create(-(long long)UINT_MAX);
+  big_integer_add_inplace(left, right, &result);
+  assert(big_integer_to_long_long(result) == (-(long long)UINT_MAX - UINT_MAX));
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(-(long long)UINT_MAX - UINT_MAX);
+  right = big_integer_create(-(long long)UINT_MAX);
+  big_integer_add_inplace(left, right, &result);
+  assert(big_integer_to_long_long(result) ==
+         (-(long long)UINT_MAX - UINT_MAX - UINT_MAX));
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(5);
+  right = big_integer_create(0);
+  big_integer_add_inplace(left, right, &result);
+  assert(big_integer_to_int(result) == 5);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(0);
+  right = big_integer_create(5);
+  big_integer_add_inplace(left, right, &result);
+  assert(big_integer_to_int(result) == 5);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(0);
+  right = big_integer_create(0);
+  big_integer_add_inplace(left, right, &result);
+  assert(big_integer_to_int(result) == 0);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(-5);
+  right = big_integer_create(0);
+  big_integer_add_inplace(left, right, &result);
+  assert(big_integer_to_int(result) == -5);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(0);
+  right = big_integer_create(-5);
+  big_integer_add_inplace(left, right, &result);
+  assert(big_integer_to_int(result) == -5);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(18);
+  right = big_integer_create(-3);
+  big_integer_add_inplace(left, right, &result);
+  assert(big_integer_to_int(result) == 15);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(-18);
+  right = big_integer_create(+3);
+  big_integer_add_inplace(left, right, &result);
+  assert(big_integer_to_int(result) == -15);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(-(long long)UINT_MAX - UINT_MAX);
+  right = big_integer_create(+UINT_MAX);
+  big_integer_add_inplace(left, right, &result);
+  assert(big_integer_to_long_long(result) == -(long long)UINT_MAX);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create((long long)UINT_MAX + UINT_MAX + UINT_MAX);
+  right = big_integer_create(-(long long)UINT_MAX - UINT_MAX);
+  big_integer_add_inplace(left, right, &result);
+  assert(big_integer_to_long_long(result) == (long long)UINT_MAX);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  FILE *in = fopen("data/simple_add.txt", "r");
+  for (int i = 0; i < 6; ++i) {
+    left = big_integer_create_from_file(&in);
+    right = big_integer_create_from_file(&in);
+    answer = big_integer_create_from_file(&in);
+    big_integer_add_inplace(left, right, &result);
+    assert(big_integer_compare(result, answer) == 0);
+    big_integer_destroy(&left);
+    big_integer_destroy(&right);
+    big_integer_destroy(&answer);
+  }
+
+  big_integer_destroy(&result);
+  fclose(in);
 };
 
 void test_subtract() {
   BigInteger left;
   BigInteger right;
   BigInteger result;
+  BigInteger answer;
 
   left = big_integer_create(18);
   right = big_integer_create(3);
@@ -619,6 +816,189 @@ void test_subtract() {
   big_integer_destroy(&left);
   big_integer_destroy(&right);
   big_integer_destroy(&result);
+
+  FILE *in = fopen("data/simple_sub.txt", "r");
+  for (int i = 0; i < 6; ++i) {
+    left = big_integer_create_from_file(&in);
+    right = big_integer_create_from_file(&in);
+    answer = big_integer_create_from_file(&in);
+    result = big_integer_subtract(left, right);
+    assert(big_integer_compare(result, answer) == 0);
+    big_integer_destroy(&left);
+    big_integer_destroy(&right);
+    big_integer_destroy(&result);
+    big_integer_destroy(&answer);
+  }
+  fclose(in);
+};
+
+void test_subtract_inplace() {
+  BigInteger left;
+  BigInteger right;
+  BigInteger result;
+  BigInteger answer;
+  result.data.size = 0;
+  result.data.bits = NULL;
+  result.data.capacity = 0;
+  answer.data.size = 0;
+  answer.data.bits = NULL;
+  answer.data.capacity = 0;
+
+  left = big_integer_create(18);
+  right = big_integer_create(3);
+  big_integer_subtract_inplace(left, right, &result);
+  assert(big_integer_to_int(result) == 15);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(INT_MAX);
+  right = big_integer_create(5);
+  big_integer_subtract_inplace(left, right, &result);
+  assert(big_integer_to_long_long(result) == ((long long)INT_MAX - 5));
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(UINT_MAX);
+  right = big_integer_create(1);
+  big_integer_subtract_inplace(left, right, &result);
+  assert(big_integer_to_long_long(result) == ((long long)UINT_MAX - 1));
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(UINT_MAX);
+  right = big_integer_create(5);
+  big_integer_subtract_inplace(left, right, &result);
+  assert(big_integer_to_long_long(result) == ((long long)UINT_MAX - 5));
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(UINT_MAX);
+  right = big_integer_create(UINT_MAX);
+  big_integer_subtract_inplace(left, right, &result);
+  assert(big_integer_to_long_long(result) == 0);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create((long long)UINT_MAX + UINT_MAX);
+  right = big_integer_create(UINT_MAX);
+  big_integer_subtract_inplace(left, right, &result);
+  assert(big_integer_to_long_long(result) == ((long long)UINT_MAX));
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(-18);
+  right = big_integer_create(-3);
+  big_integer_subtract_inplace(left, right, &result);
+  assert(big_integer_to_int(result) == -15);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(-(long long)UINT_MAX);
+  right = big_integer_create(-1);
+  big_integer_subtract_inplace(left, right, &result);
+  assert(big_integer_to_long_long(result) == (-(long long)UINT_MAX + 1));
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(-(long long)UINT_MAX);
+  right = big_integer_create(-5);
+  big_integer_subtract_inplace(left, right, &result);
+  assert(big_integer_to_long_long(result) == (-(long long)UINT_MAX + 5));
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(-(long long)UINT_MAX);
+  right = big_integer_create(-(long long)UINT_MAX);
+  big_integer_subtract_inplace(left, right, &result);
+  assert(big_integer_to_long_long(result) == 0);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(-(long long)UINT_MAX - UINT_MAX);
+  right = big_integer_create(-(long long)UINT_MAX);
+  big_integer_subtract_inplace(left, right, &result);
+  assert(big_integer_to_long_long(result) == (-(long long)UINT_MAX));
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(5);
+  right = big_integer_create(0);
+  big_integer_subtract_inplace(left, right, &result);
+  assert(big_integer_to_int(result) == 5);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(0);
+  right = big_integer_create(5);
+  big_integer_subtract_inplace(left, right, &result);
+  assert(big_integer_to_int(result) == -5);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(0);
+  right = big_integer_create(0);
+  big_integer_subtract_inplace(left, right, &result);
+  assert(big_integer_to_int(result) == 0);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(-5);
+  right = big_integer_create(0);
+  big_integer_subtract_inplace(left, right, &result);
+  assert(big_integer_to_int(result) == -5);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(0);
+  right = big_integer_create(-5);
+  big_integer_subtract_inplace(left, right, &result);
+  assert(big_integer_to_int(result) == 5);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(18);
+  right = big_integer_create(-3);
+  big_integer_subtract_inplace(left, right, &result);
+  assert(big_integer_to_int(result) == 21);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(-18);
+  right = big_integer_create(+3);
+  big_integer_subtract_inplace(left, right, &result);
+  assert(big_integer_to_int(result) == -21);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(-(long long)UINT_MAX - UINT_MAX);
+  right = big_integer_create(+UINT_MAX);
+  big_integer_subtract_inplace(left, right, &result);
+  assert(big_integer_to_long_long(result) ==
+         -(long long)UINT_MAX - UINT_MAX - UINT_MAX);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create((long long)UINT_MAX + UINT_MAX + UINT_MAX);
+  right = big_integer_create(-(long long)UINT_MAX - UINT_MAX);
+  big_integer_subtract_inplace(left, right, &result);
+  assert(big_integer_to_long_long(result) ==
+         (long long)UINT_MAX + UINT_MAX + UINT_MAX + UINT_MAX + UINT_MAX);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  FILE *in = fopen("data/simple_sub.txt", "r");
+  for (int i = 0; i < 6; ++i) {
+    left = big_integer_create_from_file(&in);
+    right = big_integer_create_from_file(&in);
+    answer = big_integer_create_from_file(&in);
+    big_integer_subtract_inplace(left, right, &result);
+    assert(big_integer_compare(result, answer) == 0);
+    big_integer_destroy(&left);
+    big_integer_destroy(&right);
+    big_integer_destroy(&answer);
+  }
+  big_integer_destroy(&result);
+  fclose(in);
 };
 
 void test_multiply() {
@@ -900,12 +1280,16 @@ int main(int argc, const char **argv) {
   printf("test_to_int pass\n");
   test_to_long_long();
   printf("test_to_long_long pass\n");
-  // test_compare();
-  // printf("test_compare pass\n");
-  // test_add();
-  // printf("test_add pass\n");
-  // test_subtract();
-  // printf("test_subtract pass\n");
+  test_compare();
+  printf("test_compare pass\n");
+  test_add();
+  printf("test_add pass\n");
+  test_add_inplace();
+  printf("test_add_inplace pass\n");
+  test_subtract();
+  printf("test_subtract pass\n");
+  test_subtract_inplace();
+  printf("test_subtract_inplace pass\n");
   // test_multiply();
   // printf("test_multiply pass\n");
   // test_increment();
