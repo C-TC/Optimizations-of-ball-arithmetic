@@ -31,21 +31,26 @@ BigIntegerData big_integer_create_data(const unsigned int bits[],
 /* set a big_integer with with size `size`, capacity 2*`size`, & bits copied */
 void big_integer_set_data(const unsigned int bits[], const int size,
                           BigIntegerData *pBigIntData);
+/* print a BigIntegerData to stdout in the specific format:
+ *     capacity size bits[0] bits[1] ... bits[size-1]
+ */
+void big_integer_print_data(const BigIntegerData bigIntData);
+
 /* create a BigInteger with sign `sign` & data `data` */
 BigInteger big_integer_create_internal(const int sign,
                                        const BigIntegerData data);
 /* free the allocated bits array and set size/sign/capacity to 0 */
 void big_integer_destroy(BigInteger *pBigInt);
 /* free the allocated bits array and set size/capacity to 0 */
-void big_integer_data_destroy(BigIntegerData *pBigIntData);
+void big_integer_destroy_data(BigIntegerData *pBigIntData);
 /* allocate a new bits array with `new_capacity` & copy the old data into it */
-void big_integer_data_resize(BigIntegerData *pBigIntData,
+void big_integer_resize_data(BigIntegerData *pBigIntData,
                              const int new_capacity);
 /* create a deep copy of a bigint/bigintdata */
 BigInteger big_integer_deepcopy(const BigInteger other);
 void big_integer_deepcopy_inplace(const BigInteger other, BigInteger *this);
-BigIntegerData big_integer_data_deepcopy(const BigIntegerData other);
-void big_integer_data_deepcopy_inplace(const BigIntegerData other,
+BigIntegerData big_integer_deepcopy_data(const BigIntegerData other);
+void big_integer_deepcopy_data_inplace(const BigIntegerData other,
                                        BigIntegerData *this);
 /* set the size according to the largest index i s.t. bits[i] is not zero */
 void big_integer_normalize(BigIntegerData *pBigIntData);
@@ -92,7 +97,7 @@ void big_integer_multiply_data_inplace(const BigIntegerData left,
                                        const BigIntegerData right,
                                        BigIntegerData *pResult);
 /* shift an unsigned bigint to the left by d*UINT_NUM_BITS */
-void big_integer_data_left_shift(BigIntegerData *pBigIntData, int d);
+void big_integer_left_shift_data(BigIntegerData *pBigIntData, int d);
 BigInteger big_integer_multiply(const BigInteger left, const BigInteger right);
 
 /* PRIVATE FUNCTIONS IMPLEMENTATION */
@@ -131,7 +136,7 @@ void big_integer_set_data(const unsigned int bits[], const int size,
 
   if (pBigIntData->capacity <= size) {
     pBigIntData->size = 0;
-    big_integer_data_resize(pBigIntData, size * 2);
+    big_integer_resize_data(pBigIntData, size * 2);
   }
   // allocate memory
   pBigIntData->size = size;
@@ -143,6 +148,17 @@ void big_integer_set_data(const unsigned int bits[], const int size,
   big_integer_clear_trash_data(pBigIntData);
 
   return;
+}
+
+void big_integer_print_data(const BigIntegerData bigIntData) {
+  // TODO: remove this check
+
+  printf("%d\t%d\t", bigIntData.capacity, bigIntData.size);
+  int i;
+  for (i = 0; i < bigIntData.size; ++i) {
+    printf("%u\t\t\t", bigIntData.bits[i]);
+  }
+  printf("\n");
 }
 
 BigInteger big_integer_create_internal(const int sign,
@@ -164,13 +180,13 @@ void big_integer_destroy(BigInteger *pBigInt) {
 }
 
 // TODO: maybe we can just leave sign/size/capacity untouched?
-void big_integer_data_destroy(BigIntegerData *pBigIntData) {
+void big_integer_destroy_data(BigIntegerData *pBigIntData) {
   pBigIntData->capacity = 0;
   pBigIntData->size = 0;
   free(pBigIntData->bits);
 }
 
-void big_integer_data_resize(BigIntegerData *pBigIntData,
+void big_integer_resize_data(BigIntegerData *pBigIntData,
                              const int new_capacity) {
   pBigIntData->capacity = new_capacity;
   unsigned int *bits =
@@ -196,7 +212,7 @@ void big_integer_deepcopy_inplace(const BigInteger other, BigInteger *this) {
   this->sign = other.sign;
   if (this->data.capacity < other.data.size) {
     assert(other.data.capacity > other.data.size);
-    big_integer_data_resize(&this->data, other.data.capacity);
+    big_integer_resize_data(&this->data, other.data.capacity);
   }
   this->data.size = other.data.size;
   memcpy(this->data.bits, other.data.bits, this->data.size * UINT_NUM_BYTES);
@@ -204,7 +220,7 @@ void big_integer_deepcopy_inplace(const BigInteger other, BigInteger *this) {
   return;
 }
 
-BigIntegerData big_integer_data_deepcopy(const BigIntegerData other) {
+BigIntegerData big_integer_deepcopy_data(const BigIntegerData other) {
   BigIntegerData this;
   this.capacity = other.capacity;
   this.size = other.size;
@@ -213,11 +229,11 @@ BigIntegerData big_integer_data_deepcopy(const BigIntegerData other) {
   return this;
 }
 
-void big_integer_data_deepcopy_inplace(const BigIntegerData other,
+void big_integer_deepcopy_data_inplace(const BigIntegerData other,
                                        BigIntegerData *this) {
   if (this->capacity < other.size) {
     assert(other.capacity > other.size);
-    big_integer_data_resize(this, other.capacity);
+    big_integer_resize_data(this, other.capacity);
   }
   this->size = other.size;
   memcpy(this->bits, other.bits, this->size * UINT_NUM_BYTES);
@@ -323,7 +339,7 @@ BigIntegerData big_integer_add_data(const BigIntegerData left,
 
   assert(result.size <= result.capacity);
   if (result.size == result.capacity) {
-    big_integer_data_resize(&result, result.capacity * 2);
+    big_integer_resize_data(&result, result.capacity * 2);
   }
 
   return result;
@@ -348,7 +364,7 @@ void big_integer_add_data_inplace(const BigIntegerData left,
     //     right.capacity);
     // }
     assert(capacity >= size);
-    big_integer_data_resize(pResult, capacity);
+    big_integer_resize_data(pResult, capacity);
   }
 
   unsigned long long sum = 0;
@@ -370,7 +386,7 @@ void big_integer_add_data_inplace(const BigIntegerData left,
   assert(pResult->size <= pResult->capacity);
   if (pResult->size == pResult->capacity) {
     // hope this won't happen much in a addition
-    big_integer_data_resize(pResult, pResult->capacity * 2);
+    big_integer_resize_data(pResult, pResult->capacity * 2);
   }
 
   return;
@@ -417,7 +433,7 @@ void big_integer_subtract_data_inplace(const BigIntegerData left,
     // TODO: this is a design choice: make the result as large as its operands.
     // make sure overflow won't happen
     assert(capacity > size);
-    big_integer_data_resize(pResult, capacity);
+    big_integer_resize_data(pResult, capacity);
   }
 
   unsigned long long borrow = 0;
@@ -457,7 +473,7 @@ void big_integer_increment_data(BigIntegerData *pBigIntData,
 
   assert(pBigIntData->size <= pBigIntData->capacity);
   if (pBigIntData->size == pBigIntData->capacity) {
-    big_integer_data_resize(pBigIntData, pBigIntData->capacity * 2);
+    big_integer_resize_data(pBigIntData, pBigIntData->capacity * 2);
   }
 }
 
@@ -476,7 +492,7 @@ void big_integer_decrement_data(BigIntegerData *pBigIntData,
   big_integer_normalize_from(pBigIntData, i);
   assert(pBigIntData->size <= pBigIntData->capacity);
   if (pBigIntData->size == pBigIntData->capacity) {
-    big_integer_data_resize(pBigIntData, pBigIntData->capacity * 2);
+    big_integer_resize_data(pBigIntData, pBigIntData->capacity * 2);
   }
 }
 
@@ -491,7 +507,7 @@ void big_integer_multiply_data_with_uint(const BigIntegerData left,
   if (pResult->capacity < left.size + 1) {
     // avoid copy
     pResult->size = 0;
-    big_integer_data_resize(pResult, left.size * 2);
+    big_integer_resize_data(pResult, left.size * 2);
   }
 
   for (i = 0; i < left.size; ++i) {
@@ -517,7 +533,7 @@ void big_integer_multiply_data_with_uint(const BigIntegerData left,
 BigIntegerData big_integer_multiply_data(const BigIntegerData left,
                                          const BigIntegerData right) {
   BigIntegerData result;
-  BigIntegerData left_copy = big_integer_data_deepcopy(left);
+  BigIntegerData left_copy = big_integer_deepcopy_data(left);
   int capacity = MAX(left.capacity, right.capacity);
   // calloc is fater than malloc+memset
   // good for initialization
@@ -529,60 +545,54 @@ BigIntegerData big_integer_multiply_data(const BigIntegerData left,
   for (i = 0; i < right.size; i++) {
     // not gonna test now. need more general test data
     // big_integer_multiply_data_with_uint(left_copy, right.bits[i], &result);
-    // TODO: remove this stupid loop
-    // printf("%d %d\n", left_copy.size, left_copy.capacity);
-    // printf("\t%d %d\n", right.size, right.capacity);
     for (j = 1; j <= right.bits[i]; j++) {
       // this is memory leaking!
       // result=big_integer_add_data(result,left);
       big_integer_add_data_inplace(result, left_copy, &result);
     }
-    big_integer_data_left_shift(&left_copy, 1);
+    big_integer_left_shift_data(&left_copy, 1);
   }
-  big_integer_data_destroy(&left_copy);
+  big_integer_destroy_data(&left_copy);
   return result;
 }
 
 void big_integer_multiply_data_inplace(const BigIntegerData left,
                                        const BigIntegerData right,
                                        BigIntegerData *pResult) {
-  BigIntegerData left_copy = big_integer_data_deepcopy(left);
+  BigIntegerData left_copy = big_integer_deepcopy_data(left);
   int capacity = MAX(left.capacity, right.capacity);
   int size = MAX(left.size, right.size);
   pResult->size = 0;
+  big_integer_clear_trash_data(pResult);
+  // TODO: this is a design choice
   if (pResult->capacity < 2 * size) {
     assert(capacity > size);
-    big_integer_data_resize(pResult, 2 * capacity);
+    big_integer_resize_data(pResult, 2 * capacity);
   }
-  // calloc is fater than malloc+memset
-  // good for initialization
-  pResult->size = 0;
 
   int i, j;
   for (i = 0; i < right.size; i++) {
     // not gonna test now. need more general test data
     // big_integer_multiply_data_with_uint(left_copy, right.bits[i], &result);
     // TODO: remove this stupid loop
-    // printf("%d %d\n", left_copy.size, left_copy.capacity);
-    // printf("\t%d %d\n", right.size, right.capacity);
     for (j = 1; j <= right.bits[i]; j++) {
       // this is memory leaking!
       // result=big_integer_add_data(result,left);
       big_integer_add_data_inplace(*pResult, left_copy, pResult);
     }
-    big_integer_data_left_shift(&left_copy, 1);
+    big_integer_left_shift_data(&left_copy, 1);
   }
-  big_integer_data_destroy(&left_copy);
+  big_integer_destroy_data(&left_copy);
   return;
 }
 
-void big_integer_data_left_shift(BigIntegerData *pBigIntData, int d) {
+void big_integer_left_shift_data(BigIntegerData *pBigIntData, int d) {
   assert(d > 0);
   int i;
   if (pBigIntData->size == 1 && pBigIntData->bits[0] == 0)
     return;
   if (pBigIntData->size + d > pBigIntData->capacity)
-    big_integer_data_resize(pBigIntData, 2 * (pBigIntData->size + d));
+    big_integer_resize_data(pBigIntData, 2 * (pBigIntData->size + d));
   for (i = pBigIntData->size; i >= 0; i--) {
     pBigIntData->bits[i + d] = pBigIntData->bits[i];
   }
@@ -629,7 +639,7 @@ BigInteger big_integer_create(long long value) {
 void big_integer_set(long long value, BigInteger *pBigInt) {
   // TODO: by default 128 bits?
   if (pBigInt->data.capacity < 4) {
-    big_integer_data_resize(&pBigInt->data, 4);
+    big_integer_resize_data(&pBigInt->data, 4);
   }
 
   if (value == 0) {
@@ -683,6 +693,7 @@ BigInteger big_integer_create_from_file(FILE **ppFile) {
 }
 
 void big_integer_output_to_file(const BigInteger bigInt, FILE **ppFile) {
+  // TODO: remove this check
   if (bigInt.sign == 0) {
     assert(bigInt.data.size == 1);
     assert(bigInt.data.bits[0] == 0);
@@ -695,6 +706,21 @@ void big_integer_output_to_file(const BigInteger bigInt, FILE **ppFile) {
   }
   fprintf(*ppFile, "\n");
   return;
+}
+
+void big_integer_print(const BigInteger bigInt) {
+  // TODO: remove this check
+  if (bigInt.sign == 0) {
+    assert(bigInt.data.size == 1);
+    assert(bigInt.data.bits[0] == 0);
+  }
+
+  printf("%d\t%d\t", bigInt.sign, bigInt.data.size);
+  int i;
+  for (i = 0; i < bigInt.data.size; ++i) {
+    printf("%u\t\t\t", bigInt.data.bits[i]);
+  }
+  printf("\n");
 }
 
 int big_integer_to_int(const BigInteger bigInt) {
@@ -811,7 +837,7 @@ void big_integer_add_inplace(const BigInteger left, const BigInteger right,
 BigInteger big_integer_subtract(const BigInteger left, const BigInteger right) {
   if (left.sign == 0)
     return big_integer_create_internal(-right.sign,
-                                       big_integer_data_deepcopy(right.data));
+                                       big_integer_deepcopy_data(right.data));
   if (right.sign == 0)
     return big_integer_deepcopy(left);
 
@@ -835,7 +861,7 @@ void big_integer_subtract_inplace(const BigInteger left, const BigInteger right,
                                   BigInteger *pResult) {
   if (left.sign == 0) {
     pResult->sign = -right.sign;
-    big_integer_data_deepcopy_inplace(right.data, &pResult->data);
+    big_integer_deepcopy_data_inplace(right.data, &pResult->data);
     return;
   }
   if (right.sign == 0) {

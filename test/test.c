@@ -1005,6 +1005,7 @@ void test_multiply() {
   BigInteger left;
   BigInteger right;
   BigInteger result;
+  BigInteger answer;
 
   left = big_integer_create(0);
   right = big_integer_create(12);
@@ -1085,6 +1086,119 @@ void test_multiply() {
   big_integer_destroy(&left);
   big_integer_destroy(&right);
   big_integer_destroy(&result);
+
+  FILE *in = fopen("data/simple_mul.txt", "r");
+  for (int i = 0; i < 6; ++i) {
+    left = big_integer_create_from_file(&in);
+    right = big_integer_create_from_file(&in);
+    answer = big_integer_create_from_file(&in);
+    result = big_integer_multiply(left, right);
+    assert(big_integer_compare(result, answer) == 0);
+    big_integer_destroy(&left);
+    big_integer_destroy(&right);
+    big_integer_destroy(&result);
+    big_integer_destroy(&answer);
+    printf("mul done [%d/6]\n", i + 1);
+  }
+  fclose(in);
+}
+
+void test_multiply_inplace() {
+  BigInteger left;
+  BigInteger right;
+  BigInteger result;
+  BigInteger answer;
+  result.data.size = 0;
+  result.data.capacity = 0;
+  result.data.bits = NULL;
+  answer.data.size = 0;
+  answer.data.capacity = 0;
+  answer.data.bits = NULL;
+
+  left = big_integer_create(0);
+  right = big_integer_create(12);
+  big_integer_multiply_inplace(left, right, &result);
+  assert(big_integer_to_int(result) == 0);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(0);
+  right = big_integer_create(-5);
+  big_integer_multiply_inplace(left, right, &result);
+  assert(big_integer_to_int(result) == 0);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(12);
+  right = big_integer_create(0);
+  big_integer_multiply_inplace(left, right, &result);
+  assert(big_integer_to_int(result) == 0);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(-5);
+  right = big_integer_create(0);
+  big_integer_multiply_inplace(left, right, &result);
+  assert(big_integer_to_int(result) == 0);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(1);
+  right = big_integer_create(117);
+  big_integer_multiply_inplace(left, right, &result);
+  assert(big_integer_to_int(result) == 117);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(-1);
+  right = big_integer_create(117);
+  big_integer_multiply_inplace(left, right, &result);
+  assert(big_integer_to_int(result) == -117);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(-11);
+  right = big_integer_create(15);
+  big_integer_multiply_inplace(left, right, &result);
+  assert(big_integer_to_int(result) == -165);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(1);
+  right = big_integer_create(1);
+  big_integer_multiply_inplace(left, right, &result);
+  assert(big_integer_to_int(result) == 1);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(-1);
+  right = big_integer_create(-1);
+  big_integer_multiply_inplace(left, right, &result);
+  assert(big_integer_to_int(result) == 1);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(-(long long)UINT_MAX - UINT_MAX);
+  right = big_integer_create(1);
+  big_integer_multiply_inplace(left, right, &result);
+  assert(big_integer_to_long_long(result) == -(long long)UINT_MAX - UINT_MAX);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  FILE *in = fopen("data/simple_mul.txt", "r");
+  for (int i = 0; i < 6; ++i) {
+    left = big_integer_create_from_file(&in);
+    right = big_integer_create_from_file(&in);
+    answer = big_integer_create_from_file(&in);
+    big_integer_multiply_inplace(left, right, &result);
+    assert(big_integer_compare(result, answer) == 0);
+    big_integer_destroy(&left);
+    big_integer_destroy(&right);
+    big_integer_destroy(&answer);
+    printf("mul done [%d/6]\n", i + 1);
+  }
+  big_integer_destroy(&result);
+  fclose(in);
 }
 
 void test_increment() {
@@ -1291,7 +1405,9 @@ int main(int argc, const char **argv) {
   test_subtract_inplace();
   printf("test_subtract_inplace pass\n");
   // test_multiply();
-  // printf("test_multiply pass\n");
+  printf("test_multiply pass\n");
+  test_multiply_inplace();
+  printf("test_multiply_inplace pass\n");
   // test_increment();
   // printf("test_increment pass\n");
   // test_decrement();
