@@ -34,7 +34,7 @@ void big_integer_set_data(const unsigned int bits[], const int size,
 /* print a BigIntegerData to stdout in the specific format:
  *     capacity size bits[0] bits[1] ... bits[size-1]
  */
-void big_integer_print_data(const BigIntegerData bigIntData);
+void big_integer_print_data(const BigIntegerData bigIntData, const char *msg);
 
 /* create a BigInteger with sign `sign` & data `data` */
 BigInteger big_integer_create_internal(const int sign,
@@ -150,9 +150,9 @@ void big_integer_set_data(const unsigned int bits[], const int size,
   return;
 }
 
-void big_integer_print_data(const BigIntegerData bigIntData) {
+void big_integer_print_data(const BigIntegerData bigIntData, const char *msg) {
   // TODO: remove this check
-
+  printf("%s\t\t", msg);
   printf("%d\t%d\t", bigIntData.capacity, bigIntData.size);
   int i;
   for (i = 0; i < bigIntData.size; ++i) {
@@ -527,32 +527,40 @@ void big_integer_multiply_data_with_uint(const BigIntegerData left,
     pResult->size = i;
   }
 
+  // TODO: skip this as we won't visit that area?
+  big_integer_clear_trash_data(pResult);
+
   return;
 }
 
 BigIntegerData big_integer_multiply_data(const BigIntegerData left,
                                          const BigIntegerData right) {
-  BigIntegerData result;
   BigIntegerData left_copy = big_integer_deepcopy_data(left);
   int capacity = MAX(left.capacity, right.capacity);
+  BigIntegerData result, tmpResult;
   // calloc is fater than malloc+memset
   // good for initialization
   result.bits = (unsigned int *)calloc(capacity * 2, UINT_NUM_BYTES);
   result.capacity = capacity * 2;
   result.size = 0;
 
-  int i, j;
+  tmpResult.bits = (unsigned int *)calloc(capacity * 2, UINT_NUM_BYTES);
+  tmpResult.capacity = capacity * 2;
+  tmpResult.size = 0;
+
+  int i;
   for (i = 0; i < right.size; i++) {
-    // not gonna test now. need more general test data
-    // big_integer_multiply_data_with_uint(left_copy, right.bits[i], &result);
-    for (j = 1; j <= right.bits[i]; j++) {
-      // this is memory leaking!
-      // result=big_integer_add_data(result,left);
-      big_integer_add_data_inplace(result, left_copy, &result);
-    }
+    big_integer_multiply_data_with_uint(left_copy, right.bits[i], &tmpResult);
+    // for (j = 1; j <= right.bits[i]; j++) {
+    //   // this is memory leaking!
+    //   // result=big_integer_add_data(result,left);
+    //   big_integer_add_data_inplace(result, left_copy, &result);
+    // }
+    big_integer_add_data_inplace(result, tmpResult, &result);
     big_integer_left_shift_data(&left_copy, 1);
   }
   big_integer_destroy_data(&left_copy);
+  big_integer_destroy_data(&tmpResult);
   return result;
 }
 
@@ -563,26 +571,33 @@ void big_integer_multiply_data_inplace(const BigIntegerData left,
   int capacity = MAX(left.capacity, right.capacity);
   int size = MAX(left.size, right.size);
   pResult->size = 0;
-  big_integer_clear_trash_data(pResult);
   // TODO: this is a design choice
   if (pResult->capacity < 2 * size) {
     assert(capacity > size);
     big_integer_resize_data(pResult, 2 * capacity);
   }
+  big_integer_clear_trash_data(pResult);
 
-  int i, j;
+  BigIntegerData tmpResult;
+  tmpResult.bits = (unsigned int *)calloc(left.size + 1, UINT_NUM_BYTES);
+  tmpResult.capacity = left.size + 1;
+  tmpResult.size = 0;
+
+  int i;
   for (i = 0; i < right.size; i++) {
-    // not gonna test now. need more general test data
-    // big_integer_multiply_data_with_uint(left_copy, right.bits[i], &result);
-    // TODO: remove this stupid loop
-    for (j = 1; j <= right.bits[i]; j++) {
-      // this is memory leaking!
-      // result=big_integer_add_data(result,left);
-      big_integer_add_data_inplace(*pResult, left_copy, pResult);
-    }
+    big_integer_multiply_data_with_uint(left_copy, right.bits[i], &tmpResult);
+    // big_integer_print_data(tmpResult, "tmpResult: ");
+    // for (j = 1; j <= right.bits[i]; j++) {
+    //   // this is memory leaking!
+    //   // result=big_integer_add_data(result,left);
+    //   big_integer_add_data_inplace(*pResult, left_copy, pResult);
+    // }
+    big_integer_add_data_inplace(*pResult, tmpResult, pResult);
+    // big_integer_print_data(*pResult, "*pResult: ");
     big_integer_left_shift_data(&left_copy, 1);
   }
   big_integer_destroy_data(&left_copy);
+  big_integer_destroy_data(&tmpResult);
   return;
 }
 
@@ -591,7 +606,10 @@ void big_integer_left_shift_data(BigIntegerData *pBigIntData, int d) {
   int i;
   if (pBigIntData->size == 1 && pBigIntData->bits[0] == 0)
     return;
-  if (pBigIntData->size + d > pBigIntData->capacity)
+  // TODO: understand why valgrind prompts bug here
+  // bug: we need to make sure capacity > size always holds
+  // printf("left_copy size: %d, capacity: %d\n", pBigIntData->size, pBigIntData->capacity);
+  if (pBigIntData->size + d >= pBigIntData->capacity)
     big_integer_resize_data(pBigIntData, 2 * (pBigIntData->size + d));
   for (i = pBigIntData->size; i >= 0; i--) {
     pBigIntData->bits[i + d] = pBigIntData->bits[i];
@@ -602,6 +620,7 @@ void big_integer_left_shift_data(BigIntegerData *pBigIntData, int d) {
   // TODO: use memset here?
   // memset(&pBigIntData->bits[0], 0, d*UINT_NUM_BYTES);
   pBigIntData->size += d;
+  big_integer_clear_trash_data(pBigIntData);
 }
 
 /* PUBLIC FUNCTIONS IMPLEMENTATION */
@@ -708,13 +727,14 @@ void big_integer_output_to_file(const BigInteger bigInt, FILE **ppFile) {
   return;
 }
 
-void big_integer_print(const BigInteger bigInt) {
+void big_integer_print(const BigInteger bigInt, const char *msg) {
   // TODO: remove this check
   if (bigInt.sign == 0) {
     assert(bigInt.data.size == 1);
     assert(bigInt.data.bits[0] == 0);
   }
 
+  printf("%s\t\t", msg);
   printf("%d\t%d\t", bigInt.sign, bigInt.data.size);
   int i;
   for (i = 0; i < bigInt.data.size; ++i) {

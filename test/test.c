@@ -1088,17 +1088,19 @@ void test_multiply() {
   big_integer_destroy(&result);
 
   FILE *in = fopen("data/simple_mul.txt", "r");
-  for (int i = 0; i < 6; ++i) {
+  for (int i = 0; i < 1; ++i) {
     left = big_integer_create_from_file(&in);
     right = big_integer_create_from_file(&in);
     answer = big_integer_create_from_file(&in);
     result = big_integer_multiply(left, right);
+    // big_integer_print(result, "result: ");
+    // big_integer_print(answer, "answer: ");
     assert(big_integer_compare(result, answer) == 0);
     big_integer_destroy(&left);
     big_integer_destroy(&right);
     big_integer_destroy(&result);
     big_integer_destroy(&answer);
-    printf("mul done [%d/6]\n", i + 1);
+    // printf("mul done [%d/6]\n", i + 1);
   }
   fclose(in);
 }
@@ -1115,6 +1117,7 @@ void test_multiply_inplace() {
   answer.data.capacity = 0;
   answer.data.bits = NULL;
 
+/*
   left = big_integer_create(0);
   right = big_integer_create(12);
   big_integer_multiply_inplace(left, right, &result);
@@ -1184,13 +1187,15 @@ void test_multiply_inplace() {
   assert(big_integer_to_long_long(result) == -(long long)UINT_MAX - UINT_MAX);
   big_integer_destroy(&left);
   big_integer_destroy(&right);
-
+*/
   FILE *in = fopen("data/simple_mul.txt", "r");
-  for (int i = 0; i < 6; ++i) {
+  for (int i = 0; i < 2; ++i) {
     left = big_integer_create_from_file(&in);
     right = big_integer_create_from_file(&in);
     answer = big_integer_create_from_file(&in);
     big_integer_multiply_inplace(left, right, &result);
+    big_integer_print(result, "result: ");
+    big_integer_print(answer, "answer: ");
     assert(big_integer_compare(result, answer) == 0);
     big_integer_destroy(&left);
     big_integer_destroy(&right);
@@ -1404,7 +1409,7 @@ int main(int argc, const char **argv) {
   printf("test_subtract pass\n");
   test_subtract_inplace();
   printf("test_subtract_inplace pass\n");
-  // test_multiply();
+  test_multiply();
   printf("test_multiply pass\n");
   test_multiply_inplace();
   printf("test_multiply_inplace pass\n");

@@ -36,7 +36,7 @@ void big_integer_output_to_file(const BigInteger bigInt, FILE **ppFile);
 /* print a big integer number to stdout in the specific format:
  *     sign size bits[0] bits[1] ... bits[size-1]
  */
-void big_integer_print(const BigInteger bigInt);
+void big_integer_print(const BigInteger bigInt, const char *msg);
 
 /* destroy(free) a big integer number */
 void big_integer_destroy(BigInteger *pBigInt);
