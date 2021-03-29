@@ -48,6 +48,8 @@ void big_integer_increment( BigInteger *bigInt, const unsigned int value );
 void big_integer_decrement( BigInteger *bigInt, const unsigned int value );
 
 BigInteger big_integer_multiply(const BigInteger left, const BigInteger right);
+BigInteger big_integer_deep_copy(const BigInteger other);
+
 
 
 #ifdef DEBUG

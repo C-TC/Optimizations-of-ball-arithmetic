@@ -40,7 +40,6 @@ void big_integer_increment_data( BigIntegerData *pBigIntData, const unsigned int
 void big_integer_decrement_data( BigIntegerData *pBigIntData, const unsigned int value );
 
 /* function Lixin adds */
-BigInteger big_integer_deep_copy(const BigInteger other);
 BigIntegerData big_integer_data_deep_copy(const BigIntegerData other);
 void big_integer_destroy(BigInteger* pBigInteger);
 void big_integer_resize( BigIntegerData *pBigIntData, const int new_capacity );

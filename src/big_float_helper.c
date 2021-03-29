@@ -8,5 +8,5 @@ BigFloat big_float_create(BigInteger bi, long long power) {
 }
 
 void big_float_destroy(BigFloat *bf) {
-    big_integer_destroy(&bf->mantissa);
+    if (&bf->mantissa) big_integer_destroy(&bf->mantissa);
 }
