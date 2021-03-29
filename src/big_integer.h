@@ -54,6 +54,18 @@ int big_integer_compare(const BigInteger left, const BigInteger right);
 BigInteger big_integer_add(const BigInteger left, const BigInteger right);
 void big_integer_add_inplace(const BigInteger left, const BigInteger right,
                              BigInteger *pResult);
+/* 
+ * Adds two fixed precision big integers inplacely 
+ * i.e. left += right
+ * 
+ * !!! left and right can refer to the same object
+ * 
+ * Assumptions: 
+ * !!! left.size >= precision
+ * !!! right.size >= precision
+ *  => no memory allocation
+*/
+void big_integer_add_inplace_fixed_precision(BigInteger left, const BigInteger right, const int precision);                             
 
 /* subtracts one big integer from another ( left - right ) */
 BigInteger big_integer_subtract(const BigInteger left, const BigInteger right);

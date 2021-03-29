@@ -70,6 +70,9 @@ int big_integer_compare_data_uint(const BigIntegerData *pBigIntData,
 /* add/subtract two unsigned bigints */
 BigIntegerData big_integer_add_data(const BigIntegerData left,
                                     const BigIntegerData right);
+void big_integer_add_inplace_fixed_precision_data(BigIntegerData left, 
+                                                  const BigIntegerData right, 
+                                                  const int precision);
 void big_integer_add_data_inplace(const BigIntegerData left,
                                   const BigIntegerData right,
                                   BigIntegerData *pResult);
@@ -989,6 +992,65 @@ void big_integer_multiply_inplace(const BigInteger left, const BigInteger right,
     pResult->sign = left.sign * right.sign;
     big_integer_multiply_data_inplace(left.data, right.data, &pResult->data);
   }
+}
+
+void big_integer_add_inplace_fixed_precision(BigInteger left, const BigInteger right, const int precision){
+  if(left.sign == 0){
+    // left is 0, copy right to left
+    memmove(left.data.bits, right.data.bits + right.data.size - precision, precision * UINT_NUM_BYTES);
+    left.data.size = precision;
+    left.sign = right.sign;
+    return;
+  }
+  if(right.sign == 0){
+    // right is 0
+    memmove(left.data.bits, left.data.bits + left.data.size - precision, precision * UINT_NUM_BYTES);
+    left.data.size = precision;
+    return;
+  }
+
+  if(left.sign == right.sign){
+    big_integer_add_inplace_fixed_precision_data(left.data, right.data, precision);
+    return;
+  }
+
+  /*
+   * TODO: substraction; 
+   */
+
+  // int compRes = big_integer_compare_data(&left.data, &right.data);
+
+  // if (compRes == 0)
+  //   return big_integer_create(0);
+  // else if (compRes > 0) // left > right
+  //   return big_integer_create_internal(
+  //       left.sign, big_integer_subtract_data(left.data, right.data));
+  // else
+  //   return big_integer_create_internal(
+  //       right.sign, big_integer_subtract_data(right.data, left.data));  
+}
+
+void big_integer_add_inplace_fixed_precision_data(BigIntegerData left, const BigIntegerData right, const int precision){
+  unsigned long long sum = 0;
+  int offset = left.size - precision;
+  for(int i=offset;i<left.size;i++){
+    sum += (unsigned long long)left.bits[i] + right.bits[i];
+    left.bits[i] = (unsigned int)sum;
+    sum >>= UINT_NUM_BITS;
+  }
+  int data_size = precision;
+  if(sum != 0){
+    // carry-over
+    offset++;
+    data_size--;
+  }
+  memmove(left.bits, left.bits + offset, data_size * UINT_NUM_BYTES);
+  if(sum != 0){
+    // carry-over
+    left.bits[left.size-1] = (unsigned int)sum;
+  }
+  left.size = precision;
+  return;
 }
 
 #ifdef DEBUG
