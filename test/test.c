@@ -82,6 +82,20 @@ void test_set() {
   big_integer_destroy(&bigInt);
 }
 
+void test_input_output() {
+  BigInteger bigInt;
+  FILE *in = fopen("data/simple_add.txt", "r");
+  FILE *out = fopen("data/copy_simple_add.txt", "w");
+  for (int i = 0; i < 18; ++i) {
+    bigInt = big_integer_create_from_file(&in);
+    big_integer_output_to_file(bigInt, &out);
+    big_integer_destroy(&bigInt);
+  }
+
+  fclose(in);
+  fclose(out);
+}
+
 void test_to_long_long() {
   BigInteger bigInt;
   long long result;
@@ -791,6 +805,8 @@ int main(int argc, const char **argv) {
   printf("test_create pass\n");
   test_set();
   printf("test_set pass\n");
+  test_input_output();
+  printf("test input & output with file finished. need to verify with diff -w\n");
   // test_to_long_long();
   // printf("test_to_long_long pass\n");
   // test_compare();

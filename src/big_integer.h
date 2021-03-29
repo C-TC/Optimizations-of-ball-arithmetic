@@ -29,10 +29,10 @@ void big_integer_set(long long value, BigInteger *pBigInt);
  *     sign size bits[0] bits[1] ... bits[size-1]
  */
 BigInteger big_integer_create_from_file(FILE **ppFile);
-/* create a big integer number from file in the specific format:
+/* output a big integer number to file in the specific format:
  *     sign size bits[0] bits[1] ... bits[size-1]
  */
-void big_integer_output_to_file(FILE **ppFile);
+void big_integer_output_to_file(const BigInteger bigInt, FILE **ppFile);
 
 /* destroy(free) a big integer number */
 void big_integer_destroy(BigInteger *pBigInt);

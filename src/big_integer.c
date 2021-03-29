@@ -662,7 +662,7 @@ BigInteger big_integer_create_from_file(FILE **ppFile) {
   int sign, size;
   int ret;
   int i;
-  ret = fscanf(*ppFile, "%d %d", &sign, &size);
+  ret = fscanf(*ppFile, "%d%d", &sign, &size);
   if (ret != 2) {
     printf("Error during reading a bigint's sign & size!");
     exit(EXIT_FAILURE);
@@ -679,6 +679,21 @@ BigInteger big_integer_create_from_file(FILE **ppFile) {
   }
   big_integer_clear_trash_data(&bigInt.data);
   return bigInt;
+}
+
+void big_integer_output_to_file(const BigInteger bigInt, FILE **ppFile) {
+    if (bigInt.sign == 0) {
+        assert(bigInt.data.size == 1);
+        assert(bigInt.data.bits[0] == 0);
+    }
+
+    fprintf(*ppFile, "%d\t%d\t", bigInt.sign, bigInt.data.size);
+    int i;
+    for (i = 0; i < bigInt.data.size; ++i) {
+        fprintf(*ppFile, "%u\t\t\t", bigInt.data.bits[i]);
+    }
+    fprintf(*ppFile, "\n");
+    return;
 }
 
 int big_integer_to_int(const BigInteger bigInt) {
