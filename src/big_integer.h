@@ -63,7 +63,8 @@ void big_integer_add_inplace(const BigInteger left, const BigInteger right,
  * Assumptions: 
  * !!! left.size >= precision
  * !!! right.size >= precision
- *  => no memory allocation
+ *  => almost no memory allocation
+ * !!! left and right should not have leading zeros
 */
 void big_integer_add_inplace_fixed_precision(BigInteger* left, const BigInteger right, const int precision);                             
 
@@ -82,6 +83,20 @@ void big_integer_decrement(BigInteger *bigInt, const unsigned int value);
 BigInteger big_integer_multiply(const BigInteger left, const BigInteger right);
 void big_integer_multiply_inplace(const BigInteger left, const BigInteger right,
                                   BigInteger *pResult);
+
+/* 
+ * Multiply two fixed precision big integers inplacely 
+ * i.e. left *= right
+ * 
+ * !!! left and right can refer to the same object
+ * 
+ * Assumptions: 
+ * !!! left.size >= precision
+ * !!! right.size >= precision
+ *  => almost no memory allocation
+ * !!! left and right should not have leading zeros
+*/
+void big_integer_multiply_inplace_fixed_precision(BigInteger* left, const BigInteger right, const int precision);      
 
 #ifdef DEBUG
 void big_integer_dump(const BigInteger bigInt);

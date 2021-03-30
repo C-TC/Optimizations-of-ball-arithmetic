@@ -1048,10 +1048,6 @@ void big_integer_add_inplace_fixed_precision(BigInteger* left, const BigInteger 
     return;
   }
 
-  /*
-   * TODO: substraction; 
-   */
-
   int compRes = big_integer_compare_data(&left->data, &right.data);
 
   if(compRes == 0){
@@ -1081,6 +1077,7 @@ void big_integer_add_inplace_fixed_precision(BigInteger* left, const BigInteger 
 /**
  * TODO: Optimization
  * 1. scalar replacement for left->size
+ * 2. avoid explicit type casting?
  */
 void big_integer_subtract_inplace_fixed_precision_data(const BigIntegerData left, const BigIntegerData right, BigIntegerData* result, const int precision){
   unsigned long long borrow = 0;
@@ -1102,6 +1099,7 @@ void big_integer_subtract_inplace_fixed_precision_data(const BigIntegerData left
 /**
  * TODO: Optimization
  * 1. scalar replacement for left->size
+ * 2. avoid explicit type casting?
  */
 void big_integer_add_inplace_fixed_precision_data(BigIntegerData* left, const BigIntegerData right, const int precision){
   unsigned long long sum = 0;
@@ -1124,6 +1122,50 @@ void big_integer_add_inplace_fixed_precision_data(BigIntegerData* left, const Bi
   }
   left->size = precision;
   return;
+}
+
+/**
+ * TODO: Optimization
+ * 1. scalar replacement for left->data.size
+ * 2. scalar replacement for right.data.size
+ * 3. strength redection for idx
+ * 4. avoid explicit type casting?
+ */
+void big_integer_multiply_inplace_fixed_precision(BigInteger* left, const BigInteger right, const int precision){
+  if(left->sign == 0 || right.sign == 0){
+    // answer is 0
+    left->sign = 0;
+    left->data.size = precision;
+    memset(left->data.bits, 0, precision * UINT_NUM_BYTES);    
+  }
+  unsigned int* tmp = calloc(2 * precision, UINT_NUM_BYTES);
+  int offset_left = left->data.size - precision;
+  int offset_right = right.data.size - precision;
+  for(int j=offset_right;j<right.data.size;j++){
+    unsigned long long carry = 0;
+    for(int i=offset_left;i<left->data.size;i++){
+      int idx = j - offset_right + i - offset_left;
+      carry += (unsigned long long)left->data.bits[i] * right.data.bits[j] + tmp[idx];
+      tmp[idx] = (unsigned int)carry;
+      carry >>= UINT_NUM_BITS;
+    }
+    int idx = j - offset_right + precision;
+    carry += tmp[idx];
+    tmp[idx] = (unsigned int)carry;
+  }
+
+  left->sign *= right.sign;
+  left->data.size = precision;
+  int offset = precision;
+  for(int i=2*precision-1;i>=precision;i--){
+    if(tmp[i] != 0){
+      break;
+    }else{
+      offset--;
+    }
+  }
+  memmove(left->data.bits, tmp + offset, precision * UINT_NUM_BYTES);
+  free(tmp); // release temporal variable
 }
 
 #ifdef DEBUG
