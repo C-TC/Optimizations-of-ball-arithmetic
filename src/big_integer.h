@@ -65,7 +65,7 @@ void big_integer_add_inplace(const BigInteger left, const BigInteger right,
  * !!! right.size >= precision
  *  => no memory allocation
 */
-void big_integer_add_inplace_fixed_precision(BigInteger left, const BigInteger right, const int precision);                             
+void big_integer_add_inplace_fixed_precision(BigInteger* left, const BigInteger right, const int precision);                             
 
 /* subtracts one big integer from another ( left - right ) */
 BigInteger big_integer_subtract(const BigInteger left, const BigInteger right);
