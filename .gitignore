@@ -1,3 +1,7 @@
 .vscode/
-**/*.o
 bigint
+test/
+prog
+prog_*
+*.o
+*.out

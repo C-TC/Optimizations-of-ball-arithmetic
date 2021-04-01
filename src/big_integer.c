@@ -31,23 +31,14 @@ BigIntegerData big_integer_create_data(const unsigned int bits[],
 /* set a big_integer with with size `size`, capacity 2*`size`, & bits copied */
 void big_integer_set_data(const unsigned int bits[], const int size,
                           BigIntegerData *pBigIntData);
-/* print a BigIntegerData to stdout in the specific format:
- *     capacity size bits[0] bits[1] ... bits[size-1]
- */
-void big_integer_print_data(const BigIntegerData bigIntData, const char *msg);
-
 /* create a BigInteger with sign `sign` & data `data` */
 BigInteger big_integer_create_internal(const int sign,
                                        const BigIntegerData data);
-/* free the allocated bits array and set size/sign/capacity to 0 */
-void big_integer_destroy(BigInteger *pBigInt);
 /* free the allocated bits array and set size/capacity to 0 */
 void big_integer_destroy_data(BigIntegerData *pBigIntData);
 /* allocate a new bits array with `new_capacity` & copy the old data into it */
 void big_integer_resize_data(BigIntegerData *pBigIntData,
                              const int new_capacity);
-/* create a deep copy of a bigint/bigintdata */
-BigInteger big_integer_deepcopy(const BigInteger other);
 void big_integer_deepcopy_inplace(const BigInteger other, BigInteger *this);
 BigIntegerData big_integer_deepcopy_data(const BigIntegerData other);
 void big_integer_deepcopy_data_inplace(const BigIntegerData other,
@@ -59,9 +50,6 @@ void big_integer_normalize_from(BigIntegerData *pBigIntData, const int from);
 void big_integer_clear_trash_data(BigIntegerData *pBigIntData);
 
 /* ---------- Comparision ---------- */
-/* compare two unsigned bigints, return 1 if left > right, 0 if =, & -1 if < */
-int big_integer_compare_data(const BigIntegerData *pLeft,
-                             const BigIntegerData *pRight);
 /* compare a unsigned bigint with an uint */
 int big_integer_compare_data_uint(const BigIntegerData *pBigIntData,
                                   unsigned int value);
@@ -70,12 +58,10 @@ int big_integer_compare_data_uint(const BigIntegerData *pBigIntData,
 /* add/subtract two unsigned bigints */
 BigIntegerData big_integer_add_data(const BigIntegerData left,
                                     const BigIntegerData right);
-void big_integer_add_inplace_fixed_precision_data(BigIntegerData* left, 
-                                                  const BigIntegerData right, 
-                                                  const int precision);
 void big_integer_add_data_inplace(const BigIntegerData left,
                                   const BigIntegerData right,
                                   BigIntegerData *pResult);
+void big_integer_add_inplace_fixed_precision_data(BigIntegerData* , const BigIntegerData, const int);
 /* subtraction assumes that left > right always holds */
 BigIntegerData big_integer_subtract_data(const BigIntegerData left,
                                          const BigIntegerData right);
@@ -105,7 +91,7 @@ void big_integer_multiply_data_inplace(const BigIntegerData left,
                                        BigIntegerData *pResult);
 /* shift an unsigned bigint to the left by d*UINT_NUM_BITS */
 void big_integer_left_shift_data(BigIntegerData *pBigIntData, int d);
-BigInteger big_integer_multiply(const BigInteger left, const BigInteger right);
+
 
 /* PRIVATE FUNCTIONS IMPLEMENTATION */
 BigIntegerData big_integer_empty_data() {
@@ -969,9 +955,9 @@ void big_integer_increment(BigInteger *bigInt, const unsigned int value) {
     } else {
       // |bigInt| < |value|
 #ifdef DEBUG
-      /* |bigInt| < |value| implies that bigInt has length 1
-         because value, if expressed as a BigInteger, would have length 1. */
-      assert(bigInt->data.length == 1);
+			/* |bigInt| < |value| implies that bigInt has length 1
+			   because value, if expressed as a BigInteger, would have length 1. */
+			assert( bigInt->data.size == 1 );
 #endif
       bigInt->sign = 1;
       bigInt->data.bits[0] = value - bigInt->data.bits[0];
@@ -1001,9 +987,9 @@ void big_integer_decrement(BigInteger *bigInt, const unsigned int value) {
     } else {
       // |bigInt| < |value|
 #ifdef DEBUG
-      /* |bigInt| < |value| implies that bigInt has length 1 or less
-         because value, if expressed as a BigInteger, would have length 1. */
-      assert(bigInt->data.length == 1);
+			/* |bigInt| < |value| implies that bigInt has length 1 or less 
+			   because value, if expressed as a BigInteger, would have length 1. */
+			assert( bigInt->data.size == 1 );
 #endif
       bigInt->sign = -1;
       bigInt->data.bits[0] = value - bigInt->data.bits[0];
@@ -1169,17 +1155,19 @@ void big_integer_multiply_inplace_fixed_precision(BigInteger* left, const BigInt
 }
 
 #ifdef DEBUG
-void big_integer_dump(const BigInteger bigInt) {
-  printf("BigInteger:\n");
-  printf("Sign: %d\n", (int)bigInt.sign);
-  printf("Data: { ");
-  if (bigInt.data.length > 0) {
-    int i;
-    for (i = 0; i < (bigInt.data.length - 1); i++)
-      printf("%u, ", bigInt.data.bits[i]);
-    printf("%u ", bigInt.data.bits[bigInt.data.length - 1]);
-  }
-  printf("}\n");
-  printf("Length: %d\n", bigInt.data.length);
+void big_integer_dump( const BigInteger bigInt )
+{
+	printf("BigInteger:\n");
+	printf("Sign: %d\n", (int)bigInt.sign);
+	printf("Data: { ");
+	if ( bigInt.data.size > 0 )
+	{
+		int i;
+		for ( i = 0; i < (bigInt.data.size - 1); i++ )
+			printf("%u, ", bigInt.data.bits[i]);
+		printf("%u ", bigInt.data.bits[bigInt.data.size-1]);
+	}
+	printf("}\n");
+	printf("Length: %d\n", bigInt.data.size);
 }
 #endif

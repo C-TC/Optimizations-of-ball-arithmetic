@@ -38,7 +38,7 @@ void big_integer_output_to_file(const BigInteger bigInt, FILE **ppFile);
  */
 void big_integer_print(const BigInteger bigInt, const char *msg);
 
-/* destroy(free) a big integer number */
+/* free the allocated bits array and set size/sign/capacity to 0 */
 void big_integer_destroy(BigInteger *pBigInt);
 
 /* returns the big integer as int */
@@ -48,7 +48,9 @@ int big_integer_to_int(const BigInteger bigInt);
 long long big_integer_to_long_long(const BigInteger bigInt);
 
 /* compare big integers */
-int big_integer_compare(const BigInteger left, const BigInteger right);
+int big_integer_compare( const BigInteger left, const BigInteger right );
+/* compare two unsigned bigints, return 1 if left > right, 0 if =, & -1 if < */
+int big_integer_compare_data( const BigIntegerData *, const BigIntegerData * );
 
 /* adds two big integers together ( left + right ) */
 BigInteger big_integer_add(const BigInteger left, const BigInteger right);
@@ -97,6 +99,10 @@ void big_integer_multiply_inplace(const BigInteger left, const BigInteger right,
  * !!! left and right should not have leading zeros
 */
 void big_integer_multiply_inplace_fixed_precision(BigInteger* left, const BigInteger right, const int precision);      
+/* create a deep copy of a bigint/bigintdata */
+BigInteger big_integer_deepcopy(const BigInteger other);
+
+
 
 #ifdef DEBUG
 void big_integer_dump(const BigInteger bigInt);
