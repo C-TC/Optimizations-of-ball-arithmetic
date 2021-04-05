@@ -1154,6 +1154,16 @@ void big_integer_multiply_inplace_fixed_precision(BigInteger* left, const BigInt
   free(tmp); // release temporal variable
 }
 
+BigInteger big_integer_add_trailing_zeros(const BigInteger bi, int num) {
+    BigInteger ans;
+    ans.sign = bi.sign;
+    ans.data.size = bi.data.size + num;
+    ans.data.capacity = 2 * ans.data.size;
+    ans.data.bits = (unsigned int*) calloc(ans.data.capacity, UINT_NUM_BYTES);
+	memcpy(ans.data.bits + num, bi.data.bits, bi.data.size * UINT_NUM_BYTES);
+	return ans;
+}
+
 #ifdef DEBUG
 void big_integer_dump( const BigInteger bigInt )
 {

@@ -10,14 +10,85 @@ BigFloat big_float_multiply(BigFloat lo, BigFloat ro) {
     return ans;
 }
 BigFloat big_float_add(BigFloat lo, BigFloat ro) {
+    if (lo.mantissa.sign == 0) {
+        BigFloat ans = big_float_deep_copy(ro);
+        return ans;
+    }
+    if (ro.mantissa.sign == 0) {
+        BigFloat ans = big_float_deep_copy(lo);
+        return ans;
+    }
     BigFloat ans;
-    ans.power = 0;
+    //assume lo.power > ro.power
+    if (lo.power < ro.power) {
+        BigFloat temp = lo;
+        lo = ro;
+        ro = temp;
+    }
+    //need to align mantissa to use BigInt add
+    int num_zeros_add_to_lo = lo.power - ro.power - lo.mantissa.data.size + ro.mantissa.data.size;
+    BigInteger lo_man_aligned, ro_man_aligned;
+    if (num_zeros_add_to_lo > 0) {
+        lo_man_aligned = big_integer_add_trailing_zeros(lo.mantissa, num_zeros_add_to_lo);
+        ro_man_aligned = ro.mantissa;
+        ans.mantissa = big_integer_add(lo_man_aligned,ro_man_aligned);
+        ans.power =  lo.power + ans.mantissa.data.size - lo_man_aligned.data.size;
+        if(ans.mantissa.sign ==0) ans.power = 0;
+        free(lo_man_aligned.data.bits);
+    } else if (num_zeros_add_to_lo < 0) {
+        lo_man_aligned = lo.mantissa;
+        ro_man_aligned = big_integer_add_trailing_zeros(ro.mantissa, -num_zeros_add_to_lo);
+        ans.mantissa = big_integer_add(lo_man_aligned,ro_man_aligned);
+        ans.power =  lo.power + ans.mantissa.data.size - lo_man_aligned.data.size;
+        if(ans.mantissa.sign ==0) ans.power = 0;
+        free(ro_man_aligned.data.bits);
+    } else {
+        ans.mantissa = big_integer_add(lo_man_aligned,ro_man_aligned);
+        ans.power =  lo.power + ans.mantissa.data.size - lo_man_aligned.data.size;
+        if(ans.mantissa.sign ==0) ans.power = 0;
+    }
     return ans;
 }
 
 BigFloat big_float_sub(BigFloat lo, BigFloat ro) {
+    if (lo.mantissa.sign == 0) {
+        BigFloat ans = big_float_deep_copy(ro);
+        ans.mantissa.sign = -ans.mantissa.sign;
+        return ans;
+    }
+    if (ro.mantissa.sign == 0) {
+        BigFloat ans = big_float_deep_copy(lo);
+        return ans;
+    }
     BigFloat ans;
-    ans.power = 0;
+    //assume lo.power > ro.power
+    if (lo.power < ro.power) {
+        BigFloat temp = lo;
+        lo = ro;
+        ro = temp;
+    }
+    //need to align mantissa to use BigInt add
+    int num_zeros_add_to_lo = lo.power - ro.power - lo.mantissa.data.size + ro.mantissa.data.size;
+    BigInteger lo_man_aligned, ro_man_aligned;
+    if (num_zeros_add_to_lo > 0) {
+        lo_man_aligned = big_integer_add_trailing_zeros(lo.mantissa, num_zeros_add_to_lo);
+        ro_man_aligned = ro.mantissa;
+        ans.mantissa = big_integer_subtract(lo_man_aligned,ro_man_aligned);
+        ans.power =  lo.power + ans.mantissa.data.size - lo_man_aligned.data.size;
+        if(ans.mantissa.sign ==0) ans.power = 0;
+        free(lo_man_aligned.data.bits);
+    } else if (num_zeros_add_to_lo < 0) {
+        lo_man_aligned = lo.mantissa;
+        ro_man_aligned = big_integer_add_trailing_zeros(ro.mantissa, -num_zeros_add_to_lo);
+        ans.mantissa = big_integer_subtract(lo_man_aligned,ro_man_aligned);
+        ans.power =  lo.power + ans.mantissa.data.size - lo_man_aligned.data.size;
+        if(ans.mantissa.sign ==0) ans.power = 0;
+        free(ro_man_aligned.data.bits);
+    } else {
+        ans.mantissa = big_integer_subtract(lo_man_aligned,ro_man_aligned);
+        ans.power =  lo.power + ans.mantissa.data.size - lo_man_aligned.data.size;
+        if(ans.mantissa.sign ==0) ans.power = 0;
+    }
     return ans;
 }
 

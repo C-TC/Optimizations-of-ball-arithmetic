@@ -102,7 +102,8 @@ void big_integer_multiply_inplace_fixed_precision(BigInteger* left, const BigInt
 /* create a deep copy of a bigint/bigintdata */
 BigInteger big_integer_deepcopy(const BigInteger other);
 
-
+/*e.g. 1-2-3-4 to 1-2-3-4-0-0, untested bigfloat helperfunc */
+BigInteger big_integer_add_trailing_zeros(const BigInteger , int );
 
 #ifdef DEBUG
 void big_integer_dump(const BigInteger bigInt);
