@@ -5,4 +5,5 @@
 BigFloat big_float_create(BigInteger, long long);
 void big_float_destroy(BigFloat *);
 BigFloat big_float_deep_copy(const BigFloat);
+double big_float_to_double(const BigFloat);
 #endif
