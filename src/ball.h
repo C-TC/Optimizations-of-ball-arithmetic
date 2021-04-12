@@ -1,7 +1,6 @@
 #ifndef BALL_H
 #define BALL_H
 #include "big_float.h"
-#include "ball_helper.h"
 typedef struct Ball {
     BigFloat center;
     double radius;

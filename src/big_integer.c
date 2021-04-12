@@ -89,6 +89,16 @@ BigIntegerData big_integer_multiply_data(const BigIntegerData left,
 void big_integer_multiply_data_inplace(const BigIntegerData left,
                                        const BigIntegerData right,
                                        BigIntegerData *pResult);
+/* multiply two unsigned bigints using karatsuba algorithm */
+BigIntegerData big_integer_multiply_data_karatsuba(const BigIntegerData left,
+                                                   const BigIntegerData right);
+void big_integer_multiply_data_inplace_karatsuba(const BigIntegerData left,
+                                                 const BigIntegerData right,
+                                                 BigIntegerData *pResult);
+void big_integer_split_data(const BigIntegerData source,
+                            const int mid,
+                            BigIntegerData* pHigh,
+                            BigIntegerData* pLow);
 /* shift an unsigned bigint to the left by d*UINT_NUM_BITS */
 void big_integer_left_shift_data(BigIntegerData *pBigIntData, int d);
 
@@ -646,6 +656,93 @@ void big_integer_left_shift_data(BigIntegerData *pBigIntData, int d) {
   big_integer_clear_trash_data(pBigIntData);
 }
 
+#define KARATSUBA_SWITCH 2
+BigIntegerData big_integer_multiply_data_karatsuba(const BigIntegerData left,
+                                                   const BigIntegerData right) {
+    // printf("left.size: %d, right.size: %d\n", left.size, right.size);
+    if (left.size < KARATSUBA_SWITCH || right.size < KARATSUBA_SWITCH) {
+        return big_integer_multiply_data(left, right);
+    }
+    // printf("hello\n");
+    int size = MAX(left.size, right.size);
+    int mid = size >> 1;
+    BigIntegerData leftHigh, leftLow, rightHigh, rightLow;
+    // big_integer_print_data(left, "left: ");
+    big_integer_split_data(left, mid, &leftHigh, &leftLow);
+    // big_integer_print_data(right, "right: ");
+    big_integer_split_data(right, mid, &rightHigh, &rightLow);
+
+    // a = leftHigh * rightHigh
+    // b = leftLow * rightLow
+    // c = leftHigh + leftLow
+    // d = rightHigh + rightLow
+    // e = c * d - a - d
+    BigIntegerData a, b, c, d, e;
+    a = big_integer_multiply_data_karatsuba(leftHigh, rightHigh);
+    b = big_integer_multiply_data_karatsuba(leftLow, rightLow);
+    c = big_integer_add_data(leftHigh, leftLow);
+    d = big_integer_add_data(rightHigh, rightLow);
+    e = big_integer_multiply_data_karatsuba(c, d);
+    big_integer_subtract_data_inplace(e, a, &e);
+    big_integer_subtract_data_inplace(e, b, &e);
+
+    // result = a * 2**(mid*2) + e * 2**mid + b
+    big_integer_left_shift_data(&a, mid*2);
+    big_integer_left_shift_data(&e, mid);
+    big_integer_add_data_inplace(a, e, &a);
+    big_integer_add_data_inplace(a, b, &a);
+
+    // free all the intermediate results
+    big_integer_destroy_data(&leftHigh);
+    big_integer_destroy_data(&leftLow);
+    big_integer_destroy_data(&rightHigh);
+    big_integer_destroy_data(&rightLow);
+    big_integer_destroy_data(&b);
+    big_integer_destroy_data(&c);
+    big_integer_destroy_data(&d);
+    big_integer_destroy_data(&e);
+
+    return a;
+}
+
+void big_integer_multiply_data_inplace_karatsuba(const BigIntegerData left,
+                                                 const BigIntegerData right,
+                                                 BigIntegerData *pResult);
+
+void big_integer_split_data(const BigIntegerData source,
+                            const int mid,
+                            BigIntegerData* pHigh,
+                            BigIntegerData* pLow) {
+    // assume pHigh and pLow are unintialized BigIntgerData
+    assert(mid > 0);
+    if (source.size > mid) {
+        // only allocate when source is larger than UINT_MAX**mid
+        pHigh->size = source.size - mid;
+        pHigh->capacity = source.size - mid + 1;
+        // We don't allocate more than needed
+        pHigh->bits = (unsigned int*)malloc(pHigh->capacity * UINT_NUM_BYTES);
+        memcpy(pHigh->bits, source.bits+mid, pHigh->size * UINT_NUM_BYTES);
+        big_integer_clear_trash_data(pHigh);
+        // printf("mid: %d, bits: %u, bits+mid: %u\n", mid, *(source.bits), *(source.bits+mid));
+        // big_integer_print_data(*pHigh, "pHigh: ");
+    }
+    else {
+        // set pHigh to zero
+        // TODO: escape this next time?
+        pHigh->size = 1;
+        pHigh->capacity = 2;
+        pHigh->bits = (unsigned int*)calloc(2, UINT_NUM_BYTES);
+    }
+    pLow->size = mid;
+    pLow->capacity = mid + 1;
+    pLow->bits = (unsigned int*)malloc(pLow->capacity * UINT_NUM_BYTES);
+    memcpy(pLow->bits, source.bits, mid * UINT_NUM_BYTES);
+    big_integer_clear_trash_data(pLow);
+    // big_integer_print_data(*pLow, "pLow: ");
+
+    return;
+}
+
 /* PUBLIC FUNCTIONS IMPLEMENTATION */
 BigInteger big_integer_create(long long value) {
   BigInteger bigInt;
@@ -1012,6 +1109,13 @@ void big_integer_multiply_inplace(const BigInteger left, const BigInteger right,
     pResult->sign = left.sign * right.sign;
     big_integer_multiply_data_inplace(left.data, right.data, &pResult->data);
   }
+}
+
+BigInteger big_integer_multiply_karatsuba(const BigInteger left, const BigInteger right) {
+    if (left.sign == 0 || right.sign == 0)
+        return big_integer_create(0);
+    return big_integer_create_internal(
+        left.sign * right.sign, big_integer_multiply_data_karatsuba(left.data, right.data));
 }
 
 void big_integer_add_inplace_fixed_precision(BigInteger* left, const BigInteger right, const int precision){

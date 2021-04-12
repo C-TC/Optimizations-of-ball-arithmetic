@@ -1,4 +1,4 @@
-#include "big_integer.h"
+#include "../src/big_integer.h"
 #include <assert.h>
 #include <limits.h>
 #include <math.h>
@@ -1088,7 +1088,7 @@ void test_multiply() {
   big_integer_destroy(&result);
 
   FILE *in = fopen("data/simple_mul.txt", "r");
-  for (int i = 0; i < 1; ++i) {
+  for (int i = 0; i < 6; ++i) {
     left = big_integer_create_from_file(&in);
     right = big_integer_create_from_file(&in);
     answer = big_integer_create_from_file(&in);
@@ -1202,6 +1202,30 @@ void test_multiply_inplace() {
     // printf("mul done [%d/6]\n", i + 1);
   }
   big_integer_destroy(&result);
+  fclose(in);
+}
+
+void test_multiply_karatsuba() {
+  BigInteger left;
+  BigInteger right;
+  BigInteger result;
+  BigInteger answer;
+
+  FILE *in = fopen("data/simple_mul.txt", "r");
+  for (int i = 0; i < 6; ++i) {
+    left = big_integer_create_from_file(&in);
+    right = big_integer_create_from_file(&in);
+    answer = big_integer_create_from_file(&in);
+    result = big_integer_multiply_karatsuba(left, right);
+    // big_integer_print(result, "result: ");
+    // big_integer_print(answer, "answer: ");
+    assert(big_integer_compare(result, answer) == 0);
+    big_integer_destroy(&left);
+    big_integer_destroy(&right);
+    big_integer_destroy(&result);
+    big_integer_destroy(&answer);
+    // printf("mul done [%d/6]\n", i + 1);
+  }
   fclose(in);
 }
 
@@ -1497,6 +1521,8 @@ int main(int argc, const char **argv) {
   printf("test_multiply pass\n");
   test_multiply_inplace();
   printf("test_multiply_inplace pass\n");
+  test_multiply_karatsuba();
+  printf("test_multiply_karatsuba pass\n");
   test_increment();
   printf("test_increment pass\n");
   test_decrement();

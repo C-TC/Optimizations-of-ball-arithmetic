@@ -85,6 +85,8 @@ void big_integer_decrement(BigInteger *bigInt, const unsigned int value);
 BigInteger big_integer_multiply(const BigInteger left, const BigInteger right);
 void big_integer_multiply_inplace(const BigInteger left, const BigInteger right,
                                   BigInteger *pResult);
+/* A divide-and-conquer algorithm to speedup multiplication of very large numbers */
+BigInteger big_integer_multiply_karatsuba(const BigInteger left, const BigInteger right);
 
 /* 
  * Multiply two fixed precision big integers inplacely 
