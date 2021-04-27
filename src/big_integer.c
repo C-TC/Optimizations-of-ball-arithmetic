@@ -854,8 +854,9 @@ void big_integer_print(const BigInteger bigInt, const char *msg) {
     assert(bigInt.data.bits[0] == 0);
   }
 
-  printf("%s\t\t", msg);
-  printf("%d\t%d\t", bigInt.sign, bigInt.data.size);
+  printf("%s\n", msg);
+  printf("The sign of the big int is %d\nThe size(length) of the big int is %d\n", bigInt.sign, bigInt.data.size);
+  printf("The data is: \n");
   int i;
   for (i = 0; i < bigInt.data.size; ++i) {
     printf("%u\t\t\t", bigInt.data.bits[i]);

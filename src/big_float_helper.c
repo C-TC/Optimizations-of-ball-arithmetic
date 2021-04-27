@@ -52,7 +52,7 @@ double big_float_to_double(const BigFloat bf) {
     unsigned int *bits = bf.mantissa.data.bits;
     unsigned int bit0 = bits[size - 1], bit1 = bits[size - 2], bit2 = bits[size - 3];
     unsigned long data1 = (unsigned long) bit0 << 32 | bit1, data2 = (unsigned long) bit1 << 32 | bit2;
-    unsigned long mask1 = 0x8000000000000000, mask2 = 0xFFFFFFFFFFFFF000, mask3 = 0xFFFFFFFF00000000, mask4 = 0x00000000FFFFFFFF;
+    unsigned long mask1 = 0x8000000000000000, mask2 = 0xFFFFFFFFFFFFF000, mask3 = 0xFFFFFFFF00000000;
     if (bf.power == -32) {
         unsigned long res = data1 >> 2;
         res &= mask2;

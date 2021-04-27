@@ -1,5 +1,6 @@
 #include "ball.h"
 #include <stdio.h>
+#include <stdlib.h>
 Ball ball_add(Ball lo, Ball ro) {
     Ball ans;
     ans.center = big_float_add(lo.center,ro.center);
@@ -25,5 +26,13 @@ Ball ball_div(Ball lo, Ball ro) {
     return ans;
 }
 int main() {
-    printf("hello world\n");
+    BigInteger tmp_lo = big_integer_create(1);
+    BigInteger tmp_ro = big_integer_create(3);
+    BigFloat lo = big_float_create(tmp_lo, 1);
+    BigFloat ro = big_float_create(tmp_ro, 1);
+    BigFloat ans = big_float_div(lo, ro);
+    printf("The power of the ans is %lld\n", ans.power);
+    free(tmp_lo.data.bits);
+    free(tmp_ro.data.bits);
+    free(ans.mantissa.data.bits);
 }
