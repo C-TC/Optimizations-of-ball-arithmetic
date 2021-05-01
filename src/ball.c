@@ -31,8 +31,17 @@ int main() {
     BigFloat lo = big_float_create(tmp_lo, 1);
     BigFloat ro = big_float_create(tmp_ro, 1);
     BigFloat ans = big_float_div(lo, ro);
+    big_float_print(ans);
     printf("The power of the ans is %lld\n", ans.power);
     free(tmp_lo.data.bits);
     free(tmp_ro.data.bits);
     free(ans.mantissa.data.bits);
+
+    double testdata = -1e300;
+    BigFloat test1 = double_to_big_float(testdata);
+    printf("input double: %e\n",testdata);
+    big_float_print(test1);
+    printf("transformed back to double: %e\n",big_float_to_double(test1));
+    big_float_destroy(&test1);
+
 }
