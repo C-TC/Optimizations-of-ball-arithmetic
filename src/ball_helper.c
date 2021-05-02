@@ -17,17 +17,22 @@ Ball double_to_ball(double data) {
     // assume data is not NAN or INF
     // Consider: zero(as a special case of denormal) or denormal or normal
     BigFloat center = double_to_big_float(data);
-    double_cast radius;
-    radius.parts.sign = 0;
-    radius.parts.mantissa = 1;
-    radius.parts.exponent = d_c.parts.exponent;
-    double rad = radius.d;
-    Ball res =ball_create(center, rad);
+    double_cast l;
+    l.parts.sign = 0;
+    l.parts.mantissa = 0x1;
+    l.parts.exponent = d_c.parts.exponent;
+    double_cast r;
+    r.parts.sign = 0;
+    r.parts.mantissa = 0x2;
+    r.parts.exponent = d_c.parts.exponent;
+    double rad = r.d-l.d;
+    Ball res = ball_create(center, rad);
     return res;    
 }
 
 double ball_to_double(Ball b) {
-    return 0.0;
+    // ball -> double, simply discard radius info
+    return big_float_to_double(b.center);
 }
 
 void ball_print(Ball b) {

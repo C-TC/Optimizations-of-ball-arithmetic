@@ -44,6 +44,8 @@ BigFloat big_float_add(BigFloat lo, BigFloat ro) {
         if(ans.mantissa.sign ==0) ans.power = 0;
         free(ro_man_aligned.data.bits);
     } else {
+        lo_man_aligned = lo.mantissa;
+        ro_man_aligned = ro.mantissa;
         ans.mantissa = big_integer_add(lo_man_aligned,ro_man_aligned);
         ans.power =  lo.power + ans.mantissa.data.size - lo_man_aligned.data.size;
         if(ans.mantissa.sign ==0) ans.power = 0;

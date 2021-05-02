@@ -8,6 +8,12 @@ Ball ball_add(Ball lo, Ball ro) {
     ans.radius = lo.radius + ro.radius;
     return ans;
 }
+Ball ball_sub(Ball lo, Ball ro) {
+    Ball ans;
+    ans.center = big_float_sub(lo.center,ro.center);
+    ans.radius = lo.radius + ro.radius;
+    return ans;
+}
 Ball ball_multiply(Ball lo, Ball ro) {
     Ball ans;
     ans.center = big_float_multiply(lo.center,ro.center);
@@ -26,6 +32,50 @@ Ball ball_div(Ball lo, Ball ro) {
     ans.radius = anscentervalue + anscentervalue / big_float_to_double(ro.center) * ro.radius + lo.radius / rovalue + lo.radius * ro.radius / rovalue / rovalue;
     return ans;
 }
+
+typedef enum {BALL_ADD,BALL_SUB,BALL_MUL,BALL_DIV}test_type_ball;
+void test_ball(double lo, double ro, test_type_ball t) {
+    printf("\n\n----------------ball ");
+    switch (t)
+    {
+    case BALL_ADD: printf("add"); break;
+    case BALL_SUB: printf("sub"); break;
+    case BALL_MUL: printf("mul"); break;
+    case BALL_DIV: printf("div"); break;
+    default: exit(-1);
+    }
+    printf(" routine----------------\n");
+    Ball b1 = double_to_ball(lo);
+    Ball b2 = double_to_ball(ro);
+    printf("input 1: %e\n",lo);
+    ball_print(b1);
+    printf("input 2: %e\n",ro);
+    ball_print(b2);
+    Ball b3;
+    switch (t)
+    {
+    case BALL_ADD: b3 = ball_add(b1,b2); break;
+    case BALL_SUB: b3 = ball_sub(b1,b2); break;
+    case BALL_MUL: b3 = ball_multiply(b1,b2); break;
+    case BALL_DIV: b3 = ball_div(b1,b2); break;
+    default: exit(-1);
+    }
+    printf("output: \n");
+    ball_print(b3);
+    printf("transformed back to double: %e\n",ball_to_double(b3));
+    switch (t)
+    {
+    case BALL_ADD: printf("reference: %e\n",lo+ro); break;
+    case BALL_SUB: printf("reference: %e\n",lo-ro); break;
+    case BALL_MUL: printf("reference: %e\n",lo*ro); break;
+    case BALL_DIV: printf("reference: %e\n",lo/ro); break;
+    default: exit(-1);
+    }
+    ball_destory(&b1);
+    ball_destory(&b2);
+    ball_destory(&b3);
+}
+
 int main() {
     BigInteger tmp_lo = big_integer_create(1);
     BigInteger tmp_ro = big_integer_create(3);
@@ -52,4 +102,22 @@ int main() {
     printf("transformed back to double: %e\n",big_float_to_double(test2.center));
     ball_destory(&test2);
 
+    double testdata3 = -1e-300;
+    Ball test3 = double_to_ball(testdata3);
+    printf("input double: %e\n",testdata3);
+    ball_print(test3);
+    printf("transformed back to double: %e\n",ball_to_double(test3));
+    ball_destory(&test3);
+
+    test_ball(1.0e3,2.1e2,BALL_ADD);
+    test_ball(-1.0e3,1e3,BALL_ADD);
+    test_ball(1.0e300,2.1e301,BALL_ADD);
+
+    test_ball(1.0e3,2.1e2,BALL_MUL);
+    test_ball(-1.0e3,1e3,BALL_MUL);
+    test_ball(1.0e30,2.1e50,BALL_MUL);
+
+    test_ball(1.0e3,2.1e2,BALL_DIV);
+    test_ball(-1.0e3,1e3,BALL_DIV);
+    test_ball(1.0e30,2.1e50,BALL_DIV);
 }
