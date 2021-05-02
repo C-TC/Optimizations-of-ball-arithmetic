@@ -1,4 +1,5 @@
 #include "ball.h"
+#include "ball_helper.h"
 #include <stdio.h>
 #include <stdlib.h>
 Ball ball_add(Ball lo, Ball ro) {
@@ -43,5 +44,12 @@ int main() {
     big_float_print(test1);
     printf("transformed back to double: %e\n",big_float_to_double(test1));
     big_float_destroy(&test1);
+
+    double testdata2 = -1e-300;
+    Ball test2 = double_to_ball(testdata2);
+    printf("input double: %e\n",testdata2);
+    ball_print(test2);
+    printf("transformed back to double: %e\n",big_float_to_double(test2.center));
+    ball_destory(&test2);
 
 }

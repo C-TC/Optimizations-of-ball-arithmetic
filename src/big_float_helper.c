@@ -19,15 +19,6 @@ BigFloat big_float_deep_copy(const BigFloat bf){
     return res;
 }
 
-typedef union {
-  double d;
-  struct {
-    unsigned long mantissa:52;
-    unsigned int exponent : 11;
-    unsigned int sign : 1;
-  } parts;
-} double_cast;
-
 double big_float_to_double(const BigFloat bf) {
     if(bf.mantissa.data.bits[bf.mantissa.data.size - 1] == 0) {//if bf = 0 because we assume bf is normalized
         return 0.0;
@@ -141,18 +132,18 @@ BigFloat double_to_big_float(double data) {
     } else {
         // normal
         int expo = ((int) d_c.parts.exponent) - 1023 + 1; //double representation: exponent(unsigned) = power + 1023, take the "1" left to decimal point into consideration
-        printf("expo: %d\n",expo);
+        //printf("expo: %d\n",expo);
         unsigned long man = d_c.parts.mantissa | 0x0010000000000000;
         man <<= 11; //64-53
         int power = expo / 32;
-        printf("power: %d\n",power);
+        //printf("power: %d\n",power);
         int remainder = expo % 32;
         if (remainder < 0) {
             //modulo for negative value
             power--;
             remainder+=32; 
         }
-        printf("remainder: %d\n",remainder);
+        //printf("remainder: %d\n",remainder);
         unsigned long part1 = man >> 32, part2 = man;
         part1 <<= remainder;
         part2 <<= remainder;
@@ -195,7 +186,7 @@ void big_float_print(BigFloat bf) {
     for (j = i - 1; j >= i - print_precision + 1 && j >= 0; j--) {
         printf(" -- [%u]",bf.mantissa.data.bits[j]);
     }
-    if (j != 0) {
+    if (j >= 0) {
         printf(" -- ...");
     }
     printf(" x 2^(32 x %lld) \n",bf.power);
