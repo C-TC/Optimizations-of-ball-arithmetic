@@ -5,4 +5,5 @@ prog
 prog_*
 *.o
 *.out
-big_int_test
+big_int*
+**/*.pdf

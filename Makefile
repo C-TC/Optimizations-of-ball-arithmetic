@@ -40,3 +40,15 @@ clean:
 big_int_test:
 $(BIG_INT_TEST): $(BIG_INT_TEST_OBJS)
 	$(CC) $(CFLAGS) $(INCLUDES) -o $(BIG_INT_TEST) $(BIG_INT_TEST_OBJS) $(LFLAGS) $(LIBS)
+
+TEST_DIR := ./test
+BIG_INT_MUL_BENCHMARK_SRCS := test/timing_mul.c src/big_integer.c
+BIG_INT_MUL_BENCHMARK_OBJS := build/test/timing_mul.o build/big_integer.o
+BIG_INT_MUL_BENCHMARK := big_int_mul_benchmark
+big_int_mul_benchmark:
+$(BIG_INT_MUL_BENCHMARK): $(BIG_INT_MUL_BENCHMARK_OBJS)
+	$(CC) $(CFLAGS) $(INCLUDES) -o $(BIG_INT_MUL_BENCHMARK) $(BIG_INT_MUL_BENCHMARK_OBJS) $(LFLAGS) $(LIBS)
+
+$(BUILD_DIR)/test/%.o: $(TEST_DIR)/%.c
+	mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
