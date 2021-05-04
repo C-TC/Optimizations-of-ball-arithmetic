@@ -113,7 +113,6 @@ BigFloat big_float_div(BigFloat lo, BigFloat ro) {
     BigFloat tmp_normalize;
     tmp_ro.power = 1;
     tmp_lo.power = 1;
-    printf("%f\n", big_float_to_double(tmp_ro));
     BigFloat tmp_point5;
     tmp_point5.mantissa = big_integer_create(2147483648u);
     tmp_point5.power = 0;
