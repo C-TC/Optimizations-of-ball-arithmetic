@@ -169,7 +169,6 @@ BigFloat big_float_div(BigFloat lo, BigFloat ro) {
         free(tmp_normalize.mantissa.data.bits);
     }
     int num_zeros_add_to_lo = lo.mantissa.data.size - ro.mantissa.data.size;
-    printf("hello world %d\n", num_zeros_add_to_lo);
     BigInteger lo_man_aligned, ro_man_aligned;
     if (num_zeros_add_to_lo < 0) {
         lo_man_aligned = big_integer_add_trailing_zeros(lo.mantissa, -num_zeros_add_to_lo);
@@ -182,8 +181,7 @@ BigFloat big_float_div(BigFloat lo, BigFloat ro) {
         ro_man_aligned = ro.mantissa;
     }
     ans.power = lo.power - ro.power + 1;
-    printf("the current power %lld\n", ans.power);
-    if (big_integer_compare_data(&(lo_man_aligned.data), &(ro_man_aligned.data)) == -1) {--ans.power;}
+    if (big_integer_compare_data(&(lo_man_aligned.data), &(ro_man_aligned.data)) != 1) {--ans.power;}
     if (num_zeros_add_to_lo < 0) 
         {free(lo_man_aligned.data.bits);} 
     else if (num_zeros_add_to_lo > 0)
@@ -193,7 +191,5 @@ BigFloat big_float_div(BigFloat lo, BigFloat ro) {
     free(tmp_x.mantissa.data.bits);
     free(tmp_one.mantissa.data.bits);
     free(tmp_point5.mantissa.data.bits);
-    // ans.power = 1;
-    printf("%f\n", big_float_to_double(ans));
     return ans;
 }

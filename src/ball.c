@@ -77,8 +77,8 @@ void test_ball(double lo, double ro, test_type_ball t) {
 }
 
 int main() {
-    BigInteger tmp_lo = big_integer_create(4);
-    BigInteger tmp_ro = big_integer_create(3);
+    BigInteger tmp_lo = big_integer_create(100000);
+    BigInteger tmp_ro = big_integer_create(100000);
     BigFloat lo = big_float_create(tmp_lo, 1);
     BigFloat ro = big_float_create(tmp_ro, 1);
     BigFloat ans = big_float_div(lo, ro);
