@@ -80,7 +80,7 @@ int main() {
     BigInteger tmp_lo = big_integer_create(4);
     BigInteger tmp_ro = big_integer_create(3);
     BigFloat lo = big_float_create(tmp_lo, 1);
-    BigFloat ro = big_float_create(tmp_ro, 2);
+    BigFloat ro = big_float_create(tmp_ro, 1);
     BigFloat ans = big_float_div(lo, ro);
     printf("%f\n", big_float_to_double(ans));
     free(tmp_lo.data.bits);
