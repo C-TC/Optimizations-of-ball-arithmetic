@@ -48,27 +48,29 @@ int big_integer_to_int(const BigInteger bigInt);
 long long big_integer_to_long_long(const BigInteger bigInt);
 
 /* compare big integers */
-int big_integer_compare( const BigInteger left, const BigInteger right );
+int big_integer_compare(const BigInteger left, const BigInteger right);
 /* compare two unsigned bigints, return 1 if left > right, 0 if =, & -1 if < */
-int big_integer_compare_data( const BigIntegerData *, const BigIntegerData * );
+int big_integer_compare_data(const BigIntegerData *, const BigIntegerData *);
 
 /* adds two big integers together ( left + right ) */
 BigInteger big_integer_add(const BigInteger left, const BigInteger right);
 void big_integer_add_inplace(const BigInteger left, const BigInteger right,
                              BigInteger *pResult);
-/* 
- * Adds two fixed precision big integers inplacely 
+/*
+ * Adds two fixed precision big integers inplacely
  * i.e. left += right
- * 
+ *
  * !!! left and right can refer to the same object
- * 
- * Assumptions: 
+ *
+ * Assumptions:
  * !!! left.size >= precision
  * !!! right.size >= precision
  *  => almost no memory allocation
  * !!! left and right should not have leading zeros
-*/
-void big_integer_add_inplace_fixed_precision(BigInteger* left, const BigInteger right, const int precision);                             
+ */
+void big_integer_add_inplace_fixed_precision(BigInteger *left,
+                                             const BigInteger right,
+                                             const int precision);
 
 /* subtracts one big integer from another ( left - right ) */
 BigInteger big_integer_subtract(const BigInteger left, const BigInteger right);
@@ -83,29 +85,37 @@ void big_integer_decrement(BigInteger *bigInt, const unsigned int value);
 
 /* multiply two big integers ( left * right ) */
 BigInteger big_integer_multiply(const BigInteger left, const BigInteger right);
+/* multiply two big integers ( left * right ) */
+BigInteger big_integer_multiply_opt(const BigInteger left,
+                                    const BigInteger right);
 void big_integer_multiply_inplace(const BigInteger left, const BigInteger right,
                                   BigInteger *pResult);
-/* A divide-and-conquer algorithm to speedup multiplication of very large numbers */
-BigInteger big_integer_multiply_karatsuba(const BigInteger left, const BigInteger right);
+/* A divide-and-conquer algorithm to speedup multiplication of very large
+ * numbers */
+BigInteger big_integer_multiply_karatsuba(const BigInteger left,
+                                          const BigInteger right);
 
-/* 
- * Multiply two fixed precision big integers inplacely 
+/*
+ * Multiply two fixed precision big integers inplacely
  * i.e. left *= right
- * 
+ *
  * !!! left and right can refer to the same object
- * 
- * Assumptions: 
+ *
+ * Assumptions:
  * !!! left.size >= precision
  * !!! right.size >= precision
  *  => almost no memory allocation
  * !!! left and right should not have leading zeros
-*/
-void big_integer_multiply_inplace_fixed_precision(BigInteger* left, const BigInteger right, const int precision);      
+ */
+void big_integer_multiply_inplace_fixed_precision(BigInteger *left,
+                                                  const BigInteger right,
+                                                  const int precision);
+
 /* create a deep copy of a bigint/bigintdata */
 BigInteger big_integer_deepcopy(const BigInteger other);
 
 /*e.g. 1-2-3-4 to 1-2-3-4-0-0, untested bigfloat helperfunc */
-BigInteger big_integer_add_trailing_zeros(const BigInteger , int );
+BigInteger big_integer_add_trailing_zeros(const BigInteger, int);
 
 #ifdef DEBUG
 void big_integer_dump(const BigInteger bigInt);

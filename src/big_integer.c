@@ -61,14 +61,15 @@ BigIntegerData big_integer_add_data(const BigIntegerData left,
 void big_integer_add_data_inplace(const BigIntegerData left,
                                   const BigIntegerData right,
                                   BigIntegerData *pResult);
-void big_integer_add_inplace_fixed_precision_data(BigIntegerData* , const BigIntegerData, const int);
+void big_integer_add_inplace_fixed_precision_data(BigIntegerData *,
+                                                  const BigIntegerData,
+                                                  const int);
 /* subtraction assumes that left > right always holds */
 BigIntegerData big_integer_subtract_data(const BigIntegerData left,
                                          const BigIntegerData right);
-void big_integer_subtract_inplace_fixed_precision_data(const BigIntegerData left, 
-                                                       const BigIntegerData right,
-                                                       BigIntegerData* result,
-                                                       const int precision);
+void big_integer_subtract_inplace_fixed_precision_data(
+    const BigIntegerData left, const BigIntegerData right,
+    BigIntegerData *result, const int precision);
 void big_integer_subtract_data_inplace(const BigIntegerData left,
                                        const BigIntegerData right,
                                        BigIntegerData *pResult);
@@ -95,13 +96,10 @@ BigIntegerData big_integer_multiply_data_karatsuba(const BigIntegerData left,
 void big_integer_multiply_data_inplace_karatsuba(const BigIntegerData left,
                                                  const BigIntegerData right,
                                                  BigIntegerData *pResult);
-void big_integer_split_data(const BigIntegerData source,
-                            const int mid,
-                            BigIntegerData* pHigh,
-                            BigIntegerData* pLow);
+void big_integer_split_data(const BigIntegerData source, const int mid,
+                            BigIntegerData *pHigh, BigIntegerData *pLow);
 /* shift an unsigned bigint to the left by d*UINT_NUM_BITS */
 void big_integer_left_shift_data(BigIntegerData *pBigIntData, int d);
-
 
 /* PRIVATE FUNCTIONS IMPLEMENTATION */
 BigIntegerData big_integer_empty_data() {
@@ -589,6 +587,41 @@ BigIntegerData big_integer_multiply_data(const BigIntegerData left,
   return result;
 }
 
+BigIntegerData big_integer_multiply_data_opt(const BigIntegerData left,
+                                             const BigIntegerData right) {
+  int capacity = MAX(left.capacity, right.capacity);
+  BigIntegerData result;
+  // calloc is fater than malloc+memset
+  // good for initialization
+  result.bits = (unsigned int *)calloc(capacity * 2, UINT_NUM_BYTES);
+  result.capacity = capacity * 2;
+  result.size = 0;
+
+  unsigned long carry = 0;
+  for (int i = 0; i < right.size; ++i) {
+    // big_integer_multiply_data_with_uint(left_copy, right.bits[i], &mulResult);
+    carry = 0;
+    for (int j = 0; j < left.size; ++j) {
+        carry += (unsigned long)left.bits[j] * right.bits[i] + result.bits[i+j];
+        result.bits[i+j] = (unsigned int)carry;
+        carry >>= UINT_NUM_BITS;
+    }
+    if (carry > 0) {
+        result.bits[left.size+i] = carry;
+    }
+    // big_integer_add_data_inplace(mulResult, tmpResult, &result);
+    // big_integer_deepcopy_data_inplace(result, &tmpResult);
+    // big_integer_left_shift_data(&left_copy, 1);
+  }
+  if (carry > 0) {
+      result.size = left.size + right.size;
+  }
+  else {
+      result.size = left.size + right.size - 1;
+  }
+  return result;
+}
+
 void big_integer_multiply_data_inplace(const BigIntegerData left,
                                        const BigIntegerData right,
                                        BigIntegerData *pResult) {
@@ -661,88 +694,85 @@ void big_integer_left_shift_data(BigIntegerData *pBigIntData, int d) {
 #define KARATSUBA_SWITCH 2
 BigIntegerData big_integer_multiply_data_karatsuba(const BigIntegerData left,
                                                    const BigIntegerData right) {
-    // printf("left.size: %d, right.size: %d\n", left.size, right.size);
-    if (left.size < KARATSUBA_SWITCH || right.size < KARATSUBA_SWITCH) {
-        return big_integer_multiply_data(left, right);
-    }
-    // printf("hello\n");
-    int size = MAX(left.size, right.size);
-    int mid = size >> 1;
-    BigIntegerData leftHigh, leftLow, rightHigh, rightLow;
-    // big_integer_print_data(left, "left: ");
-    big_integer_split_data(left, mid, &leftHigh, &leftLow);
-    // big_integer_print_data(right, "right: ");
-    big_integer_split_data(right, mid, &rightHigh, &rightLow);
+  // printf("left.size: %d, right.size: %d\n", left.size, right.size);
+  if (left.size < KARATSUBA_SWITCH || right.size < KARATSUBA_SWITCH) {
+    return big_integer_multiply_data(left, right);
+  }
+  // printf("hello\n");
+  int size = MAX(left.size, right.size);
+  int mid = size >> 1;
+  BigIntegerData leftHigh, leftLow, rightHigh, rightLow;
+  // big_integer_print_data(left, "left: ");
+  big_integer_split_data(left, mid, &leftHigh, &leftLow);
+  // big_integer_print_data(right, "right: ");
+  big_integer_split_data(right, mid, &rightHigh, &rightLow);
 
-    // a = leftHigh * rightHigh
-    // b = leftLow * rightLow
-    // c = leftHigh + leftLow
-    // d = rightHigh + rightLow
-    // e = c * d - a - d
-    BigIntegerData a, b, c, d, e;
-    a = big_integer_multiply_data_karatsuba(leftHigh, rightHigh);
-    b = big_integer_multiply_data_karatsuba(leftLow, rightLow);
-    c = big_integer_add_data(leftHigh, leftLow);
-    d = big_integer_add_data(rightHigh, rightLow);
-    e = big_integer_multiply_data_karatsuba(c, d);
-    big_integer_subtract_data_inplace(e, a, &e);
-    big_integer_subtract_data_inplace(e, b, &e);
+  // a = leftHigh * rightHigh
+  // b = leftLow * rightLow
+  // c = leftHigh + leftLow
+  // d = rightHigh + rightLow
+  // e = c * d - a - d
+  BigIntegerData a, b, c, d, e;
+  a = big_integer_multiply_data_karatsuba(leftHigh, rightHigh);
+  b = big_integer_multiply_data_karatsuba(leftLow, rightLow);
+  c = big_integer_add_data(leftHigh, leftLow);
+  d = big_integer_add_data(rightHigh, rightLow);
+  e = big_integer_multiply_data_karatsuba(c, d);
+  big_integer_subtract_data_inplace(e, a, &e);
+  big_integer_subtract_data_inplace(e, b, &e);
 
-    // result = a * 2**(mid*2) + e * 2**mid + b
-    big_integer_left_shift_data(&a, mid*2);
-    big_integer_left_shift_data(&e, mid);
-    big_integer_add_data_inplace(a, e, &a);
-    big_integer_add_data_inplace(a, b, &a);
+  // result = a * 2**(mid*2) + e * 2**mid + b
+  big_integer_left_shift_data(&a, mid * 2);
+  big_integer_left_shift_data(&e, mid);
+  big_integer_add_data_inplace(a, e, &a);
+  big_integer_add_data_inplace(a, b, &a);
 
-    // free all the intermediate results
-    big_integer_destroy_data(&leftHigh);
-    big_integer_destroy_data(&leftLow);
-    big_integer_destroy_data(&rightHigh);
-    big_integer_destroy_data(&rightLow);
-    big_integer_destroy_data(&b);
-    big_integer_destroy_data(&c);
-    big_integer_destroy_data(&d);
-    big_integer_destroy_data(&e);
+  // free all the intermediate results
+  big_integer_destroy_data(&leftHigh);
+  big_integer_destroy_data(&leftLow);
+  big_integer_destroy_data(&rightHigh);
+  big_integer_destroy_data(&rightLow);
+  big_integer_destroy_data(&b);
+  big_integer_destroy_data(&c);
+  big_integer_destroy_data(&d);
+  big_integer_destroy_data(&e);
 
-    return a;
+  return a;
 }
 
 void big_integer_multiply_data_inplace_karatsuba(const BigIntegerData left,
                                                  const BigIntegerData right,
                                                  BigIntegerData *pResult);
 
-void big_integer_split_data(const BigIntegerData source,
-                            const int mid,
-                            BigIntegerData* pHigh,
-                            BigIntegerData* pLow) {
-    // assume pHigh and pLow are unintialized BigIntgerData
-    assert(mid > 0);
-    if (source.size > mid) {
-        // only allocate when source is larger than UINT_MAX**mid
-        pHigh->size = source.size - mid;
-        pHigh->capacity = source.size - mid + 1;
-        // We don't allocate more than needed
-        pHigh->bits = (unsigned int*)malloc(pHigh->capacity * UINT_NUM_BYTES);
-        memcpy(pHigh->bits, source.bits+mid, pHigh->size * UINT_NUM_BYTES);
-        big_integer_clear_trash_data(pHigh);
-        // printf("mid: %d, bits: %u, bits+mid: %u\n", mid, *(source.bits), *(source.bits+mid));
-        // big_integer_print_data(*pHigh, "pHigh: ");
-    }
-    else {
-        // set pHigh to zero
-        // TODO: escape this next time?
-        pHigh->size = 1;
-        pHigh->capacity = 2;
-        pHigh->bits = (unsigned int*)calloc(2, UINT_NUM_BYTES);
-    }
-    pLow->size = mid;
-    pLow->capacity = mid + 1;
-    pLow->bits = (unsigned int*)malloc(pLow->capacity * UINT_NUM_BYTES);
-    memcpy(pLow->bits, source.bits, mid * UINT_NUM_BYTES);
-    big_integer_clear_trash_data(pLow);
-    // big_integer_print_data(*pLow, "pLow: ");
+void big_integer_split_data(const BigIntegerData source, const int mid,
+                            BigIntegerData *pHigh, BigIntegerData *pLow) {
+  // assume pHigh and pLow are unintialized BigIntgerData
+  assert(mid > 0);
+  if (source.size > mid) {
+    // only allocate when source is larger than UINT_MAX**mid
+    pHigh->size = source.size - mid;
+    pHigh->capacity = source.size - mid + 1;
+    // We don't allocate more than needed
+    pHigh->bits = (unsigned int *)malloc(pHigh->capacity * UINT_NUM_BYTES);
+    memcpy(pHigh->bits, source.bits + mid, pHigh->size * UINT_NUM_BYTES);
+    big_integer_clear_trash_data(pHigh);
+    // printf("mid: %d, bits: %u, bits+mid: %u\n", mid, *(source.bits),
+    // *(source.bits+mid)); big_integer_print_data(*pHigh, "pHigh: ");
+  } else {
+    // set pHigh to zero
+    // TODO: escape this next time?
+    pHigh->size = 1;
+    pHigh->capacity = 2;
+    pHigh->bits = (unsigned int *)calloc(2, UINT_NUM_BYTES);
+  }
+  pLow->size = mid;
+  pLow->capacity = mid + 1;
+  pLow->bits = (unsigned int *)malloc(pLow->capacity * UINT_NUM_BYTES);
+  memcpy(pLow->bits, source.bits, mid * UINT_NUM_BYTES);
+  big_integer_clear_trash_data(pLow);
+  // big_integer_print_data(*pLow, "pLow: ");
 
-    return;
+  return;
 }
 
 /* PUBLIC FUNCTIONS IMPLEMENTATION */
@@ -857,7 +887,9 @@ void big_integer_print(const BigInteger bigInt, const char *msg) {
   }
 
   printf("%s\n", msg);
-  printf("The sign of the big int is %d\nThe size(length) of the big int is %d\n", bigInt.sign, bigInt.data.size);
+  printf(
+      "The sign of the big int is %d\nThe size(length) of the big int is %d\n",
+      bigInt.sign, bigInt.data.size);
   printf("The data is: \n");
   int i;
   for (i = 0; i < bigInt.data.size; ++i) {
@@ -1055,9 +1087,9 @@ void big_integer_increment(BigInteger *bigInt, const unsigned int value) {
     } else {
       // |bigInt| < |value|
 #ifdef DEBUG
-			/* |bigInt| < |value| implies that bigInt has length 1
-			   because value, if expressed as a BigInteger, would have length 1. */
-			assert( bigInt->data.size == 1 );
+      /* |bigInt| < |value| implies that bigInt has length 1
+         because value, if expressed as a BigInteger, would have length 1. */
+      assert(bigInt->data.size == 1);
 #endif
       bigInt->sign = 1;
       bigInt->data.bits[0] = value - bigInt->data.bits[0];
@@ -1087,9 +1119,9 @@ void big_integer_decrement(BigInteger *bigInt, const unsigned int value) {
     } else {
       // |bigInt| < |value|
 #ifdef DEBUG
-			/* |bigInt| < |value| implies that bigInt has length 1 or less 
-			   because value, if expressed as a BigInteger, would have length 1. */
-			assert( bigInt->data.size == 1 );
+      /* |bigInt| < |value| implies that bigInt has length 1 or less
+         because value, if expressed as a BigInteger, would have length 1. */
+      assert(bigInt->data.size == 1);
 #endif
       bigInt->sign = -1;
       bigInt->data.bits[0] = value - bigInt->data.bits[0];
@@ -1104,6 +1136,13 @@ BigInteger big_integer_multiply(const BigInteger left, const BigInteger right) {
       left.sign * right.sign, big_integer_multiply_data(left.data, right.data));
 }
 
+BigInteger big_integer_multiply_opt(const BigInteger left, const BigInteger right) {
+  if (left.sign == 0 || right.sign == 0)
+    return big_integer_create(0);
+  return big_integer_create_internal(
+      left.sign * right.sign, big_integer_multiply_data_opt(left.data, right.data));
+}
+
 void big_integer_multiply_inplace(const BigInteger left, const BigInteger right,
                                   BigInteger *pResult) {
   if (left.sign == 0 || right.sign == 0)
@@ -1114,36 +1153,43 @@ void big_integer_multiply_inplace(const BigInteger left, const BigInteger right,
   }
 }
 
-BigInteger big_integer_multiply_karatsuba(const BigInteger left, const BigInteger right) {
-    if (left.sign == 0 || right.sign == 0)
-        return big_integer_create(0);
-    return big_integer_create_internal(
-        left.sign * right.sign, big_integer_multiply_data_karatsuba(left.data, right.data));
+BigInteger big_integer_multiply_karatsuba(const BigInteger left,
+                                          const BigInteger right) {
+  if (left.sign == 0 || right.sign == 0)
+    return big_integer_create(0);
+  return big_integer_create_internal(
+      left.sign * right.sign,
+      big_integer_multiply_data_karatsuba(left.data, right.data));
 }
 
-void big_integer_add_inplace_fixed_precision(BigInteger* left, const BigInteger right, const int precision){
-  if(left->sign == 0){
+void big_integer_add_inplace_fixed_precision(BigInteger *left,
+                                             const BigInteger right,
+                                             const int precision) {
+  if (left->sign == 0) {
     // left is 0, copy right to left
-    memmove(left->data.bits, right.data.bits + right.data.size - precision, precision * UINT_NUM_BYTES);
+    memmove(left->data.bits, right.data.bits + right.data.size - precision,
+            precision * UINT_NUM_BYTES);
     left->data.size = precision;
     left->sign = right.sign;
     return;
   }
-  if(right.sign == 0){
+  if (right.sign == 0) {
     // right is 0
-    memmove(left->data.bits, left->data.bits + left->data.size - precision, precision * UINT_NUM_BYTES);
+    memmove(left->data.bits, left->data.bits + left->data.size - precision,
+            precision * UINT_NUM_BYTES);
     left->data.size = precision;
     return;
   }
 
-  if(left->sign == right.sign){
-    big_integer_add_inplace_fixed_precision_data(&left->data, right.data, precision);
+  if (left->sign == right.sign) {
+    big_integer_add_inplace_fixed_precision_data(&left->data, right.data,
+                                                 precision);
     return;
   }
 
   int compRes = big_integer_compare_data(&left->data, &right.data);
 
-  if(compRes == 0){
+  if (compRes == 0) {
     // answer is 0
     left->sign = 0;
     left->data.size = precision;
@@ -1151,19 +1197,21 @@ void big_integer_add_inplace_fixed_precision(BigInteger* left, const BigInteger 
     return;
   }
 
-  if(compRes > 0){
+  if (compRes > 0) {
     // left > right
-    big_integer_subtract_inplace_fixed_precision_data(left->data, right.data, &left->data, precision);
-  }else{
+    big_integer_subtract_inplace_fixed_precision_data(left->data, right.data,
+                                                      &left->data, precision);
+  } else {
     // right > left
     BigIntegerData result;
     result.bits = malloc(precision * UINT_NUM_BYTES);
     result.capacity = precision;
     result.size = precision;
-    big_integer_subtract_inplace_fixed_precision_data(right.data, left->data, &result, precision);
+    big_integer_subtract_inplace_fixed_precision_data(right.data, left->data,
+                                                      &result, precision);
     left->sign = right.sign;
     free(left->data.bits); // free left's original memory space
-    left->data = result; // assign the new one
+    left->data = result;   // assign the new one
   }
 }
 
@@ -1172,10 +1220,12 @@ void big_integer_add_inplace_fixed_precision(BigInteger* left, const BigInteger 
  * 1. scalar replacement for left->size
  * 2. avoid explicit type casting?
  */
-void big_integer_subtract_inplace_fixed_precision_data(const BigIntegerData left, const BigIntegerData right, BigIntegerData* result, const int precision){
+void big_integer_subtract_inplace_fixed_precision_data(
+    const BigIntegerData left, const BigIntegerData right,
+    BigIntegerData *result, const int precision) {
   unsigned long long borrow = 0;
   int offset = left.size - precision;
-  for(int i=offset;i<left.size;i++){
+  for (int i = offset; i < left.size; i++) {
     /* what happens here is that, if left is less than right, borrow will become
        "negative" (not really because it is unsigned), and the bit pattern for
        that is the 1's complement (complementing it to get to 0), which is
@@ -1194,24 +1244,26 @@ void big_integer_subtract_inplace_fixed_precision_data(const BigIntegerData left
  * 1. scalar replacement for left->size
  * 2. avoid explicit type casting?
  */
-void big_integer_add_inplace_fixed_precision_data(BigIntegerData* left, const BigIntegerData right, const int precision){
+void big_integer_add_inplace_fixed_precision_data(BigIntegerData *left,
+                                                  const BigIntegerData right,
+                                                  const int precision) {
   unsigned long long sum = 0;
   int offset = left->size - precision;
-  for(int i=offset;i<left->size;i++){
+  for (int i = offset; i < left->size; i++) {
     sum += (unsigned long long)left->bits[i] + right.bits[i];
     left->bits[i] = (unsigned int)sum;
     sum >>= UINT_NUM_BITS;
   }
   int data_size = precision;
-  if(sum != 0){
+  if (sum != 0) {
     // carry-over
     offset++;
     data_size--;
   }
   memmove(left->bits, left->bits + offset, data_size * UINT_NUM_BYTES);
-  if(sum != 0){
+  if (sum != 0) {
     // carry-over
-    left->bits[left->size-1] = (unsigned int)sum;
+    left->bits[left->size - 1] = (unsigned int)sum;
   }
   left->size = precision;
   return;
@@ -1224,21 +1276,24 @@ void big_integer_add_inplace_fixed_precision_data(BigIntegerData* left, const Bi
  * 3. strength redection for idx
  * 4. avoid explicit type casting?
  */
-void big_integer_multiply_inplace_fixed_precision(BigInteger* left, const BigInteger right, const int precision){
-  if(left->sign == 0 || right.sign == 0){
+void big_integer_multiply_inplace_fixed_precision(BigInteger *left,
+                                                  const BigInteger right,
+                                                  const int precision) {
+  if (left->sign == 0 || right.sign == 0) {
     // answer is 0
     left->sign = 0;
     left->data.size = precision;
-    memset(left->data.bits, 0, precision * UINT_NUM_BYTES);    
+    memset(left->data.bits, 0, precision * UINT_NUM_BYTES);
   }
-  unsigned int* tmp = calloc(2 * precision, UINT_NUM_BYTES);
+  unsigned int *tmp = calloc(2 * precision, UINT_NUM_BYTES);
   int offset_left = left->data.size - precision;
   int offset_right = right.data.size - precision;
-  for(int j=offset_right;j<right.data.size;j++){
+  for (int j = offset_right; j < right.data.size; j++) {
     unsigned long long carry = 0;
-    for(int i=offset_left;i<left->data.size;i++){
+    for (int i = offset_left; i < left->data.size; i++) {
       int idx = j - offset_right + i - offset_left;
-      carry += (unsigned long long)left->data.bits[i] * right.data.bits[j] + tmp[idx];
+      carry += (unsigned long long)left->data.bits[i] * right.data.bits[j] +
+               tmp[idx];
       tmp[idx] = (unsigned int)carry;
       carry >>= UINT_NUM_BITS;
     }
@@ -1250,10 +1305,10 @@ void big_integer_multiply_inplace_fixed_precision(BigInteger* left, const BigInt
   left->sign *= right.sign;
   left->data.size = precision;
   int offset = precision;
-  for(int i=2*precision-1;i>=precision;i--){
-    if(tmp[i] != 0){
+  for (int i = 2 * precision - 1; i >= precision; i--) {
+    if (tmp[i] != 0) {
       break;
-    }else{
+    } else {
       offset--;
     }
   }
@@ -1262,29 +1317,27 @@ void big_integer_multiply_inplace_fixed_precision(BigInteger* left, const BigInt
 }
 
 BigInteger big_integer_add_trailing_zeros(const BigInteger bi, int num) {
-    BigInteger ans;
-    ans.sign = bi.sign;
-    ans.data.size = bi.data.size + num;
-    ans.data.capacity = 2 * ans.data.size;
-    ans.data.bits = (unsigned int*) calloc(ans.data.capacity, UINT_NUM_BYTES);
-	memcpy(ans.data.bits + num, bi.data.bits, bi.data.size * UINT_NUM_BYTES);
-	return ans;
+  BigInteger ans;
+  ans.sign = bi.sign;
+  ans.data.size = bi.data.size + num;
+  ans.data.capacity = 2 * ans.data.size;
+  ans.data.bits = (unsigned int *)calloc(ans.data.capacity, UINT_NUM_BYTES);
+  memcpy(ans.data.bits + num, bi.data.bits, bi.data.size * UINT_NUM_BYTES);
+  return ans;
 }
 
 #ifdef DEBUG
-void big_integer_dump( const BigInteger bigInt )
-{
-	printf("BigInteger:\n");
-	printf("Sign: %d\n", (int)bigInt.sign);
-	printf("Data: { ");
-	if ( bigInt.data.size > 0 )
-	{
-		int i;
-		for ( i = 0; i < (bigInt.data.size - 1); i++ )
-			printf("%u, ", bigInt.data.bits[i]);
-		printf("%u ", bigInt.data.bits[bigInt.data.size-1]);
-	}
-	printf("}\n");
-	printf("Length: %d\n", bigInt.data.size);
+void big_integer_dump(const BigInteger bigInt) {
+  printf("BigInteger:\n");
+  printf("Sign: %d\n", (int)bigInt.sign);
+  printf("Data: { ");
+  if (bigInt.data.size > 0) {
+    int i;
+    for (i = 0; i < (bigInt.data.size - 1); i++)
+      printf("%u, ", bigInt.data.bits[i]);
+    printf("%u ", bigInt.data.bits[bigInt.data.size - 1]);
+  }
+  printf("}\n");
+  printf("Length: %d\n", bigInt.data.size);
 }
 #endif
