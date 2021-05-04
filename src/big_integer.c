@@ -91,8 +91,8 @@ void big_integer_multiply_data_inplace(const BigIntegerData left,
                                        const BigIntegerData right,
                                        BigIntegerData *pResult);
 /* left = left * right */
-void big_integer_multiply_data_two_operands_opt(BigIntegerData **ppLeft,
-                                                const BigIntegerData right);
+void big_integer_multiply_data_two_operands_opt(const BigIntegerData left,
+                                                const BigIntegerData right, BigIntegerData *pResult);
 /* multiply two unsigned bigints using karatsuba algorithm */
 BigIntegerData big_integer_multiply_data_karatsuba(const BigIntegerData left,
                                                    const BigIntegerData right);
@@ -625,51 +625,41 @@ BigIntegerData big_integer_multiply_data_opt(const BigIntegerData left,
   return result;
 }
 
-void big_integer_multiply_data_two_operands_opt(BigIntegerData **ppLeft,
-                                                const BigIntegerData right) {
-  // int capacity = MAX(pLeft->capacity, right.capacity);
-  BigIntegerData *pLeft = *ppLeft;
-  // big_integer_print_data(*pLeft, "*pLeft:");
-  int allocated_size = pLeft->size + right.size + 1;
-  BigIntegerData result;
-  // calloc is fater than malloc+memset
-  // good for initialization
-  result.bits = (unsigned int *)calloc(allocated_size, UINT_NUM_BYTES);
-  result.capacity = allocated_size;
-
+void big_integer_multiply_data_two_operands_opt(const BigIntegerData left,
+                                                const BigIntegerData right, BigIntegerData *pResult) {
   unsigned long carry = 0;
   for (int i = 0; i < right.size; ++i) {
     // big_integer_multiply_data_with_uint(left_copy, right.bits[i],
     // &mulResult);
     carry = 0;
-    for (int j = 0; j < pLeft->size; ++j) {
+    for (int j = 0; j < left.size; ++j) {
       carry +=
-          (unsigned long)pLeft->bits[j] * right.bits[i] + result.bits[i + j];
-      result.bits[i + j] = (unsigned int)carry;
+          (unsigned long)left.bits[j] * right.bits[i] + pResult->bits[i + j];
+      pResult->bits[i + j] = (unsigned int)carry;
       carry >>= UINT_NUM_BITS;
     }
     if (carry > 0) {
-      result.bits[pLeft->size + i] = carry;
+      pResult->bits[left.size + i] = carry;
     }
     // big_integer_add_data_inplace(mulResult, tmpResult, &result);
     // big_integer_deepcopy_data_inplace(result, &tmpResult);
     // big_integer_left_shift_data(&left_copy, 1);
   }
   if (carry > 0) {
-    result.size = pLeft->size + right.size;
+    pResult->size = left.size + right.size;
   } else {
-    printf("%d %d %d\n", pLeft->size, right.size, result.size);
-    result.size = pLeft->size + right.size - 1;
-    printf("%d %d %d\n", pLeft->size, right.size, result.size);
+    // printf("%d %d %d\n", pLeft->size, right.size, result.size);
+    pResult->size = left.size + right.size - 1;
+    // printf("%d %d %d\n", pLeft->size, right.size, result.size);
   }
   // printf("size: %d %d %d\n", pLeft->size, right.size, result.size);
   // big_integer_print_data(*pLeft, "pLeft: ");
   // big_integer_print_data(result, "result: ");
-  big_integer_destroy_data(pLeft);
+  // big_integer_destroy_data(pLeft);
   // printf("%p\n", pLeft);
   // printf("%p\n", ppLeft);
   // printf("%p\n", *ppLeft);
-  *ppLeft = &result;
+  // *ppLeft = &result;
   // printf("ppLeft size: %d\n", (*ppLeft)->size);
   // printf("%p\n", *ppLeft);
   // printf("%p\n", &result);
@@ -1216,9 +1206,18 @@ void big_integer_multiply_two_operands_opt(BigInteger *pLeft,
     big_integer_set(0, pLeft);
   else {
     pLeft->sign *= right.sign;
-    BigIntegerData *pLeftData = &(pLeft->data);
-    big_integer_multiply_data_two_operands_opt(&pLeftData, right.data);
-    pLeft->data = *pLeftData;
+    int allocated_size = pLeft->data.size + right.data.size + 1;
+    BigIntegerData result;
+    // BigIntegerData *pLeftData = &(pLeft->data);
+    result.bits = (unsigned int *)calloc(allocated_size, UINT_NUM_BYTES);
+    result.capacity = allocated_size;
+    big_integer_multiply_data_two_operands_opt(pLeft->data, right.data, &result);
+    // pLeft->data = *pLeftData;
+    // big_integer_destroy_data(&(pLeft->data));
+    pLeft->data.size = result.size;
+    pLeft->data.capacity = result.capacity;
+    free(pLeft->data.bits);
+    pLeft->data.bits = result.bits;
   }
 }
 

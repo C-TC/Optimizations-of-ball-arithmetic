@@ -1213,7 +1213,6 @@ void test_multiply_two_operands_opt() {
   BigInteger left;
   BigInteger right;
   BigInteger answer;
-  /*
   left = big_integer_create(0);
   right = big_integer_create(12);
   big_integer_multiply_two_operands_opt(&left, right);
@@ -1277,13 +1276,12 @@ void test_multiply_two_operands_opt() {
   assert(big_integer_to_int(left) == 1);
   big_integer_destroy(&left);
   big_integer_destroy(&right);
-  */
 
   left = big_integer_create(-(long long)UINT_MAX - UINT_MAX);
   right = big_integer_create(1);
   big_integer_multiply_two_operands_opt(&left, right);
   // big_integer_print(left, "left");
-  printf("%d\n", left.data.size);
+  // printf("%d\n", left.data.size);
   // printf("%lld\t%lld\n", big_integer_to_long_long(left), -(long long)UINT_MAX - UINT_MAX);
   assert(big_integer_to_long_long(left) == -(long long)UINT_MAX - UINT_MAX);
   big_integer_destroy(&left);
@@ -1295,8 +1293,8 @@ void test_multiply_two_operands_opt() {
     right = big_integer_create_from_file(&in);
     answer = big_integer_create_from_file(&in);
     big_integer_multiply_two_operands_opt(&left, right);
-    big_integer_print(left, "left: ");
-    big_integer_print(answer, "answer: ");
+    // big_integer_print(left, "left: ");
+    // big_integer_print(answer, "answer: ");
     assert(big_integer_compare(left, answer) == 0);
     big_integer_destroy(&left);
     big_integer_destroy(&right);
