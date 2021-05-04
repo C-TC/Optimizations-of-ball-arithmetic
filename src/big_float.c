@@ -113,10 +113,11 @@ BigFloat big_float_div(BigFloat lo, BigFloat ro) {
     BigFloat tmp_normalize;
     tmp_ro.power = 1;
     tmp_lo.power = 1;
+    printf("%f\n", big_float_to_double(tmp_ro));
     BigFloat tmp_point5;
     tmp_point5.mantissa = big_integer_create(2147483648u);
     tmp_point5.power = 0;
-    unsigned int normalize_factor = (unsigned int)(log(ro.mantissa.data.bits[0]) / log(2)) + 1;
+    unsigned int normalize_factor = (unsigned int)(log(ro.mantissa.data.bits[ro.mantissa.data.size - 1]) / log(2)) + 1;
     for (int i = 0; i < normalize_factor; ++i) {
         tmp_normalize = big_float_multiply(tmp_ro, tmp_point5);
         tmp_normalize.mantissa.data.capacity = tmp_normalize.mantissa.data.size;
