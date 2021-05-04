@@ -1209,6 +1209,102 @@ void test_multiply_opt() {
   fclose(in);
 }
 
+void test_multiply_two_operands_opt() {
+  BigInteger left;
+  BigInteger right;
+  BigInteger answer;
+  /*
+  left = big_integer_create(0);
+  right = big_integer_create(12);
+  big_integer_multiply_two_operands_opt(&left, right);
+  assert(big_integer_to_int(left) == 0);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(0);
+  right = big_integer_create(-5);
+  big_integer_multiply_two_operands_opt(&left, right);
+  assert(big_integer_to_int(left) == 0);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(12);
+  right = big_integer_create(0);
+  big_integer_multiply_two_operands_opt(&left, right);
+  assert(big_integer_to_int(left) == 0);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(-5);
+  right = big_integer_create(0);
+  big_integer_multiply_two_operands_opt(&left, right);
+  assert(big_integer_to_int(left) == 0);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(1);
+  right = big_integer_create(117);
+  big_integer_multiply_two_operands_opt(&left, right);
+  // big_integer_print(left, "left: ");
+  assert(big_integer_to_int(left) == 117);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(-1);
+  right = big_integer_create(117);
+  big_integer_multiply_two_operands_opt(&left, right);
+  assert(big_integer_to_int(left) == -117);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(-11);
+  right = big_integer_create(15);
+  big_integer_multiply_two_operands_opt(&left, right);
+  assert(big_integer_to_int(left) == -165);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(1);
+  right = big_integer_create(1);
+  big_integer_multiply_two_operands_opt(&left, right);
+  assert(big_integer_to_int(left) == 1);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  left = big_integer_create(-1);
+  right = big_integer_create(-1);
+  big_integer_multiply_two_operands_opt(&left, right);
+  assert(big_integer_to_int(left) == 1);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+  */
+
+  left = big_integer_create(-(long long)UINT_MAX - UINT_MAX);
+  right = big_integer_create(1);
+  big_integer_multiply_two_operands_opt(&left, right);
+  // big_integer_print(left, "left");
+  printf("%d\n", left.data.size);
+  // printf("%lld\t%lld\n", big_integer_to_long_long(left), -(long long)UINT_MAX - UINT_MAX);
+  assert(big_integer_to_long_long(left) == -(long long)UINT_MAX - UINT_MAX);
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+
+  FILE *in = fopen("data/simple_mul.txt", "r");
+  for (int i = 0; i < 6; ++i) {
+    left = big_integer_create_from_file(&in);
+    right = big_integer_create_from_file(&in);
+    answer = big_integer_create_from_file(&in);
+    big_integer_multiply_two_operands_opt(&left, right);
+    big_integer_print(left, "left: ");
+    big_integer_print(answer, "answer: ");
+    assert(big_integer_compare(left, answer) == 0);
+    big_integer_destroy(&left);
+    big_integer_destroy(&right);
+    big_integer_destroy(&answer);
+    // printf("mul done [%d/6]\n", i + 1);
+  }
+  fclose(in);
+}
 
 
 void test_multiply_inplace() {
@@ -1627,6 +1723,8 @@ int main(int argc, const char **argv) {
   printf("test_multiply pass\n");
   test_multiply_opt();
   printf("test_multiply_opt pass\n");
+  test_multiply_two_operands_opt();
+  printf("test_multiply_two_operands_opt pass\n");
   test_multiply_inplace();
   printf("test_multiply_inplace pass\n");
   test_multiply_karatsuba();

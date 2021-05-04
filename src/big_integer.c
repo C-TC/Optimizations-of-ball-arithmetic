@@ -90,6 +90,9 @@ BigIntegerData big_integer_multiply_data(const BigIntegerData left,
 void big_integer_multiply_data_inplace(const BigIntegerData left,
                                        const BigIntegerData right,
                                        BigIntegerData *pResult);
+/* left = left * right */
+void big_integer_multiply_data_two_operands_opt(BigIntegerData **ppLeft,
+                                                const BigIntegerData right);
 /* multiply two unsigned bigints using karatsuba algorithm */
 BigIntegerData big_integer_multiply_data_karatsuba(const BigIntegerData left,
                                                    const BigIntegerData right);
@@ -152,11 +155,11 @@ void big_integer_set_data(const unsigned int bits[], const int size,
 }
 
 void big_integer_print_data(const BigIntegerData bigIntData, const char *msg) {
-  printf("%s\t\t", msg);
-  printf("%d\t%d\t", bigIntData.capacity, bigIntData.size);
+  printf("%s\n", msg);
+  printf("%4d%4d\t", bigIntData.capacity, bigIntData.size);
   int i;
   for (i = 0; i < bigIntData.size; ++i) {
-    printf("%u\t\t\t", bigIntData.bits[i]);
+    printf("%10u\t", bigIntData.bits[i]);
   }
   printf("\n");
 }
@@ -599,27 +602,79 @@ BigIntegerData big_integer_multiply_data_opt(const BigIntegerData left,
 
   unsigned long carry = 0;
   for (int i = 0; i < right.size; ++i) {
-    // big_integer_multiply_data_with_uint(left_copy, right.bits[i], &mulResult);
+    // big_integer_multiply_data_with_uint(left_copy, right.bits[i],
+    // &mulResult);
     carry = 0;
     for (int j = 0; j < left.size; ++j) {
-        carry += (unsigned long)left.bits[j] * right.bits[i] + result.bits[i+j];
-        result.bits[i+j] = (unsigned int)carry;
-        carry >>= UINT_NUM_BITS;
+      carry += (unsigned long)left.bits[j] * right.bits[i] + result.bits[i + j];
+      result.bits[i + j] = (unsigned int)carry;
+      carry >>= UINT_NUM_BITS;
     }
     if (carry > 0) {
-        result.bits[left.size+i] = carry;
+      result.bits[left.size + i] = carry;
     }
     // big_integer_add_data_inplace(mulResult, tmpResult, &result);
     // big_integer_deepcopy_data_inplace(result, &tmpResult);
     // big_integer_left_shift_data(&left_copy, 1);
   }
   if (carry > 0) {
-      result.size = left.size + right.size;
-  }
-  else {
-      result.size = left.size + right.size - 1;
+    result.size = left.size + right.size;
+  } else {
+    result.size = left.size + right.size - 1;
   }
   return result;
+}
+
+void big_integer_multiply_data_two_operands_opt(BigIntegerData **ppLeft,
+                                                const BigIntegerData right) {
+  // int capacity = MAX(pLeft->capacity, right.capacity);
+  BigIntegerData *pLeft = *ppLeft;
+  // big_integer_print_data(*pLeft, "*pLeft:");
+  int allocated_size = pLeft->size + right.size + 1;
+  BigIntegerData result;
+  // calloc is fater than malloc+memset
+  // good for initialization
+  result.bits = (unsigned int *)calloc(allocated_size, UINT_NUM_BYTES);
+  result.capacity = allocated_size;
+
+  unsigned long carry = 0;
+  for (int i = 0; i < right.size; ++i) {
+    // big_integer_multiply_data_with_uint(left_copy, right.bits[i],
+    // &mulResult);
+    carry = 0;
+    for (int j = 0; j < pLeft->size; ++j) {
+      carry +=
+          (unsigned long)pLeft->bits[j] * right.bits[i] + result.bits[i + j];
+      result.bits[i + j] = (unsigned int)carry;
+      carry >>= UINT_NUM_BITS;
+    }
+    if (carry > 0) {
+      result.bits[pLeft->size + i] = carry;
+    }
+    // big_integer_add_data_inplace(mulResult, tmpResult, &result);
+    // big_integer_deepcopy_data_inplace(result, &tmpResult);
+    // big_integer_left_shift_data(&left_copy, 1);
+  }
+  if (carry > 0) {
+    result.size = pLeft->size + right.size;
+  } else {
+    printf("%d %d %d\n", pLeft->size, right.size, result.size);
+    result.size = pLeft->size + right.size - 1;
+    printf("%d %d %d\n", pLeft->size, right.size, result.size);
+  }
+  // printf("size: %d %d %d\n", pLeft->size, right.size, result.size);
+  // big_integer_print_data(*pLeft, "pLeft: ");
+  // big_integer_print_data(result, "result: ");
+  big_integer_destroy_data(pLeft);
+  // printf("%p\n", pLeft);
+  // printf("%p\n", ppLeft);
+  // printf("%p\n", *ppLeft);
+  *ppLeft = &result;
+  // printf("ppLeft size: %d\n", (*ppLeft)->size);
+  // printf("%p\n", *ppLeft);
+  // printf("%p\n", &result);
+  // big_integer_print_data(**ppLeft, "ppLeft: ");
+  return;
 }
 
 void big_integer_multiply_data_inplace(const BigIntegerData left,
@@ -1136,11 +1191,13 @@ BigInteger big_integer_multiply(const BigInteger left, const BigInteger right) {
       left.sign * right.sign, big_integer_multiply_data(left.data, right.data));
 }
 
-BigInteger big_integer_multiply_opt(const BigInteger left, const BigInteger right) {
+BigInteger big_integer_multiply_opt(const BigInteger left,
+                                    const BigInteger right) {
   if (left.sign == 0 || right.sign == 0)
     return big_integer_create(0);
   return big_integer_create_internal(
-      left.sign * right.sign, big_integer_multiply_data_opt(left.data, right.data));
+      left.sign * right.sign,
+      big_integer_multiply_data_opt(left.data, right.data));
 }
 
 void big_integer_multiply_inplace(const BigInteger left, const BigInteger right,
@@ -1150,6 +1207,18 @@ void big_integer_multiply_inplace(const BigInteger left, const BigInteger right,
   else {
     pResult->sign = left.sign * right.sign;
     big_integer_multiply_data_inplace(left.data, right.data, &pResult->data);
+  }
+}
+
+void big_integer_multiply_two_operands_opt(BigInteger *pLeft,
+                                           const BigInteger right) {
+  if (pLeft->sign == 0 || right.sign == 0)
+    big_integer_set(0, pLeft);
+  else {
+    pLeft->sign *= right.sign;
+    BigIntegerData *pLeftData = &(pLeft->data);
+    big_integer_multiply_data_two_operands_opt(&pLeftData, right.data);
+    pLeft->data = *pLeftData;
   }
 }
 

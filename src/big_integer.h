@@ -83,13 +83,17 @@ void big_integer_increment(BigInteger *bigInt, const unsigned int value);
 /* decrements the bigInteger by the amount specified */
 void big_integer_decrement(BigInteger *bigInt, const unsigned int value);
 
-/* multiply two big integers ( left * right ) */
+/* multiply two big integers ( result = left * right ) */
 BigInteger big_integer_multiply(const BigInteger left, const BigInteger right);
-/* multiply two big integers ( left * right ) */
+/* multiply two big integers ( result = left * right ), reduced memory copy */
 BigInteger big_integer_multiply_opt(const BigInteger left,
                                     const BigInteger right);
+/* multiply two big integers ( result = left * right ) */
 void big_integer_multiply_inplace(const BigInteger left, const BigInteger right,
                                   BigInteger *pResult);
+/* multiply_two_big_integers ( left = left * right) */
+void big_integer_multiply_two_operands_opt(BigInteger *pLeft,
+                                           const BigInteger right);
 /* A divide-and-conquer algorithm to speedup multiplication of very large
  * numbers */
 BigInteger big_integer_multiply_karatsuba(const BigInteger left,
