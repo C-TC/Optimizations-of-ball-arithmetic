@@ -77,31 +77,15 @@ void test_ball(double lo, double ro, test_type_ball t) {
 }
 
 int main() {
-    // BigInteger tmp_lo = big_integer_create(4294967295u);
-    // BigInteger tmp_ro = big_integer_create(4294967295u);
-    BigFloat lo, ro;
-    lo.power = 2;
-    ro.power = 2;
-    // lo.power = ro.power = 1;
-    lo.mantissa.sign = ro.mantissa.sign = 1;
-    lo.mantissa.data.size = 1;
-    ro.mantissa.data.size = 2;
-    // lo.mantissa.data.size = ro.mantissa.data.size = 3;
-    lo.mantissa.data.capacity = ro.mantissa.data.capacity = 4;
-    lo.mantissa.data.bits = (unsigned int*)calloc(4, sizeof(unsigned int));
-    ro.mantissa.data.bits = (unsigned int*)calloc(4, sizeof(unsigned int));
-    lo.mantissa.data.bits[0] = 3789676544u;
-    lo.mantissa.data.bits[1] = 3789677025u;
-    // lo.mantissa.data.bits[2] = 2u;
-    ro.mantissa.data.bits[0] = 5u;
-    ro.mantissa.data.bits[1] = 1u;
-    // ro.mantissa.data.bits[2] = 1u;
+    BigInteger tmp_lo = big_integer_create(1);
+    BigInteger tmp_ro = big_integer_create(3);
+    BigFloat lo = big_float_create(tmp_lo, 1);
+    BigFloat ro = big_float_create(tmp_ro, 1);
     BigFloat ans = big_float_div(lo, ro);
-    printf("%f\n", big_float_to_double(lo));
-    printf("%f\n", big_float_to_double(ro));
-    printf("%f\n", big_float_to_double(ans));
-    free(lo.mantissa.data.bits);
-    free(ro.mantissa.data.bits);
+    big_float_print(ans);
+    printf("The power of the ans is %lld\n", ans.power);
+    free(tmp_lo.data.bits);
+    free(tmp_ro.data.bits);
     free(ans.mantissa.data.bits);
 
     double testdata = -1e300;
