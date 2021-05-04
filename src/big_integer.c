@@ -92,7 +92,8 @@ void big_integer_multiply_data_inplace(const BigIntegerData left,
                                        BigIntegerData *pResult);
 /* left = left * right */
 void big_integer_multiply_data_two_operands_opt(const BigIntegerData left,
-                                                const BigIntegerData right, BigIntegerData *pResult);
+                                                const BigIntegerData right,
+                                                BigIntegerData *pResult);
 /* multiply two unsigned bigints using karatsuba algorithm */
 BigIntegerData big_integer_multiply_data_karatsuba(const BigIntegerData left,
                                                    const BigIntegerData right);
@@ -626,7 +627,8 @@ BigIntegerData big_integer_multiply_data_opt(const BigIntegerData left,
 }
 
 void big_integer_multiply_data_two_operands_opt(const BigIntegerData left,
-                                                const BigIntegerData right, BigIntegerData *pResult) {
+                                                const BigIntegerData right,
+                                                BigIntegerData *pResult) {
   unsigned long carry = 0;
   for (int i = 0; i < right.size; ++i) {
     // big_integer_multiply_data_with_uint(left_copy, right.bits[i],
@@ -1211,7 +1213,8 @@ void big_integer_multiply_two_operands_opt(BigInteger *pLeft,
     // BigIntegerData *pLeftData = &(pLeft->data);
     result.bits = (unsigned int *)calloc(allocated_size, UINT_NUM_BYTES);
     result.capacity = allocated_size;
-    big_integer_multiply_data_two_operands_opt(pLeft->data, right.data, &result);
+    big_integer_multiply_data_two_operands_opt(pLeft->data, right.data,
+                                               &result);
     // pLeft->data = *pLeftData;
     // big_integer_destroy_data(&(pLeft->data));
     pLeft->data.size = result.size;

@@ -55,6 +55,31 @@ double rdtsc_big_integer_multiply_opt(BigInteger left, BigInteger right) {
   return (double)cycles / num_runs;
 }
 
+double rdtsc_big_integer_multiply_two_operands_opt(BigInteger left,
+                                                   BigInteger right) {
+  int i, num_runs = 1;
+  myInt64 cycles;
+  myInt64 start;
+
+  while (num_runs < (1 << 14)) {
+    start = start_tsc();
+    for (i = 0; i < num_runs; ++i) {
+      big_integer_multiply_two_operands_opt(&left, right);
+    }
+    cycles = stop_tsc(start);
+    if (cycles >= CYCLES_REQUIRED)
+      break;
+    num_runs *= 2;
+  }
+
+  start = start_tsc();
+  for (i = 0; i < num_runs; ++i) {
+    big_integer_multiply_two_operands_opt(&left, right);
+  }
+  cycles = stop_tsc(start);
+  return (double)cycles / num_runs;
+}
+
 double rdtsc_big_integer_multiply_inplace_fixed_precision(BigInteger *left,
                                                           BigInteger right,
                                                           int precision) {
@@ -103,6 +128,7 @@ int main() {
 
     double cycles_mul = 0;
     double cycles_mul_opt = 0;
+    double cycles_mul_two_operands_opt = 0;
     double cycles_mul_precision = 0;
     for (int j = 0; j < REP_COUNT; j++) {
       cycles_mul += rdtsc_big_integer_multiply(left, right);
@@ -111,11 +137,16 @@ int main() {
       cycles_mul_opt += rdtsc_big_integer_multiply_opt(left, right);
     }
     for (int j = 0; j < REP_COUNT; j++) {
+      cycles_mul_two_operands_opt +=
+          rdtsc_big_integer_multiply_two_operands_opt(left, right);
+    }
+    for (int j = 0; j < REP_COUNT; j++) {
       cycles_mul_precision +=
           rdtsc_big_integer_multiply_inplace_fixed_precision(&left, right, n);
     }
-    printf("%10d %16.2lf %16.2lf %16.2lf\n", n, cycles_mul / REP_COUNT,
-           cycles_mul_opt / REP_COUNT, cycles_mul_precision / REP_COUNT);
+    printf("%10d %16.2lf %16.2lf %16.2lf %16.2lf\n", n, cycles_mul / REP_COUNT,
+           cycles_mul_opt / REP_COUNT, cycles_mul_two_operands_opt / REP_COUNT,
+           cycles_mul_precision / REP_COUNT);
   }
   return 0;
 }

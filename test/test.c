@@ -1282,7 +1282,8 @@ void test_multiply_two_operands_opt() {
   big_integer_multiply_two_operands_opt(&left, right);
   // big_integer_print(left, "left");
   // printf("%d\n", left.data.size);
-  // printf("%lld\t%lld\n", big_integer_to_long_long(left), -(long long)UINT_MAX - UINT_MAX);
+  // printf("%lld\t%lld\n", big_integer_to_long_long(left), -(long long)UINT_MAX
+  // - UINT_MAX);
   assert(big_integer_to_long_long(left) == -(long long)UINT_MAX - UINT_MAX);
   big_integer_destroy(&left);
   big_integer_destroy(&right);
@@ -1303,7 +1304,6 @@ void test_multiply_two_operands_opt() {
   }
   fclose(in);
 }
-
 
 void test_multiply_inplace() {
   BigInteger left;
