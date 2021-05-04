@@ -2,7 +2,7 @@
 #define BIG_FLOAT_H
 #include "big_integer.h"
 
-#define DIV_STEP 9
+#define DIV_STEP 4
 typedef struct BigFloat
 {
     BigInteger mantissa;

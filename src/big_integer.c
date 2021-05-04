@@ -340,9 +340,9 @@ BigIntegerData big_integer_add_data(const BigIntegerData left,
   big_integer_clear_trash_data(&result);
 
   assert(result.size <= result.capacity);
-  if (result.size == result.capacity) {
-    big_integer_resize_data(&result, result.capacity * 2);
-  }
+  // if (result.size == result.capacity) {
+  //   big_integer_resize_data(&result, result.capacity * 2);
+  // }
 
   return result;
 }
@@ -402,7 +402,7 @@ void big_integer_add_data_inplace(const BigIntegerData left,
   assert(pResult->size <= pResult->capacity);
   if (pResult->size == pResult->capacity) {
     // hope this won't happen much in a addition
-    big_integer_resize_data(pResult, pResult->capacity * 2);
+    // big_integer_resize_data(pResult, pResult->capacity * 2);
   }
   // big_integer_print_data(*pResult, "*pResult in add: ");
 
@@ -492,7 +492,7 @@ void big_integer_increment_data(BigIntegerData *pBigIntData,
 
   assert(pBigIntData->size <= pBigIntData->capacity);
   if (pBigIntData->size == pBigIntData->capacity) {
-    big_integer_resize_data(pBigIntData, pBigIntData->capacity * 2);
+    // big_integer_resize_data(pBigIntData, pBigIntData->capacity * 2);
   }
 }
 
@@ -511,7 +511,7 @@ void big_integer_decrement_data(BigIntegerData *pBigIntData,
   big_integer_normalize_from(pBigIntData, i);
   assert(pBigIntData->size <= pBigIntData->capacity);
   if (pBigIntData->size == pBigIntData->capacity) {
-    big_integer_resize_data(pBigIntData, pBigIntData->capacity * 2);
+    // big_integer_resize_data(pBigIntData, pBigIntData->capacity * 2);
   }
 }
 
@@ -604,10 +604,12 @@ void big_integer_multiply_data_inplace(const BigIntegerData left,
   big_integer_clear_trash_data(pResult);
 
   BigIntegerData tmpResult, mulResult;
-  tmpResult.bits = (unsigned int *)calloc(capacity * 2, UINT_NUM_BYTES);
+  // tmpResult.bits = (unsigned int *)calloc(capacity * 2, UINT_NUM_BYTES);
+  tmpResult.bits = (unsigned int *)calloc(capacity, UINT_NUM_BYTES);
   tmpResult.capacity = left.size + 1;
   tmpResult.size = 1;
-  mulResult.bits = (unsigned int *)calloc(capacity * 2, UINT_NUM_BYTES);
+  // mulResult.bits = (unsigned int *)calloc(capacity * 2, UINT_NUM_BYTES);
+  mulResult.bits = (unsigned int *)calloc(capacity, UINT_NUM_BYTES);
   mulResult.capacity = left.size + 1;
   mulResult.size = 0;
 
