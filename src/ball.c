@@ -79,29 +79,6 @@ void test_ball(double lo, double ro, test_type_ball t) {
 }
 
 int main() {
-    BigFloat lo, ro;
-    lo.power = ro.power = 1;
-    lo.mantissa.sign = ro.mantissa.sign = 1;
-    lo.mantissa.data.size = ro.mantissa.data.size = 1;
-    lo.mantissa.data.capacity = ro.mantissa.data.capacity = 4;
-    lo.mantissa.data.bits = (unsigned int*)calloc(4, sizeof(unsigned int));
-    ro.mantissa.data.bits = (unsigned int*)calloc(4, sizeof(unsigned int));
-    lo.mantissa.data.bits[0] = 2048u;
-    // lo.mantissa.data.bits[1] = 3537031890u;
-    // lo.mantissa.data.bits[2] = 2u;
-    ro.mantissa.data.bits[0] = 2048u;
-    // ro.mantissa.data.bits[1] = 3789677025u;
-    // ro.mantissa.data.bits[2] = 1u;
-    BigFloat ans = big_float_div(lo, ro);
-    printf("%f\n", big_float_to_double(lo));
-    printf("%f\n", big_float_to_double(ro));
-    printf("%f\n", big_float_to_double(ans));
-    // big_float_print(ans);
-    // printf("The power of the ans is %lld\n", ans.power);
-    free(lo.mantissa.data.bits);
-    free(ro.mantissa.data.bits);
-    free(ans.mantissa.data.bits);
-
     // double testdata = -1e300;
     // BigFloat test1 = double_to_big_float(testdata);
     // printf("input double: %e\n",testdata);
@@ -131,7 +108,7 @@ int main() {
     // test_ball(-1.0e3,1e3,BALL_MUL);
     // test_ball(1.0e30,2.1e50,BALL_MUL);
 
-    // test_ball(1.0e3,2.1e2,BALL_DIV);
-    // test_ball(-1.0e3,1e3,BALL_DIV);
-    // test_ball(1.0e30,2.1e50,BALL_DIV);
+    test_ball(1.0e3,2.1e2,BALL_DIV);
+    test_ball(-1.0e3,1e3,BALL_DIV);
+    test_ball(1.0e30,2.1e50,BALL_DIV);
 }

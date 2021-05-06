@@ -113,6 +113,8 @@ BigFloat big_float_div(BigFloat lo, BigFloat ro) {
     BigFloat tmp_normalize;
     tmp_ro.power = 1;
     tmp_lo.power = 1;
+    tmp_ro.mantissa.sign = 1;
+    tmp_lo.mantissa.sign = 1;
     BigFloat tmp_point5;
     tmp_point5.mantissa = big_integer_create(2147483648u);
     tmp_point5.power = 0;
@@ -168,6 +170,7 @@ BigFloat big_float_div(BigFloat lo, BigFloat ro) {
         ans.mantissa = big_float_deep_copy(tmp_normalize).mantissa;
         free(tmp_normalize.mantissa.data.bits);
     }
+
     int num_zeros_add_to_lo = lo.mantissa.data.size - ro.mantissa.data.size;
     BigInteger lo_man_aligned, ro_man_aligned;
     if (num_zeros_add_to_lo < 0) {
@@ -191,5 +194,6 @@ BigFloat big_float_div(BigFloat lo, BigFloat ro) {
     free(tmp_x.mantissa.data.bits);
     free(tmp_one.mantissa.data.bits);
     free(tmp_point5.mantissa.data.bits);
+    ans.mantissa.sign = lo.mantissa.sign * ro.mantissa.sign;
     return ans;
 }
