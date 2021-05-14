@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <assert.h>
+#include <string.h>
 // #include "tsc_x86.h"
 Ball ball_add(Ball lo, Ball ro) {
     Ball ans;
@@ -32,6 +34,73 @@ Ball ball_div(Ball lo, Ball ro) {
     // TODO: optimize this
     // ans.radius = l/r + l*dr/r^2 + dl/r + dl*dr/r^2
     ans.radius = ans_center_abs_value + ans_center_abs_value / fabs(big_float_to_double(ro.center)) * ro.radius + lo.radius / ro_abs_value + lo.radius * ro.radius / ro_abs_value / ro_abs_value;
+    return ans;
+}
+
+Ball ball_multiply_quad_double(Ball lo, Ball ro){
+    Ball ans;
+
+    if(lo.center.mantissa.sign == 0 || ro.center.mantissa.sign == 0){
+        // one of the input center is 0
+        ans.center.power = 0;
+        ans.center.mantissa.sign = 0;
+        ans.center.mantissa.data.size = 1;
+        ans.center.mantissa.data.capacity = 2;
+        ans.center.mantissa.data.bits = calloc(2, 4);
+    }else{
+        unsigned int *tmp = calloc(16, 4);
+        int offset_tmp;
+        
+        offset_tmp = lo.center.mantissa.data.size - 8;
+        int offset_left = offset_tmp >= 0 ? offset_tmp : 0;
+        offset_tmp = ro.center.mantissa.data.size - 8;
+        int offset_right = offset_tmp >= 0 ? offset_tmp : 0;
+
+        for (int j = offset_right; j < ro.center.mantissa.data.size; j++) {
+            unsigned long long carry = 0;
+            for (int i = offset_left; i < lo.center.mantissa.data.size; i++) {
+                int idx = j - offset_right + i - offset_left;
+                carry += (unsigned long long)lo.center.mantissa.data.bits[i] * ro.center.mantissa.data.bits[j] + tmp[idx];
+                tmp[idx] = (unsigned int)carry;
+                carry >>= 32;
+            }
+            int idx = j - offset_right + 8;
+            carry += tmp[idx];
+            tmp[idx] = (unsigned int)carry;
+        }
+
+        ans.center.power = lo.center.power + ro.center.power;
+        ans.center.mantissa.sign = lo.center.mantissa.sign * ro.center.mantissa.sign;
+        ans.center.mantissa.data.size = 8;
+        ans.center.mantissa.data.capacity = 9;
+        ans.center.mantissa.data.bits = calloc(9, 4);
+
+        int offset = 8;
+        for (int i = 15; i >= 8; i--) {
+            if (tmp[i] != 0) {
+                break;
+            } else {
+                offset--;
+            }
+        }        
+        memmove(ans.center.mantissa.data.bits, tmp + offset, 32);
+        for(int i=7;i>=0;i--){
+            if(ans.center.mantissa.data.bits[i] == 0){
+                ans.center.mantissa.data.size--;
+            }else{
+                break;
+            }
+        }
+
+        if(lo.center.mantissa.data.size + ro.center.mantissa.data.size != ans.center.mantissa.data.size){
+            ans.center.power--;
+        }
+
+        free(tmp); // release temporal variable
+    }
+
+    // ans.radius = dl*r + dr*l + l*r
+    ans.radius = fabs(big_float_to_double(lo.center)) * ro.radius + fabs(big_float_to_double(ro.center)) * lo.radius + lo.radius * ro.radius;
     return ans;
 }
 
