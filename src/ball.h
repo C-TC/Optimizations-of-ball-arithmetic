@@ -16,4 +16,5 @@ Ball ball_div(Ball, Ball);
     precision = 8
 */
 Ball ball_multiply_quad_double(Ball, Ball);
+Ball ball_add_quad_double(Ball, Ball);
 #endif

@@ -37,6 +37,135 @@ Ball ball_div(Ball lo, Ball ro) {
     return ans;
 }
 
+Ball ball_add_quad_double(Ball lo, Ball ro){
+    Ball ans;
+    ans.radius = lo.radius + ro.radius;
+
+    Ball* op_large;
+    Ball* op_small;
+    if(lo.center.power >= ro.center.power){
+        op_large = &lo;
+        op_small = &ro;
+    }else{
+        op_large = &ro;
+        op_small = &lo;
+    }
+
+    int pow_diff = op_large->center.power - op_small->center.power;
+    if(pow_diff >= 8 || pow_diff >= op_small->center.mantissa.data.size){
+        ans.center = big_float_deep_copy(op_large->center);
+        return ans;
+    }
+
+    if(op_small->center.mantissa.sign == 0){
+        ans.center = big_float_deep_copy(op_large->center);
+        return ans;
+    }
+
+    
+    ans.center.power = op_large->center.power;
+    ans.center.mantissa.sign = op_large->center.mantissa.sign;
+    ans.center.mantissa.data.size = 8;
+    ans.center.mantissa.data.capacity = 9;
+    ans.center.mantissa.data.bits = calloc(9, 4);
+    if(op_large->center.mantissa.sign == op_small->center.mantissa.sign){
+        // add
+        int offset_large = op_large->center.mantissa.data.size - 8;
+        int offset_small = op_small->center.mantissa.data.size - 8 + pow_diff;
+
+        unsigned long long sum = 0;
+        for(int i=offset_large;i<op_large->center.mantissa.data.size;i++,offset_small++){
+            if(i >= 0){
+                sum += op_large->center.mantissa.data.bits[i];
+            }
+            if(offset_small < op_small->center.mantissa.data.size && offset_small >= 0){
+                sum += op_small->center.mantissa.data.bits[offset_small];
+            }
+            ans.center.mantissa.data.bits[i-offset_large] = (unsigned int)sum;
+            sum >>= 32;
+        }
+
+        if (sum != 0) {
+            // carry over
+            memmove(ans.center.mantissa.data.bits, ans.center.mantissa.data.bits + 1, 28);
+            ans.center.mantissa.data.bits[7] = (unsigned int)sum;
+            ans.center.power++;
+        } 
+    }else{
+        // sub
+        int offset_large = op_large->center.mantissa.data.size - 8;
+        int offset_small = op_small->center.mantissa.data.size - 8 + pow_diff;
+        if(offset_large < 0){
+            offset_small -= offset_large;
+            offset_large = 0;
+        }
+
+        if(pow_diff == 0){
+            // check which one has larger absolute value
+            int compRes = 0;
+            for(int k=1;k<=8;k++){
+                int data1 = 0;
+                int data2 = 0;
+                if(op_large->center.mantissa.data.size-k >= 0){
+                    data1 = op_large->center.mantissa.data.bits[op_large->center.mantissa.data.size-k];
+                }
+                if(op_small->center.mantissa.data.size-k >= 0){
+                    data2 = op_small->center.mantissa.data.bits[op_small->center.mantissa.data.size-k];
+                }
+                if(data1 > data2){
+                    compRes = 1;
+                    break;
+                }else if(data1 < data2){
+                    compRes = -1;
+                    break;
+                }
+            }
+            if(compRes < 0){
+                // swap them
+                Ball* tmp = op_large;
+                op_large = op_small;
+                op_small = tmp;
+            }
+        }
+        ans.center.mantissa.sign = op_large->center.mantissa.sign;
+        
+        unsigned long long borrow = 0;
+        for(int i=offset_large;i<op_large->center.mantissa.data.size;i++,offset_small++){
+            /* what happens here is that, if left is less than right, borrow will become
+            "negative" (not really because it is unsigned), and the bit pattern for
+            that is the 1's complement (complementing it to get to 0), which is
+            exactly the remainder of this term in the subtraction. */
+            int data1 = 0;
+            int data2 = 0;
+            if(i >= 0){
+                data1 = op_large->center.mantissa.data.bits[i];
+            }
+            if(offset_small < op_small->center.mantissa.data.size && offset_small >= 0){
+                data2 = op_small->center.mantissa.data.bits[offset_small];
+            }
+            borrow = (unsigned long long)data1 - data2 - borrow;
+
+            ans.center.mantissa.data.bits[i-offset_large] = (unsigned int)borrow;
+            /* here we just want the first 1 after removing the lower order term */
+            borrow = (borrow >> 32) & 1;
+        }
+
+        if(borrow == 0){
+            ans.center.power--;
+        }
+    }
+    // remove leading zeros
+    for(int i=7;i>=0;i--){
+        if(ans.center.mantissa.data.bits[i] == 0){
+            ans.center.mantissa.data.size--;
+        }else{
+            break;
+        }
+    }
+
+    return ans;    
+}
+
 Ball ball_multiply_quad_double(Ball lo, Ball ro){
     Ball ans;
 
