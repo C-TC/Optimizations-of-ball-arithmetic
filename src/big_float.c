@@ -11,6 +11,15 @@ BigFloat big_float_multiply(BigFloat lo, BigFloat ro) {
     if (0 == ans.mantissa.sign) ans.power = 0;
     return ans;
 }
+
+void big_float_mul_inplace_fixed_precision(BigFloat *lo, BigFloat ro, const int precision) {
+    int lo_size = lo->mantissa.data.size, ro_size = ro.mantissa.data.size;
+    lo->power = lo->power + ro.power;
+    big_integer_multiply_inplace_fixed_precision(&lo->mantissa, ro.mantissa, precision);
+    if (lo->mantissa.data.size != lo_size + ro_size) lo->power--;
+    if (0 == lo->mantissa.sign) lo->power = 0;
+}
+
 BigFloat big_float_add(BigFloat lo, BigFloat ro) {
     if (lo.mantissa.sign == 0) {
         BigFloat ans = big_float_deep_copy(ro);
@@ -52,6 +61,35 @@ BigFloat big_float_add(BigFloat lo, BigFloat ro) {
         if(ans.mantissa.sign ==0) ans.power = 0;
     }
     return ans;
+}
+
+void big_float_add_inplace_fixed_precision(BigFloat *lo, BigFloat ro, const int precision) {
+    int carried;
+    long long res_power = lo->power > ro.power? lo->power: ro.power;
+    //need to align mantissa to use BigInt add
+    int num_zeros_add_to_lo = lo->power - ro.power - lo->mantissa.data.size + ro.mantissa.data.size;
+    BigInteger *lo_man_aligned, ro_man_aligned;
+    if (num_zeros_add_to_lo > 0) {
+        big_integer_add_trailing_zeros_inplace(&lo->mantissa, num_zeros_add_to_lo);
+        lo_man_aligned = &lo->mantissa;
+        ro_man_aligned = ro.mantissa;
+        big_integer_add_inplace_fixed_precision(lo_man_aligned, ro_man_aligned, precision, &carried);
+        lo->power = res_power + carried;
+        if(lo->mantissa.sign ==0) lo->power = 0;
+    } else if (num_zeros_add_to_lo < 0) {
+        lo_man_aligned = &lo->mantissa;
+        ro_man_aligned = big_integer_add_trailing_zeros(ro.mantissa, -num_zeros_add_to_lo);
+        big_integer_add_inplace_fixed_precision(lo_man_aligned, ro_man_aligned, precision, &carried);
+        lo->power = res_power + carried;
+        if(lo->mantissa.sign ==0) lo->power = 0;
+        free(ro_man_aligned.data.bits);
+    } else {
+        lo_man_aligned = &lo->mantissa;
+        ro_man_aligned = ro.mantissa;
+        big_integer_add_inplace_fixed_precision(lo_man_aligned, ro_man_aligned, precision, &carried);
+        lo->power = res_power + carried;
+        if(lo->mantissa.sign ==0) lo->power = 0;
+    }
 }
 
 BigFloat big_float_sub(BigFloat lo, BigFloat ro) {
@@ -97,6 +135,12 @@ BigFloat big_float_sub(BigFloat lo, BigFloat ro) {
     }
     return ans;
 }
+
+void big_float_sub_inplace_fixed_precision(BigFloat *lo, BigFloat ro, const int precision) {
+    ro.mantissa.sign *= -1;
+    big_float_add_inplace_fixed_precision(lo, ro, precision);
+}
+
 BigFloat big_float_div(BigFloat lo, BigFloat ro) {
     if (ro.mantissa.sign == 0) {
         printf("divide by zero error!\n");

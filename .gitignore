@@ -1,6 +1,5 @@
 .vscode/
 bigint
-test/
 prog
 prog_*
 *.o

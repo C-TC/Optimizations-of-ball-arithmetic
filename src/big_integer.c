@@ -63,13 +63,14 @@ void big_integer_add_data_inplace(const BigIntegerData left,
                                   BigIntegerData *pResult);
 void big_integer_add_inplace_fixed_precision_data(BigIntegerData *,
                                                   const BigIntegerData,
-                                                  const int);
+                                                  const int,
+                                                  int *);
 /* subtraction assumes that left > right always holds */
 BigIntegerData big_integer_subtract_data(const BigIntegerData left,
                                          const BigIntegerData right);
 void big_integer_subtract_inplace_fixed_precision_data(
     const BigIntegerData left, const BigIntegerData right,
-    BigIntegerData *result, const int precision);
+    BigIntegerData *result, const int precision, int *carried);
 void big_integer_subtract_data_inplace(const BigIntegerData left,
                                        const BigIntegerData right,
                                        BigIntegerData *pResult);
@@ -1242,7 +1243,8 @@ BigInteger big_integer_multiply_karatsuba(const BigInteger left,
 
 void big_integer_add_inplace_fixed_precision(BigInteger *left,
                                              const BigInteger right,
-                                             const int precision) {
+                                             const int precision,
+                                             int *carried) {
   if (left->sign == 0) {
     // left is 0, copy right to left
     memmove(left->data.bits, right.data.bits + right.data.size - precision,
@@ -1261,7 +1263,7 @@ void big_integer_add_inplace_fixed_precision(BigInteger *left,
 
   if (left->sign == right.sign) {
     big_integer_add_inplace_fixed_precision_data(&left->data, right.data,
-                                                 precision);
+                                                 precision, carried);
     return;
   }
 
@@ -1278,7 +1280,8 @@ void big_integer_add_inplace_fixed_precision(BigInteger *left,
   if (compRes > 0) {
     // left > right
     big_integer_subtract_inplace_fixed_precision_data(left->data, right.data,
-                                                      &left->data, precision);
+                                                      &left->data, precision,
+                                                      carried);
   } else {
     // right > left
     BigIntegerData result;
@@ -1286,7 +1289,7 @@ void big_integer_add_inplace_fixed_precision(BigInteger *left,
     result.capacity = precision;
     result.size = precision;
     big_integer_subtract_inplace_fixed_precision_data(right.data, left->data,
-                                                      &result, precision);
+                                                      &result, precision, carried);
     left->sign = right.sign;
     free(left->data.bits); // free left's original memory space
     left->data = result;   // assign the new one
@@ -1300,10 +1303,10 @@ void big_integer_add_inplace_fixed_precision(BigInteger *left,
  */
 void big_integer_subtract_inplace_fixed_precision_data(
     const BigIntegerData left, const BigIntegerData right,
-    BigIntegerData *result, const int precision) {
+    BigIntegerData *result, const int precision, int *carried) {
   unsigned long long borrow = 0;
   int offset = left.size - precision;
-  for (int i = offset; i < left.size; i++) {
+  for (int i = offset; i < left.size && i < right.size; i++) {
     /* what happens here is that, if left is less than right, borrow will become
        "negative" (not really because it is unsigned), and the bit pattern for
        that is the 1's complement (complementing it to get to 0), which is
@@ -1312,6 +1315,15 @@ void big_integer_subtract_inplace_fixed_precision_data(
     result->bits[i] = (unsigned int)borrow;
     /* here we just want the first 1 after removing the lower order term */
     borrow = (borrow >> UINT_NUM_BITS) & 1;
+  }
+  // get number of zeros ahead, useful in bigfloat add
+  *carried = 0;
+  for (int i = left.size -1; i >= offset; i--) {
+    if (result->bits[i] == 0) {
+      (*carried)++;
+    } else {
+      break;
+    }
   }
   memmove(result->bits, result->bits + offset, precision * UINT_NUM_BYTES);
   result->size = precision;
@@ -1324,19 +1336,22 @@ void big_integer_subtract_inplace_fixed_precision_data(
  */
 void big_integer_add_inplace_fixed_precision_data(BigIntegerData *left,
                                                   const BigIntegerData right,
-                                                  const int precision) {
+                                                  const int precision,
+                                                  int *carried) {
   unsigned long long sum = 0;
   int offset = left->size - precision;
-  for (int i = offset; i < left->size; i++) {
+  for (int i = offset; i < left->size && i < right.size; i++) {
     sum += (unsigned long long)left->bits[i] + right.bits[i];
     left->bits[i] = (unsigned int)sum;
     sum >>= UINT_NUM_BITS;
   }
   int data_size = precision;
+  *carried = 0;
   if (sum != 0) {
     // carry-over
     offset++;
     data_size--;
+    *carried = 1;
   }
   memmove(left->bits, left->bits + offset, data_size * UINT_NUM_BYTES);
   if (sum != 0) {
@@ -1402,6 +1417,27 @@ BigInteger big_integer_add_trailing_zeros(const BigInteger bi, int num) {
   ans.data.bits = (unsigned int *)calloc(ans.data.capacity, UINT_NUM_BYTES);
   memcpy(ans.data.bits + num, bi.data.bits, bi.data.size * UINT_NUM_BYTES);
   return ans;
+}
+
+void big_integer_add_trailing_zeros_inplace(BigInteger *bi, int num) {
+  if(bi->data.capacity >= bi->data.size + num) {
+    // no allocation
+    for(int i = bi->data.size - 1; i >= 0; i--) {
+      bi->data.bits[i + num] = bi->data.bits[i];
+    }
+    for(int i = 0; i < num; i++) {
+      bi->data.bits[i] = 0;
+    }
+    bi->data.size += num;
+  } else {
+    // need allocation
+    unsigned int *res = (unsigned int *)calloc(2 * (bi->data.size + num), UINT_NUM_BYTES);
+    memcpy(res + num, bi->data.bits, bi->data.size * UINT_NUM_BYTES);
+    free(bi->data.bits);
+    bi->data.bits = res;
+    bi->data.size += num;
+    bi->data.capacity = 2 * bi->data.size;
+  }
 }
 
 #ifdef DEBUG
