@@ -67,10 +67,12 @@ void big_integer_add_inplace(const BigInteger left, const BigInteger right,
  * !!! right.size >= precision
  *  => almost no memory allocation
  * !!! left and right should not have leading zeros
+ * carried is used in big float addition, =1/-1 if add makes size bigger by 1/-1.
  */
 void big_integer_add_inplace_fixed_precision(BigInteger *left,
                                              const BigInteger right,
-                                             const int precision);
+                                             const int precision,
+                                             int *carried);
 
 /* subtracts one big integer from another ( left - right ) */
 BigInteger big_integer_subtract(const BigInteger left, const BigInteger right);

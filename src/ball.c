@@ -306,7 +306,18 @@ int main() {
     // test_ball(-1.0e3,1e3,BALL_MUL);
     // test_ball(1.0e30,2.1e50,BALL_MUL);
 
-    test_ball(1.0e3,2.1e2,BALL_DIV);
-    test_ball(-1.0e3,1e3,BALL_DIV);
-    test_ball(1.0e30,2.1e50,BALL_DIV);
+    //test_ball(1.0e3,2.1e2,BALL_DIV);
+    //test_ball(-1.0e3,1e3,BALL_DIV);
+    //test_ball(1.0e30,2.1e50,BALL_DIV);
+
+    double testdata1 = 9.999e102,testdata2=-1e90;
+    int precision = 2;
+    BigFloat test1 = double_to_big_float(testdata1),test2 = double_to_big_float(testdata2);
+    big_float_print(test1);
+    big_float_print(test2);
+    big_float_add_inplace_fixed_precision(&test1,test2,precision);
+    big_float_print(test1);
+    printf("transformed back to double: %e\n",big_float_to_double(test1));
+    big_float_destroy(&test1);
+    big_float_destroy(&test2);
 }
