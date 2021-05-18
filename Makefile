@@ -49,6 +49,13 @@ big_int_mul_benchmark:
 $(BIG_INT_MUL_BENCHMARK): $(BIG_INT_MUL_BENCHMARK_OBJS)
 	$(CC) $(CFLAGS) $(INCLUDES) -o $(BIG_INT_MUL_BENCHMARK) $(BIG_INT_MUL_BENCHMARK_OBJS) $(LFLAGS) $(LIBS)
 
+BIG_FLOAT_BENCHMARK_SRCS := test/timing_bigfloat.c src/big_integer.c src/big_float.c src/big_float_helper.c
+BIG_FLOAT_BENCHMARK_OBJS := build/test/timing_bigfloat.o build/big_integer.o build/big_float.o build/big_float_helper.o
+BIG_FLOAT_BENCHMARK := big_float_benchmark
+big_float_benchmark:
+$(TEST_DIR)/$(BIG_FLOAT_BENCHMARK): $(BIG_FLOAT_BENCHMARK_OBJS)
+	$(CC) $(CFLAGS) $(INCLUDES) -o $(BIG_FLOAT_BENCHMARK) $(BIG_FLOAT_BENCHMARK_OBJS) $(LFLAGS) $(LIBS)
+
 $(BUILD_DIR)/test/%.o: $(TEST_DIR)/%.c
 	mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
