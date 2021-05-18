@@ -9,6 +9,7 @@
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
+#include <immintrin.h>
 
 #ifndef MAX
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
@@ -909,13 +910,11 @@ BigInteger big_integer_create_from_file(FILE **ppFile) {
   bigInt.sign = sign;
   bigInt.data.size = size;
   bigInt.data.capacity = 2 * size;
-  bigInt.data.bits =
-      (unsigned int *)malloc(bigInt.data.capacity * UINT_NUM_BYTES);
+  bigInt.data.bits = calloc(bigInt.data.capacity, 8);
   for (i = 0; i < size; ++i) {
-    ret = fscanf(*ppFile, "%u", &bigInt.data.bits[i]);
+    ret = fscanf(*ppFile, "%ul", &bigInt.data.bits[i]);
     assert(ret == 1);
   }
-  big_integer_clear_trash_data(&bigInt.data);
   return bigInt;
 }
 
@@ -1376,23 +1375,23 @@ void big_integer_multiply_inplace_fixed_precision(BigInteger *left,
     // answer is 0
     left->sign = 0;
     left->data.size = precision;
-    memset(left->data.bits, 0, precision * UINT_NUM_BYTES);
+    memset(left->data.bits, 0, precision * 8);
   }
-  unsigned int *tmp = calloc(2 * precision, UINT_NUM_BYTES);
+  unsigned long *tmp = calloc(2 * precision, 8);
   int offset_left = left->data.size - precision;
   int offset_right = right.data.size - precision;
+  unsigned long bit_mask = (1lu << 32) - 1;
   for (int j = offset_right; j < right.data.size; j++) {
-    unsigned long long carry = 0;
+    unsigned long carry = 0;
     for (int i = offset_left; i < left->data.size; i++) {
       int idx = j - offset_right + i - offset_left;
-      carry += (unsigned long long)left->data.bits[i] * right.data.bits[j] +
-               tmp[idx];
-      tmp[idx] = (unsigned int)carry;
-      carry >>= UINT_NUM_BITS;
+      carry += left->data.bits[i] * right.data.bits[j] + tmp[idx];
+      tmp[idx] = carry & bit_mask;
+      carry >>= 32;
     }
     int idx = j - offset_right + precision;
     carry += tmp[idx];
-    tmp[idx] = (unsigned int)carry;
+    tmp[idx] = carry & bit_mask;
   }
 
   left->sign *= right.sign;
@@ -1405,7 +1404,83 @@ void big_integer_multiply_inplace_fixed_precision(BigInteger *left,
       offset--;
     }
   }
-  memmove(left->data.bits, tmp + offset, precision * UINT_NUM_BYTES);
+  memmove(left->data.bits, tmp + offset, precision * 8);
+  free(tmp); // release temporal variable
+}
+
+/**
+ * TODO: Optimization
+ * 1. scalar replacement for left->data.size
+ * 2. scalar replacement for right.data.size
+ * 3. strength redection for idx
+ */
+void big_integer_multiply_inplace_fixed_precision_verter(BigInteger *left,
+                                                  const BigInteger right,
+                                                  const int precision) {
+
+  unsigned long *tmp = calloc(2 * precision, 8);
+  int offset_left = left->data.size - precision;
+  int offset_right = right.data.size - precision;
+  __m256i bit_maskv = _mm256_set1_epi64x((1lu << 32) - 1);
+  int j=offset_right; 
+  for(;j<right.data.size-3;j+=4){
+    __m256i carry = _mm256_set1_epi64x(0);
+    __m256i ro = _mm256_loadu_si256(right.data.bits + j);
+    for(int i=offset_left;i<left->data.size;i++){
+      int idx = j - offset_right + i - offset_left;
+      __m256i lo = _mm256_set1_epi64x(left->data.bits[i]);
+      __m256i mul_res = _mm256_mul_epu32(lo, ro);
+      carry = _mm256_add_epi64(carry, mul_res);
+      carry = _mm256_add_epi64(carry, _mm256_loadu_si256(tmp + idx));
+      _mm256_storeu_si256(tmp + idx, _mm256_and_si256(carry, bit_maskv));
+      carry = _mm256_srli_epi64(carry, 32);
+    }
+
+    int idx = j - offset_right + precision;
+    carry = _mm256_add_epi64(carry, _mm256_loadu_si256(tmp + idx));
+    _mm256_storeu_si256(tmp + idx, _mm256_and_si256(carry, bit_maskv));
+    carry = _mm256_srli_epi64(carry, 32);
+    idx++;
+    carry = _mm256_add_epi64(carry, _mm256_loadu_si256(tmp + idx));
+    _mm256_storeu_si256(tmp + idx, _mm256_and_si256(carry, bit_maskv));
+    carry = _mm256_srli_epi64(carry, 32);
+    idx++;
+    carry = _mm256_add_epi64(carry, _mm256_loadu_si256(tmp + idx));
+    _mm256_storeu_si256(tmp + idx, _mm256_and_si256(carry, bit_maskv));
+    carry = _mm256_srli_epi64(carry, 32);
+    idx++;
+    carry = _mm256_add_epi64(carry, _mm256_loadu_si256(tmp + idx));
+    _mm256_storeu_si256(tmp + idx, _mm256_and_si256(carry, bit_maskv));
+    carry = _mm256_srli_epi64(carry, 32);
+  }
+
+  unsigned long bit_mask = (1lu << 32) - 1;
+  for(;j<right.data.size;j++){
+    unsigned long carry = 0;
+    for (int i = offset_left; i < left->data.size; i++) {
+      int idx = j - offset_right + i - offset_left;
+      carry += left->data.bits[i] * right.data.bits[j] + tmp[idx];
+      tmp[idx] = carry & bit_mask;
+      carry >>= 32;
+    }
+    int idx = j - offset_right + precision;
+    carry += tmp[idx];
+    tmp[idx] = carry & bit_mask;    
+  }
+
+
+
+  left->sign *= right.sign;
+  left->data.size = precision;
+  int offset = precision;
+  for (int i = 2 * precision - 1; i >= precision; i--) {
+    if (tmp[i] != 0) {
+      break;
+    } else {
+      offset--;
+    }
+  }
+  memmove(left->data.bits, tmp + offset, precision * 8);
   free(tmp); // release temporal variable
 }
 

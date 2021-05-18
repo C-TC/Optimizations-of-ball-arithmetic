@@ -9,7 +9,7 @@
 **/
 
 typedef struct BigIntegerData {
-  unsigned int *bits;
+  unsigned long *bits;
   // assume the number would not be larger than 2^INT_MAX
   int size;
   int capacity;
@@ -116,6 +116,14 @@ BigInteger big_integer_multiply_karatsuba(const BigInteger left,
 void big_integer_multiply_inplace_fixed_precision(BigInteger *left,
                                                   const BigInteger right,
                                                   const int precision);
+/* 
+ * Assumptions: 
+ * !!! left.size >= precision
+ * !!! right.size >= precision
+ */                                                  
+void big_integer_multiply_inplace_fixed_precision_verter(BigInteger *left,
+                                                         const BigInteger right,
+                                                         const int precision);
 
 /* create a deep copy of a bigint/bigintdata */
 BigInteger big_integer_deepcopy(const BigInteger other);
