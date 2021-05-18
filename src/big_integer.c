@@ -1404,6 +1404,27 @@ BigInteger big_integer_add_trailing_zeros(const BigInteger bi, int num) {
   return ans;
 }
 
+void big_integer_add_trailing_zeros_inplace(BigInteger *bi, int num) {
+  if(bi->data.capacity >= bi->data.size + num) {
+    // no allocation
+    for(int i = bi->data.size - 1; i >= 0; i--) {
+      bi->data.bits[i + num] = bi->data.bits[i];
+    }
+    for(int i = 0; i < num; i++) {
+      bi->data.bits[i] = 0;
+    }
+    bi->data.size += num;
+  } else {
+    // need allocation
+    unsigned int *res = (unsigned int *)calloc(2 * (bi->data.size + num), UINT_NUM_BYTES);
+    memcpy(res + num, bi->data.bits, bi->data.size * UINT_NUM_BYTES);
+    free(bi->data.bits);
+    bi->data.bits = res;
+    bi->data.size += num;
+    bi->data.capacity = 2 * bi->data.size;
+  }
+}
+
 #ifdef DEBUG
 void big_integer_dump(const BigInteger bigInt) {
   printf("BigInteger:\n");

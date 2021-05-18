@@ -120,6 +120,7 @@ BigInteger big_integer_deepcopy(const BigInteger other);
 
 /*e.g. 1-2-3-4 to 1-2-3-4-0-0, untested bigfloat helperfunc */
 BigInteger big_integer_add_trailing_zeros(const BigInteger, int);
+void big_integer_add_trailing_zeros_inplace(BigInteger *, int);
 
 #ifdef DEBUG
 void big_integer_dump(const BigInteger bigInt);
