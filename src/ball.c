@@ -135,6 +135,7 @@ Ball ball_add_quad_double(Ball lo, Ball ro){
             "negative" (not really because it is unsigned), and the bit pattern for
             that is the 1's complement (complementing it to get to 0), which is
             exactly the remainder of this term in the subtraction. */
+            borrow = (borrow >> 32) & 1;
             int data1 = 0;
             int data2 = 0;
             if(i >= 0){
@@ -147,7 +148,6 @@ Ball ball_add_quad_double(Ball lo, Ball ro){
 
             ans.center.mantissa.data.bits[i-offset_large] = (unsigned int)borrow;
             /* here we just want the first 1 after removing the lower order term */
-            borrow = (borrow >> 32) & 1;
         }
 
         if(borrow == 0){
