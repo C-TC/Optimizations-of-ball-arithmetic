@@ -12,14 +12,15 @@ def load_data(filename):
     with open(filename, 'r') as fi:
         for line in fi.readlines():
             x, cycle1, cycle2, cycle3, cycle4, cycle5, cycle6, cycle7 = line.strip().split()
+            flops = 2 * int(x) * int(x)
             data_x.append(int(x))
-            data_y1.append(float(cycle1))
-            data_y2.append(float(cycle2))
-            data_y3.append(float(cycle3))
-            data_y4.append(float(cycle4))
-            data_y5.append(float(cycle5))
-            data_y6.append(float(cycle6))
-            data_y7.append(float(cycle7))
+            data_y1.append(flops / float(cycle1))
+            data_y2.append(flops / float(cycle2))
+            data_y3.append(flops / float(cycle3))
+            data_y4.append(flops / float(cycle4))
+            data_y5.append(flops / float(cycle5))
+            data_y6.append(flops / float(cycle6))
+            data_y7.append(flops / float(cycle7))
     return data_x, data_y1, data_y2, data_y3, data_y4, data_y5, data_y6, data_y7
 
 if __name__ == '__main__':
@@ -37,19 +38,21 @@ if __name__ == '__main__':
     plt.legend(handles=[line_mul1, line_mul2, line_mul3, line_mul4, line_mul5, line_mul6, line_mul7], fontsize='x-large')
 
     plt.xscale("log")
-    plt.yscale("log")
+    # plt.yscale("log")
     plt.xticks(data_x, [r'$2^{' + str(i) + r'}$' for i in range(3, 17)], fontsize=14)
-    plt.yticks(fontsize=14)
+    plt.yticks([i * 0.5 for i in range(10)], fontsize=14)
 
     plt.axvline(x=2048, linewidth=2, color='orange')
-    plt.text(2048*1.05, 5*10**10, 'L1 Cache', color='orange', fontsize='x-large')
+    plt.text(2048*1.05, 4.3, 'L1 Cache', color='orange', fontsize='x-large')
     plt.axvline(x=16384, linewidth=2, color='orange')
-    plt.text(16384*1.05, 5*10**10, 'L2 Cache', color='orange', fontsize='x-large')
+    plt.text(16384*1.05, 4.3, 'L2 Cache', color='orange', fontsize='x-large')
+    # plt.axvline(x=524288, linewidth=2, color='orange')
+    # plt.text(524288*1.05, 4.3, 'L3 Cache', color='orange', fontsize='x-large')
 
-    plt.title("Intel® Core™ i5-7360U CPU @ 2.30GHz\nL1: 32KB, L2: 256KB, L3: 4MB\nCompiler: clang 12.0.0\nFlag:-march=native -O3", loc='left', fontsize=16, fontweight=1, color='black')
+    plt.title("Intel® Core™ i5-7360U CPU @ 2.30GHz\nL1: 32KB, L2: 256KB, L3: 4MB\nCompiler: clang 12.0.0\n Flag:-march=native -O3", loc='left', fontsize=16, fontweight=1, color='black')
     # plt.title("Intel® Core™ i7-9700K CPU @ 3.60GHz\nL1: 32KB, L2: 256KB, L3: 12MB\nCompiler: gcc 7.5.0", loc='left', fontsize=16, fontweight=1, color='black')
     plt.xlabel("Input Size", fontsize=16)
-    plt.ylabel("Runtime [Cycle]", fontsize=16)
-    plt.savefig('timing_mul_vec.pdf')
+    plt.ylabel("Performance [Flops/Cycle]", fontsize=16)
+    plt.savefig('timing_mul_vec_p.pdf')
 
     # plt.show()
