@@ -30,7 +30,7 @@ if __name__ == '__main__':
     data_x, data_y1, data_y2, data_y3, data_y4, data_y5, data_y6, data_y7, data_y8, data_y9 = load_data('timing_mul_vec.data')
 
     plt.style.use('seaborn-darkgrid')
-    plt.figure(figsize=(12.8, 8.2))
+    plt.figure(figsize=(12.8, 8.5))
     line_mul1, = plt.plot(data_x, data_y1, marker='.', color='black', linewidth=1.5, alpha=0.7, label='mul_fix_naive')
     line_mul2, = plt.plot(data_x, data_y2, marker='*', color='darkblue', linewidth=1.5, alpha=0.7, label='mul_fix_precision')
     line_mul3, = plt.plot(data_x, data_y3, marker='^', color='darkred', linewidth=1.5, alpha=0.7, label='mul_fix_precision_unfold')
@@ -52,7 +52,7 @@ if __name__ == '__main__':
     plt.axvline(x=16384, linewidth=2, color='orange')
     plt.text(16384*1.05, 5*10**10, 'L2 Cache', color='orange', fontsize='x-large')
 
-    plt.title("Intel® Core™ i5-7360U CPU @ 2.30GHz\nL1: 32KB, L2: 256KB, L3: 4MB\nCompiler: clang 12.0.0\nFlag:-march=native -O3", loc='left', fontsize=16, fontweight=1, color='black')
+    plt.title("Intel® Core™ i5-7360U CPU @ 2.30GHz (Kabylake)\nL1: 32KB, L2: 256KB, L3: 4MB\nCompiler: clang 12.0.0\nFlag:-march=native -O3", loc='left', fontsize=16, fontweight=1, color='black')
     # plt.title("Intel® Core™ i7-9700K CPU @ 3.60GHz\nL1: 32KB, L2: 256KB, L3: 12MB\nCompiler: gcc 7.5.0", loc='left', fontsize=16, fontweight=1, color='black')
     plt.xlabel("Input Size", fontsize=16)
     plt.ylabel("Runtime [Cycle]", fontsize=16)
