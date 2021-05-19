@@ -1408,6 +1408,81 @@ void big_integer_multiply_inplace_fixed_precision(BigInteger *left,
   free(tmp); // release temporal variable
 }
 
+void big_integer_multiply_inplace_fixed_precision_unflod(BigInteger *left,
+                                                  const BigInteger right,
+                                                  const int precision) {
+  int left_size = left->data.size;
+  int right_size = right.data.size;
+  unsigned long *tmp = calloc(2 * precision, 8);
+  int offset_left = left->data.size - precision;
+  int offset_right = right.data.size - precision;
+  unsigned long bit_mask = (1lu << 32) - 1;
+  int j = offset_right;
+  for (;j<right_size;j+=4) {
+    unsigned long carry1 = 0;
+    unsigned long carry2 = 0;
+    unsigned long carry3 = 0;
+    unsigned long carry4 = 0;
+    for (int i = offset_left; i < left_size; i++) {
+      int idx = j - offset_right + i - offset_left;
+      carry1 += left->data.bits[i] * right.data.bits[j] + tmp[idx];
+      carry2 += left->data.bits[i] * right.data.bits[j+1] + tmp[idx+1];
+      carry3 += left->data.bits[i] * right.data.bits[j+2] + tmp[idx+2];
+      carry4 += left->data.bits[i] * right.data.bits[j+3] + tmp[idx+3];
+      tmp[idx] = carry1 & bit_mask;
+      tmp[idx+1] = carry2 & bit_mask;
+      tmp[idx+2] = carry3 & bit_mask;
+      tmp[idx+3] = carry4 & bit_mask;
+      carry1 >>= 32;
+      carry2 >>= 32;
+      carry3 >>= 32;
+      carry4 >>= 32;
+    }
+    int idx = j - offset_right + precision;
+
+    unsigned long carry = 0;
+    carry += tmp[idx] + carry1;
+    tmp[idx] = carry & bit_mask;
+    carry >>= 32;
+    carry += tmp[idx+1] + carry2;
+    tmp[idx+1] = carry & bit_mask;
+    carry >>= 32;
+    carry += tmp[idx+2] + carry3;
+    tmp[idx+2] = carry & bit_mask;
+    carry >>= 32;
+    carry += tmp[idx+3] + carry4;
+    tmp[idx+3] = carry & bit_mask;
+    carry >>= 32;
+  }
+
+
+  for(;j<right_size;j++){
+    unsigned long carry = 0;
+    for (int i = offset_left; i < left_size; i++) {
+      int idx = j - offset_right + i - offset_left;
+      carry += left->data.bits[i] * right.data.bits[j] + tmp[idx];
+      tmp[idx] = carry & bit_mask;
+      carry >>= 32;
+    }
+    int idx = j - offset_right + precision;
+    carry += tmp[idx];
+    tmp[idx] = carry & bit_mask;    
+  }
+
+  left->sign *= right.sign;
+  left->data.size = precision;
+  int offset = precision;
+  for (int i = 2 * precision - 1; i >= precision; i--) {
+    if (tmp[i] != 0) {
+      break;
+    } else {
+      offset--;
+    }
+  }
+  memmove(left->data.bits, tmp + offset, precision * 8);
+  free(tmp); // release temporal variable
+}
+
 
 void big_integer_multiply_inplace_fixed_precision_verter_1x_unfold(BigInteger *left,
                                                   const BigInteger right,
