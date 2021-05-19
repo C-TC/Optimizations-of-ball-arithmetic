@@ -14,7 +14,7 @@ def load_data(filename):
     with open(filename, 'r') as fi:
         for line in fi.readlines():
             x, cycle1, cycle2, cycle3, cycle4, cycle5, cycle6, cycle7, cycle8, cycle9 = line.strip().split()
-            flops = 2 * int(x) * int(x)
+            flops = 3 * int(x) * int(x)
             data_x.append(int(x))
             data_y1.append(flops / float(cycle1))
             data_y2.append(flops / float(cycle2))
@@ -46,12 +46,12 @@ if __name__ == '__main__':
     plt.xscale("log")
     # plt.yscale("log")
     plt.xticks(data_x, [r'$2^{' + str(i) + r'}$' for i in range(3, 17)], fontsize=14)
-    plt.yticks([i * 0.5 for i in range(10)], fontsize=14)
+    plt.yticks([i * 0.5 for i in range(15)], fontsize=14)
 
     plt.axvline(x=2048, linewidth=2, color='orange')
-    plt.text(2048*1.05, 4.3, 'L1 Cache', color='orange', fontsize='x-large')
+    plt.text(2048*1.05, 6.7, 'L1 Cache', color='orange', fontsize='x-large')
     plt.axvline(x=16384, linewidth=2, color='orange')
-    plt.text(16384*1.05, 4.3, 'L2 Cache', color='orange', fontsize='x-large')
+    plt.text(16384*1.05, 6.7, 'L2 Cache', color='orange', fontsize='x-large')
     # plt.axvline(x=524288, linewidth=2, color='orange')
     # plt.text(524288*1.05, 4.3, 'L3 Cache', color='orange', fontsize='x-large')
 
