@@ -139,6 +139,9 @@ void big_integer_multiply_inplace_fixed_precision_verter_8x_unfold(BigInteger *l
 void big_integer_multiply_inplace_fixed_precision_verter_12x_unfold(BigInteger *left,
                                                          const BigInteger right,
                                                          const int precision);
+void big_integer_multiply_inplace_fixed_precision_verter_16x_unfold(BigInteger *left,
+                                                         const BigInteger right,
+                                                         const int precision);
 
 /* create a deep copy of a bigint/bigintdata */
 BigInteger big_integer_deepcopy(const BigInteger other);

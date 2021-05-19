@@ -9,9 +9,11 @@ def load_data(filename):
     data_y5 = []
     data_y6 = []
     data_y7 = []
+    data_y8 = []
+    data_y9 = []
     with open(filename, 'r') as fi:
         for line in fi.readlines():
-            x, cycle1, cycle2, cycle3, cycle4, cycle5, cycle6, cycle7 = line.strip().split()
+            x, cycle1, cycle2, cycle3, cycle4, cycle5, cycle6, cycle7, cycle8, cycle9 = line.strip().split()
             flops = 2 * int(x) * int(x)
             data_x.append(int(x))
             data_y1.append(flops / float(cycle1))
@@ -21,13 +23,15 @@ def load_data(filename):
             data_y5.append(flops / float(cycle5))
             data_y6.append(flops / float(cycle6))
             data_y7.append(flops / float(cycle7))
-    return data_x, data_y1, data_y2, data_y3, data_y4, data_y5, data_y6, data_y7
+            data_y8.append(flops / float(cycle8))
+            data_y9.append(flops / float(cycle9))
+    return data_x, data_y1, data_y2, data_y3, data_y4, data_y5, data_y6, data_y7, data_y8, data_y9
 
 if __name__ == '__main__':
-    data_x, data_y1, data_y2, data_y3, data_y4, data_y5, data_y6, data_y7 = load_data('timing_mul_vec.data')
+    data_x, data_y1, data_y2, data_y3, data_y4, data_y5, data_y6, data_y7, data_y8, data_y9 = load_data('timing_mul_vec.data')
 
     plt.style.use('seaborn-darkgrid')
-    plt.figure(figsize=(12.8, 7.2))
+    plt.figure(figsize=(12.8, 8.2))
     line_mul1, = plt.plot(data_x, data_y1, marker='.', color='black', linewidth=1.5, alpha=0.7, label='mul_fix_naive')
     line_mul2, = plt.plot(data_x, data_y2, marker='*', color='darkblue', linewidth=1.5, alpha=0.7, label='mul_fix_precision')
     line_mul3, = plt.plot(data_x, data_y3, marker='^', color='darkred', linewidth=1.5, alpha=0.7, label='mul_fix_precision_unfold')
@@ -35,7 +39,9 @@ if __name__ == '__main__':
     line_mul5, = plt.plot(data_x, data_y5, marker='8', color='cyan', linewidth=1.5, alpha=0.7, label='mul_fix_precision_2x_unfold')
     line_mul6, = plt.plot(data_x, data_y6, marker='v', color='pink', linewidth=1.5, alpha=0.7, label='mul_fix_precision_4x_unfold')
     line_mul7, = plt.plot(data_x, data_y7, marker='2', color='tan', linewidth=1.5, alpha=0.7, label='mul_fix_precision_8x_unfold')
-    plt.legend(handles=[line_mul1, line_mul2, line_mul3, line_mul4, line_mul5, line_mul6, line_mul7], fontsize='x-large')
+    line_mul8, = plt.plot(data_x, data_y8, marker='X', color='darkviolet', linewidth=1.5, alpha=0.7, label='mul_fix_precision_12x_unfold')
+    line_mul9, = plt.plot(data_x, data_y9, marker='H', color='yellow', linewidth=1.5, alpha=0.7, label='mul_fix_precision_16x_unfold')
+    plt.legend(handles=[line_mul1, line_mul2, line_mul3, line_mul4, line_mul5, line_mul6, line_mul7, line_mul8, line_mul9], fontsize='x-large')
 
     plt.xscale("log")
     # plt.yscale("log")
