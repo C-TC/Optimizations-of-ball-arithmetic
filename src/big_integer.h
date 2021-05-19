@@ -121,7 +121,16 @@ void big_integer_multiply_inplace_fixed_precision(BigInteger *left,
  * !!! left.size >= precision
  * !!! right.size >= precision
  */                                                  
-void big_integer_multiply_inplace_fixed_precision_verter(BigInteger *left,
+void big_integer_multiply_inplace_fixed_precision_verter_1x_unfold(BigInteger *left,
+                                                         const BigInteger right,
+                                                         const int precision);
+void big_integer_multiply_inplace_fixed_precision_verter_2x_unfold(BigInteger *left,
+                                                         const BigInteger right,
+                                                         const int precision);
+void big_integer_multiply_inplace_fixed_precision_verter_4x_unfold(BigInteger *left,
+                                                         const BigInteger right,
+                                                         const int precision);
+void big_integer_multiply_inplace_fixed_precision_verter_8x_unfold(BigInteger *left,
                                                          const BigInteger right,
                                                          const int precision);
 
