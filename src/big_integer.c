@@ -1414,7 +1414,7 @@ void big_integer_multiply_inplace_fixed_precision_unflod(BigInteger *left,
   int offset_left = left->data.size - precision;
   int offset_right = right.data.size - precision;
   int j = offset_right;
-  for (;j<right_size;j+=4) {
+  for (;j<right_size-3;j+=4) {
     unsigned long carry1 = 0;
     unsigned long carry2 = 0;
     unsigned long carry3 = 0;
