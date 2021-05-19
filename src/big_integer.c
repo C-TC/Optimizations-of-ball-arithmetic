@@ -1513,21 +1513,24 @@ void big_integer_multiply_inplace_fixed_precision_verter_1x_unfold(BigInteger *l
     }
 
     int idx = j - offset_right + precision;
-    carry1 = _mm256_add_epi64(carry1, _mm256_loadu_si256((const __m256i_u *)(tmp + idx)));
-    _mm256_storeu_si256((__m256i_u *)(tmp + idx), _mm256_and_si256(carry1, bit_maskv));
-    carry1 = _mm256_srli_epi64(carry1, 32);
-    // idx++;
-    // carry = _mm256_add_epi64(carry, _mm256_loadu_si256(tmp + idx));
-    // _mm256_storeu_si256(tmp + idx, _mm256_and_si256(carry, bit_maskv));
-    // carry = _mm256_srli_epi64(carry, 32);
-    // idx++;
-    // carry = _mm256_add_epi64(carry, _mm256_loadu_si256(tmp + idx));
-    // _mm256_storeu_si256(tmp + idx, _mm256_and_si256(carry, bit_maskv));
-    // carry = _mm256_srli_epi64(carry, 32);
-    // idx++;
-    // carry = _mm256_add_epi64(carry, _mm256_loadu_si256(tmp + idx));
-    // _mm256_storeu_si256(tmp + idx, _mm256_and_si256(carry, bit_maskv));
-    // carry = _mm256_srli_epi64(carry, 32);
+    unsigned long carry;
+
+    carry = 0;
+    unsigned long carry_array1[] = {0, 0, 0, 0};
+    _mm256_storeu_si256(carry_array1, carry1);
+    carry += tmp[idx] + carry_array1[0];
+    tmp[idx] = carry & bit_mask;
+    carry >>= 32;
+    carry += tmp[idx+1] + carry_array1[1];
+    tmp[idx+1] = carry & bit_mask;
+    carry >>= 32;
+    carry += tmp[idx+2] + carry_array1[2];
+    tmp[idx+2] = carry & bit_mask;
+    carry >>= 32;
+    carry += tmp[idx+3] + carry_array1[3];
+    tmp[idx+3] = carry & bit_mask;
+    carry >>= 32;
+
   }
 
   unsigned long bit_mask = (1lu << 32) - 1;
