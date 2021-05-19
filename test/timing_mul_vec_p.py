@@ -57,7 +57,7 @@ if __name__ == '__main__':
     plt.axhline(y=12, linewidth=2, color='darkred')
     plt.text(2048*1.05, 12.1, 'Theoretical Maximum Performance', color='darkred', fontsize='x-large')
 
-    plt.text((2**12)*1.4, 5.1, r"                    $\approx$17x Speedup                    ", ha="center", va="center", rotation=90, size=15, bbox=dict(boxstyle="darrow,pad=0.3", fc="floralwhite", ec="darkred", lw=2)) 
+    plt.text((2**12)*1.4, 5.1, "                     16x Speedup                     ", ha="center", va="center", rotation=90, size=15, bbox=dict(boxstyle="darrow,pad=0.3", fc="floralwhite", ec="darkred", lw=2)) 
 
     plt.title("Intel® Core™ i5-7360U CPU @ 2.30GHz (Kabylake)\nL1: 32KB, L2: 256KB, L3: 4MB\nCompiler: clang 12.0.0\nFlag:-march=native -O3", loc='left', fontsize=16, fontweight=1, color='black')
     # plt.title("Intel® Core™ i7-9700K CPU @ 3.60GHz\nL1: 32KB, L2: 256KB, L3: 12MB\nCompiler: gcc 7.5.0", loc='left', fontsize=16, fontweight=1, color='black')
