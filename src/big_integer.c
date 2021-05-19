@@ -18,8 +18,10 @@
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #endif
 
-const int UINT_NUM_BYTES = (sizeof(unsigned int));
+
+const int UINT_NUM_BYTES = (sizeof(unsigned long));
 const int UINT_NUM_BITS = (sizeof(unsigned int) * 8);
+const unsigned long bit_mask = (1lu << 32) - 1;
 
 /* PRIVATE FUNCTIONS DECLARATIONS */
 
@@ -194,8 +196,7 @@ void big_integer_destroy_data(BigIntegerData *pBigIntData) {
 void big_integer_resize_data(BigIntegerData *pBigIntData,
                              const int new_capacity) {
   pBigIntData->capacity = new_capacity;
-  unsigned int *bits =
-      (unsigned int *)malloc(pBigIntData->capacity * UINT_NUM_BYTES);
+  unsigned long *bits = malloc(pBigIntData->capacity * UINT_NUM_BYTES);
   memcpy(bits, pBigIntData->bits, pBigIntData->size * UINT_NUM_BYTES);
   free(pBigIntData->bits);
   pBigIntData->bits = bits;
@@ -229,7 +230,7 @@ BigIntegerData big_integer_deepcopy_data(const BigIntegerData other) {
   BigIntegerData this;
   this.capacity = other.capacity;
   this.size = other.size;
-  this.bits = (unsigned int *)malloc(this.capacity * UINT_NUM_BYTES);
+  this.bits = malloc(this.capacity * UINT_NUM_BYTES);
   memcpy(this.bits, other.bits, this.capacity * UINT_NUM_BYTES);
   return this;
 }
@@ -383,19 +384,19 @@ void big_integer_add_data_inplace(const BigIntegerData left,
   int i;
   for (i = 0; i < size; ++i) {
     if (i < left.size) {
-      sum += (unsigned long long)left.bits[i];
+      sum += left.bits[i];
     }
     if (i < right.size) {
-      sum += (unsigned long long)right.bits[i];
+      sum += right.bits[i];
     }
     // printf("left: %u, right: %u, sum: %llu\n", left.bits[i], right.bits[i],
     // sum); sum += (unsigned long long)left.bits[i] + right.bits[i];
-    pResult->bits[i] = (unsigned int)sum;
+    pResult->bits[i] = sum & bit_mask;
     sum >>= UINT_NUM_BITS;
   }
 
   if (sum > 0) {
-    pResult->bits[i] = (unsigned int)sum;
+    pResult->bits[i] = sum & bit_mask;
     i++;
   }
 
@@ -531,19 +532,19 @@ void big_integer_multiply_data_with_uint(const BigIntegerData left,
     pResult->size = 0;
     big_integer_resize_data(pResult, left.size * 2);
   }
-
+  unsigned long bit_mask = (1lu << 32) - 1;
   for (i = 0; i < left.size; ++i) {
     product += ulright * left.bits[i];
     // TODO: not sure if this is correct and the most efficient way to extract
     // the lower 32 bits pResult->bits[i] = product & 0x00000000ffffffff;
-    pResult->bits[i] = (unsigned int)product;
+    pResult->bits[i] = product & bit_mask;
     // get upper 32 bits
-    product >>= UINT_NUM_BITS;
+    product >>= 32;
   }
 
   // i is just left.size
   if (product > 0) {
-    pResult->bits[i] = (unsigned int)product;
+    pResult->bits[i] = product & bit_mask;
     pResult->size = i + 1;
   } else {
     pResult->size = i;
@@ -562,15 +563,15 @@ BigIntegerData big_integer_multiply_data(const BigIntegerData left,
   BigIntegerData result, tmpResult, mulResult;
   // calloc is fater than malloc+memset
   // good for initialization
-  result.bits = (unsigned int *)calloc(capacity * 2, UINT_NUM_BYTES);
+  result.bits = calloc(capacity * 2, UINT_NUM_BYTES);
   result.capacity = capacity * 2;
   result.size = 0;
 
-  tmpResult.bits = (unsigned int *)calloc(capacity * 2, UINT_NUM_BYTES);
+  tmpResult.bits = calloc(capacity * 2, UINT_NUM_BYTES);
   tmpResult.capacity = capacity * 2;
   tmpResult.size = 1;
 
-  mulResult.bits = (unsigned int *)calloc(capacity * 2, UINT_NUM_BYTES);
+  mulResult.bits = calloc(capacity * 2, 8);
   mulResult.capacity = capacity * 2;
   mulResult.size = 0;
 
@@ -835,7 +836,7 @@ void big_integer_split_data(const BigIntegerData source, const int mid,
 /* PUBLIC FUNCTIONS IMPLEMENTATION */
 BigInteger big_integer_create(long long value) {
   BigInteger bigInt;
-  bigInt.data.bits = (unsigned int *)malloc(sizeof(unsigned int) * 4);
+  bigInt.data.bits = (unsigned int *)malloc(32);
   bigInt.data.capacity = 4;
 
   if (value == 0) {
@@ -844,6 +845,7 @@ BigInteger big_integer_create(long long value) {
     bigInt.data.size = 1;
   } else {
     unsigned long long uValue;
+    unsigned long bit_mask = (1lu << 32) - 1;
     if (value < 0) {
       bigInt.sign = -1;
       uValue = (unsigned long long)-value;
@@ -854,8 +856,8 @@ BigInteger big_integer_create(long long value) {
 
     bigInt.data.size = 0;
     while (uValue > 0) {
-      bigInt.data.bits[bigInt.data.size++] = (unsigned int)uValue;
-      uValue >>= UINT_NUM_BITS;
+      bigInt.data.bits[bigInt.data.size++] = uValue & bit_mask;
+      uValue >>= 32;
     }
   }
 
