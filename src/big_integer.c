@@ -128,8 +128,7 @@ BigIntegerData big_integer_create_data(const unsigned int bits[],
   // by default we allocate memory twice as needed
   // TODO: this is a designed choice to be discussed
   bigIntData.capacity = 2 * size;
-  bigIntData.bits =
-      (unsigned int *)malloc(bigIntData.capacity * UINT_NUM_BYTES);
+  bigIntData.bits = malloc(bigIntData.capacity * UINT_NUM_BYTES);
   if (bits && size > 0)
     memcpy(bigIntData.bits, bits, UINT_NUM_BYTES * size);
 
@@ -163,7 +162,7 @@ void big_integer_print_data(const BigIntegerData bigIntData, const char *msg) {
   printf("%4d%4d\t", bigIntData.capacity, bigIntData.size);
   int i;
   for (i = 0; i < bigIntData.size; ++i) {
-    printf("%10u\t", bigIntData.bits[i]);
+    printf("%10lu\t", bigIntData.bits[i]);
   }
   printf("\n");
 }
@@ -209,7 +208,7 @@ BigInteger big_integer_deepcopy(const BigInteger other) {
   this.sign = other.sign;
   this.data.capacity = other.data.capacity;
   this.data.size = other.data.size;
-  this.data.bits = (unsigned int *)malloc(this.data.capacity * UINT_NUM_BYTES);
+  this.data.bits = malloc(this.data.capacity * UINT_NUM_BYTES);
   memcpy(this.data.bits, other.data.bits, this.data.capacity * UINT_NUM_BYTES);
   return this;
 }
@@ -324,19 +323,19 @@ BigIntegerData big_integer_add_data(const BigIntegerData left,
   int size = MAX(left.size, right.size);
   int capacity = MAX(left.capacity, right.capacity);
 
-  result.bits = (unsigned int *)malloc(capacity * UINT_NUM_BYTES);
+  result.bits = malloc(capacity * UINT_NUM_BYTES);
   result.capacity = capacity;
 
-  unsigned long long sum = 0;
+  unsigned long sum = 0;
   int i;
   for (i = 0; i < size; ++i) {
-    sum += (unsigned long long)left.bits[i] + right.bits[i];
-    result.bits[i] = (unsigned int)sum;
+    sum += left.bits[i] + right.bits[i];
+    result.bits[i] = sum & bit_mask;
     sum >>= UINT_NUM_BITS;
   }
 
   if (sum > 0) {
-    result.bits[i] = (unsigned int)sum;
+    result.bits[i] = sum & bit_mask;
     i++;
   }
 
@@ -380,7 +379,7 @@ void big_integer_add_data_inplace(const BigIntegerData left,
   // big_integer_print_data(left, "left: ");
   // big_integer_print_data(right, "right: ");
 
-  unsigned long long sum = 0;
+  unsigned long sum = 0;
   int i;
   for (i = 0; i < size; ++i) {
     if (i < left.size) {
@@ -421,19 +420,19 @@ BigIntegerData big_integer_subtract_data(const BigIntegerData left,
   int size = MAX(left.size, right.size);
   int capacity = MAX(left.capacity, right.capacity);
 
-  result.bits = (unsigned int *)calloc(capacity, UINT_NUM_BYTES);
+  result.bits = calloc(capacity, UINT_NUM_BYTES);
   result.capacity = capacity;
 
-  unsigned long long borrow = 0;
+  unsigned long borrow = 0;
   int i;
   for (i = 0; i < size; ++i) {
     /* what happens here is that, if left is less than right, borrow will become
        "negative" (not really because it is unsigned), and the bit pattern for
        that is the 1's complement (complementing it to get to 0), which is
        exactly the remainder of this term in the subtraction. */
-    borrow = (unsigned long long)left.bits[i] - right.bits[i] - borrow;
+    borrow = left.bits[i] - right.bits[i] - borrow;
 
-    result.bits[i] = (unsigned int)borrow;
+    result.bits[i] = borrow & bit_mask;
 
     /* here we just want the first 1 after removing the lower order term */
     borrow = (borrow >> UINT_NUM_BITS) & 1;
@@ -459,16 +458,16 @@ void big_integer_subtract_data_inplace(const BigIntegerData left,
     big_integer_resize_data(pResult, capacity);
   }
 
-  unsigned long long borrow = 0;
+  unsigned long borrow = 0;
   int i;
   for (i = 0; i < size; ++i) {
     /* what happens here is that, if left is less than right, borrow will become
        "negative" (not really because it is unsigned), and the bit pattern for
        that is the 1's complement (complementing it to get to 0), which is
        exactly the remainder of this term in the subtraction. */
-    borrow = (unsigned long long)left.bits[i] - right.bits[i] - borrow;
+    borrow = left.bits[i] - right.bits[i] - borrow;
 
-    pResult->bits[i] = (unsigned int)borrow;
+    pResult->bits[i] = borrow & bit_mask;
 
     /* here we just want the first 1 after removing the lower order term */
     borrow = (borrow >> UINT_NUM_BITS) & 1;
@@ -482,11 +481,11 @@ void big_integer_subtract_data_inplace(const BigIntegerData left,
 
 void big_integer_increment_data(BigIntegerData *pBigIntData,
                                 const unsigned int value) {
-  unsigned long long carry = value;
+  unsigned long carry = value;
   int i = 0;
   while (carry > 0) {
-    carry += (unsigned long long)pBigIntData->bits[i];
-    pBigIntData->bits[i] = (unsigned int)carry;
+    carry += pBigIntData->bits[i];
+    pBigIntData->bits[i] = carry & bit_mask;
     carry >>= UINT_NUM_BITS;
     ++i;
   }
@@ -503,11 +502,11 @@ void big_integer_increment_data(BigIntegerData *pBigIntData,
 /* pBigIntData > value */
 void big_integer_decrement_data(BigIntegerData *pBigIntData,
                                 const unsigned int value) {
-  unsigned long long borrow = value;
+  unsigned long borrow = value;
   int i = 0;
   while (borrow > 0) {
-    borrow = (unsigned long long)pBigIntData->bits[i] - borrow;
-    pBigIntData->bits[i] = (unsigned int)borrow;
+    borrow = pBigIntData->bits[i] - borrow;
+    pBigIntData->bits[i] = borrow & bit_mask;
     borrow = (borrow >> UINT_NUM_BITS) & 1;
     ++i;
   }
@@ -570,7 +569,7 @@ BigIntegerData big_integer_multiply_data(const BigIntegerData left,
   tmpResult.capacity = capacity * 2;
   tmpResult.size = 1;
 
-  mulResult.bits = calloc(capacity * 2, 8);
+  mulResult.bits = calloc(capacity * 2, UINT_NUM_BYTES);
   mulResult.capacity = capacity * 2;
   mulResult.size = 0;
 
@@ -598,7 +597,7 @@ BigIntegerData big_integer_multiply_data_opt(const BigIntegerData left,
   BigIntegerData result;
   // calloc is fater than malloc+memset
   // good for initialization
-  result.bits = (unsigned int *)calloc(capacity * 2, UINT_NUM_BYTES);
+  result.bits = calloc(capacity * 2, UINT_NUM_BYTES);
   result.capacity = capacity * 2;
   result.size = 0;
 
@@ -608,8 +607,8 @@ BigIntegerData big_integer_multiply_data_opt(const BigIntegerData left,
     // &mulResult);
     carry = 0;
     for (int j = 0; j < left.size; ++j) {
-      carry += (unsigned long)left.bits[j] * right.bits[i] + result.bits[i + j];
-      result.bits[i + j] = (unsigned int)carry;
+      carry += left.bits[j] * right.bits[i] + result.bits[i + j];
+      result.bits[i + j] = carry & bit_mask;
       carry >>= UINT_NUM_BITS;
     }
     if (carry > 0) {
@@ -644,9 +643,8 @@ void big_integer_multiply_data_two_operands_opt(BigIntegerData* pLeft,
     // &mulResult);
     carry = 0;
     for (int j = 0; j < left_copy.size; ++j) {
-      carry +=
-          (unsigned long)left_copy.bits[j] * right.bits[i] + pLeft->bits[i + j];
-      pLeft->bits[i + j] = (unsigned int)carry;
+      carry += left_copy.bits[j] * right.bits[i] + pLeft->bits[i + j];
+      pLeft->bits[i + j] = carry & bit_mask;
       carry >>= UINT_NUM_BITS;
     }
     if (carry > 0) {
@@ -695,11 +693,11 @@ void big_integer_multiply_data_inplace(const BigIntegerData left,
 
   BigIntegerData tmpResult, mulResult;
   // tmpResult.bits = (unsigned int *)calloc(capacity * 2, UINT_NUM_BYTES);
-  tmpResult.bits = (unsigned int *)calloc(capacity, UINT_NUM_BYTES);
+  tmpResult.bits = calloc(capacity, UINT_NUM_BYTES);
   tmpResult.capacity = left.size + 1;
   tmpResult.size = 1;
   // mulResult.bits = (unsigned int *)calloc(capacity * 2, UINT_NUM_BYTES);
-  mulResult.bits = (unsigned int *)calloc(capacity, UINT_NUM_BYTES);
+  mulResult.bits = calloc(capacity, UINT_NUM_BYTES);
   mulResult.capacity = left.size + 1;
   mulResult.size = 0;
 
@@ -810,7 +808,7 @@ void big_integer_split_data(const BigIntegerData source, const int mid,
     pHigh->size = source.size - mid;
     pHigh->capacity = source.size - mid + 1;
     // We don't allocate more than needed
-    pHigh->bits = (unsigned int *)malloc(pHigh->capacity * UINT_NUM_BYTES);
+    pHigh->bits = malloc(pHigh->capacity * UINT_NUM_BYTES);
     memcpy(pHigh->bits, source.bits + mid, pHigh->size * UINT_NUM_BYTES);
     big_integer_clear_trash_data(pHigh);
     // printf("mid: %d, bits: %u, bits+mid: %u\n", mid, *(source.bits),
@@ -820,11 +818,11 @@ void big_integer_split_data(const BigIntegerData source, const int mid,
     // TODO: escape this next time?
     pHigh->size = 1;
     pHigh->capacity = 2;
-    pHigh->bits = (unsigned int *)calloc(2, UINT_NUM_BYTES);
+    pHigh->bits = calloc(2, UINT_NUM_BYTES);
   }
   pLow->size = mid;
   pLow->capacity = mid + 1;
-  pLow->bits = (unsigned int *)malloc(pLow->capacity * UINT_NUM_BYTES);
+  pLow->bits = malloc(pLow->capacity * UINT_NUM_BYTES);
   memcpy(pLow->bits, source.bits, mid * UINT_NUM_BYTES);
   big_integer_clear_trash_data(pLow);
   // big_integer_print_data(*pLow, "pLow: ");
@@ -835,7 +833,7 @@ void big_integer_split_data(const BigIntegerData source, const int mid,
 /* PUBLIC FUNCTIONS IMPLEMENTATION */
 BigInteger big_integer_create(long long value) {
   BigInteger bigInt;
-  bigInt.data.bits = (unsigned int *)malloc(32);
+  bigInt.data.bits = malloc(32);
   bigInt.data.capacity = 4;
 
   if (value == 0) {
@@ -878,15 +876,15 @@ void big_integer_set(long long value, BigInteger *pBigInt) {
     unsigned long long uValue;
     if (value < 0) {
       pBigInt->sign = -1;
-      uValue = (unsigned long long)-value;
+      uValue = (unsigned long)-value;
     } else {
       pBigInt->sign = 1;
-      uValue = (unsigned long long)value;
+      uValue = (unsigned long)value;
     }
 
     pBigInt->data.size = 0;
     while (uValue > 0) {
-      pBigInt->data.bits[pBigInt->data.size++] = (unsigned int)uValue;
+      pBigInt->data.bits[pBigInt->data.size++] = uValue & bit_mask;
       uValue >>= UINT_NUM_BITS;
     }
   }
@@ -910,9 +908,9 @@ BigInteger big_integer_create_from_file(FILE **ppFile) {
   bigInt.sign = sign;
   bigInt.data.size = size;
   bigInt.data.capacity = 2 * size;
-  bigInt.data.bits = calloc(bigInt.data.capacity, 8);
+  bigInt.data.bits = calloc(bigInt.data.capacity, UINT_NUM_BYTES);
   for (i = 0; i < size; ++i) {
-    ret = fscanf(*ppFile, "%ul", &bigInt.data.bits[i]);
+    ret = fscanf(*ppFile, "%lu", &bigInt.data.bits[i]);
     assert(ret == 1);
   }
   return bigInt;
@@ -928,7 +926,7 @@ void big_integer_output_to_file(const BigInteger bigInt, FILE **ppFile) {
   fprintf(*ppFile, "%d\t%d\t", bigInt.sign, bigInt.data.size);
   int i;
   for (i = 0; i < bigInt.data.size; ++i) {
-    fprintf(*ppFile, "%u\t\t\t", bigInt.data.bits[i]);
+    fprintf(*ppFile, "%lu\t\t\t", bigInt.data.bits[i]);
   }
   fprintf(*ppFile, "\n");
   return;
@@ -948,7 +946,7 @@ void big_integer_print(const BigInteger bigInt, const char *msg) {
   printf("The data is: \n");
   int i;
   for (i = 0; i < bigInt.data.size; ++i) {
-    printf("%u\t\t\t", bigInt.data.bits[i]);
+    printf("%lu\t\t\t", bigInt.data.bits[i]);
   }
   printf("\n");
 }
@@ -961,7 +959,7 @@ int big_integer_to_int(const BigInteger bigInt) {
   if (bigInt.data.size > 1 ||
       (bigInt.sign == 1 && bigInt.data.bits[0] > INT_MAX) ||
       (bigInt.sign == -1 && -(bigInt.data.bits[0]) < INT_MIN)) {
-    printf("sign: %d; size: %d, bits[0]: %u\n", bigInt.sign, bigInt.data.size,
+    printf("sign: %d; size: %d, bits[0]: %lu\n", bigInt.sign, bigInt.data.size,
            bigInt.data.bits[0]);
     printf(
         "cannot convert this bigint to an int: not in the range of an int\n");
@@ -986,10 +984,10 @@ long long big_integer_to_long_long(const BigInteger bigInt) {
     exit(EXIT_FAILURE);
   }
 
-  unsigned long long result = 0;
+  unsigned long result = 0;
   int i = 0;
   for (i = 0; i < bigInt.data.size; ++i) {
-    result |= ((unsigned long long)bigInt.data.bits[i]) << (UINT_NUM_BITS * i);
+    result |= (bigInt.data.bits[i]) << (UINT_NUM_BITS * i);
   }
 
   if (bigInt.sign == -1)
@@ -1303,15 +1301,15 @@ void big_integer_add_inplace_fixed_precision(BigInteger *left,
 void big_integer_subtract_inplace_fixed_precision_data(
     const BigIntegerData left, const BigIntegerData right,
     BigIntegerData *result, const int precision, int *carried) {
-  unsigned long long borrow = 0;
+  unsigned long borrow = 0;
   int offset = left.size - precision;
   for (int i = offset; i < left.size && i < right.size; i++) {
     /* what happens here is that, if left is less than right, borrow will become
        "negative" (not really because it is unsigned), and the bit pattern for
        that is the 1's complement (complementing it to get to 0), which is
        exactly the remainder of this term in the subtraction. */
-    borrow = (unsigned long long)left.bits[i] - right.bits[i] - borrow;
-    result->bits[i] = (unsigned int)borrow;
+    borrow = left.bits[i] - right.bits[i] - borrow;
+    result->bits[i] = borrow & bit_mask;
     /* here we just want the first 1 after removing the lower order term */
     borrow = (borrow >> UINT_NUM_BITS) & 1;
   }
@@ -1337,11 +1335,11 @@ void big_integer_add_inplace_fixed_precision_data(BigIntegerData *left,
                                                   const BigIntegerData right,
                                                   const int precision,
                                                   int *carried) {
-  unsigned long long sum = 0;
+  unsigned long sum = 0;
   int offset = left->size - precision;
   for (int i = offset; i < left->size && i < right.size; i++) {
-    sum += (unsigned long long)left->bits[i] + right.bits[i];
-    left->bits[i] = (unsigned int)sum;
+    sum += left->bits[i] + right.bits[i];
+    left->bits[i] = sum & bit_mask;
     sum >>= UINT_NUM_BITS;
   }
   int data_size = precision;
@@ -1355,7 +1353,7 @@ void big_integer_add_inplace_fixed_precision_data(BigIntegerData *left,
   memmove(left->bits, left->bits + offset, data_size * UINT_NUM_BYTES);
   if (sum != 0) {
     // carry-over
-    left->bits[left->size - 1] = (unsigned int)sum;
+    left->bits[left->size - 1] = sum & bit_mask;
   }
   left->size = precision;
   return;
@@ -2716,7 +2714,7 @@ BigInteger big_integer_add_trailing_zeros(const BigInteger bi, int num) {
   ans.sign = bi.sign;
   ans.data.size = bi.data.size + num;
   ans.data.capacity = 2 * ans.data.size;
-  ans.data.bits = (unsigned int *)calloc(ans.data.capacity, UINT_NUM_BYTES);
+  ans.data.bits = calloc(ans.data.capacity, UINT_NUM_BYTES);
   memcpy(ans.data.bits + num, bi.data.bits, bi.data.size * UINT_NUM_BYTES);
   return ans;
 }
@@ -2733,7 +2731,7 @@ void big_integer_add_trailing_zeros_inplace(BigInteger *bi, int num) {
     bi->data.size += num;
   } else {
     // need allocation
-    unsigned int *res = (unsigned int *)calloc(2 * (bi->data.size + num), UINT_NUM_BYTES);
+    unsigned long *res = calloc(2 * (bi->data.size + num), UINT_NUM_BYTES);
     memcpy(res + num, bi->data.bits, bi->data.size * UINT_NUM_BYTES);
     free(bi->data.bits);
     bi->data.bits = res;
@@ -2750,8 +2748,8 @@ void big_integer_dump(const BigInteger bigInt) {
   if (bigInt.data.size > 0) {
     int i;
     for (i = 0; i < (bigInt.data.size - 1); i++)
-      printf("%u, ", bigInt.data.bits[i]);
-    printf("%u ", bigInt.data.bits[bigInt.data.size - 1]);
+      printf("%lu, ", bigInt.data.bits[i]);
+    printf("%lu ", bigInt.data.bits[bigInt.data.size - 1]);
   }
   printf("}\n");
   printf("Length: %d\n", bigInt.data.size);
