@@ -1543,7 +1543,7 @@ void big_integer_multiply_inplace_fixed_precision_verter_1x_unfold(BigInteger *l
 
 
   left->sign *= right.sign;
-  left_size = precision;
+  left->data.size = precision;
   int offset = precision;
   for (int i = 2 * precision - 1; i >= precision; i--) {
     if (tmp[i] != 0) {
@@ -1640,7 +1640,7 @@ void big_integer_multiply_inplace_fixed_precision_verter_2x_unfold(BigInteger *l
 
 
   left->sign *= right.sign;
-  left_size = precision;
+  left->data.size = precision;
   int offset = precision;
   for (int i = 2 * precision - 1; i >= precision; i--) {
     if (tmp[i] != 0) {
@@ -1778,7 +1778,7 @@ void big_integer_multiply_inplace_fixed_precision_verter_4x_unfold(BigInteger *l
 
 
   left->sign *= right.sign;
-  left_size = precision;
+  left->data.size = precision;
   int offset = precision;
   for (int i = 2 * precision - 1; i >= precision; i--) {
     if (tmp[i] != 0) {
@@ -2000,7 +2000,7 @@ void big_integer_multiply_inplace_fixed_precision_verter_8x_unfold(BigInteger *l
 
 
   left->sign *= right.sign;
-  left_size = precision;
+  left->data.size = precision;
   int offset = precision;
   for (int i = 2 * precision - 1; i >= precision; i--) {
     if (tmp[i] != 0) {
@@ -2306,7 +2306,7 @@ void big_integer_multiply_inplace_fixed_precision_verter_12x_unfold(BigInteger *
 
 
   left->sign *= right.sign;
-  left_size = precision;
+  left->data.size = precision;
   int offset = precision;
   for (int i = 2 * precision - 1; i >= precision; i--) {
     if (tmp[i] != 0) {
@@ -2696,7 +2696,7 @@ void big_integer_multiply_inplace_fixed_precision_verter_16x_unfold(BigInteger *
 
 
   left->sign *= right.sign;
-  left_size = precision;
+  left->data.size = precision;
   int offset = precision;
   for (int i = 2 * precision - 1; i >= precision; i--) {
     if (tmp[i] != 0) {
