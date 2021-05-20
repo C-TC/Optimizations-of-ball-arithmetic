@@ -2705,7 +2705,7 @@ void big_integer_multiply_inplace_fixed_precision_verter_16x_unfold(BigInteger *
       offset--;
     }
   }
-  memmove(left->data.bits, tmp + offset, precision * 8);
+  memcpy(left->data.bits, tmp + offset, precision * 8);
   free(tmp); // release temporal variable
 }
 
