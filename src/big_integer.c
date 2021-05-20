@@ -1475,7 +1475,7 @@ void big_integer_multiply_inplace_fixed_precision_unflod(BigInteger *left,
       offset--;
     }
   }
-  memmove(left->data.bits, tmp + offset, precision * 8);
+  memcpy(left->data.bits, tmp + offset, precision * 8);
   free(tmp); // release temporal variable
 }
 
@@ -1552,7 +1552,7 @@ void big_integer_multiply_inplace_fixed_precision_verter_1x_unfold(BigInteger *l
       offset--;
     }
   }
-  memmove(left->data.bits, tmp + offset, precision * 8);
+  memcpy(left->data.bits, tmp + offset, precision * 8);
   free(tmp); // release temporal variable
 }
 
@@ -1649,7 +1649,7 @@ void big_integer_multiply_inplace_fixed_precision_verter_2x_unfold(BigInteger *l
       offset--;
     }
   }
-  memmove(left->data.bits, tmp + offset, precision * 8);
+  memcpy(left->data.bits, tmp + offset, precision * 8);
   free(tmp); // release temporal variable
 }
 
@@ -1787,7 +1787,7 @@ void big_integer_multiply_inplace_fixed_precision_verter_4x_unfold(BigInteger *l
       offset--;
     }
   }
-  memmove(left->data.bits, tmp + offset, precision * 8);
+  memcpy(left->data.bits, tmp + offset, precision * 8);
   free(tmp); // release temporal variable
 }
 
@@ -2009,7 +2009,7 @@ void big_integer_multiply_inplace_fixed_precision_verter_8x_unfold(BigInteger *l
       offset--;
     }
   }
-  memmove(left->data.bits, tmp + offset, precision * 8);
+  memcpy(left->data.bits, tmp + offset, precision * 8);
   free(tmp); // release temporal variable
 }
 
@@ -2315,7 +2315,7 @@ void big_integer_multiply_inplace_fixed_precision_verter_12x_unfold(BigInteger *
       offset--;
     }
   }
-  memmove(left->data.bits, tmp + offset, precision * 8);
+  memcpy(left->data.bits, tmp + offset, precision * 8);
   free(tmp); // release temporal variable
 }
 
