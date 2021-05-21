@@ -37,6 +37,15 @@ Ball ball_div(Ball lo, Ball ro) {
     return ans;
 }
 
+void ball_add_inplace_fixed_precision(Ball *lo, Ball ro, const int precision) {
+    big_float_add_inplace_fixed_precision(&lo->center, ro.center, precision);
+    lo->radius = lo->radius + ro.radius;
+}
+void ball_multiply_inplace_fixed_precision(Ball *lo, Ball ro, const int precision) {
+    big_float_mul_inplace_fixed_precision(&lo->center, ro.center, precision);
+    lo->radius = fabs(big_float_to_double(lo->center)) * ro.radius + fabs(big_float_to_double(ro.center)) * lo->radius + lo->radius * ro.radius;
+}
+
 Ball ball_add_quad_double(Ball lo, Ball ro){
     Ball ans;
     ans.radius = lo.radius + ro.radius;

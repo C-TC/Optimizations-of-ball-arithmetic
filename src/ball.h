@@ -11,6 +11,9 @@ Ball ball_add(Ball, Ball);
 Ball ball_multiply(Ball, Ball);
 Ball ball_div(Ball, Ball);
 
+void ball_add_inplace_fixed_precision(Ball *, Ball, const int);
+void ball_multiply_inplace_fixed_precision(Ball *, Ball, const int);
+
 /*
     32(bit) * 8 = 256(bit)
     precision = 8
