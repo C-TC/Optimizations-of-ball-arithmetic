@@ -41,8 +41,15 @@ if __name__ == '__main__':
     line_mul7, = plt.plot(data_x, data_y7, marker='2', color='tan', linewidth=1.5, alpha=0.7, label='mul_fix_precision_8x_unfold')
     line_mul8, = plt.plot(data_x, data_y8, marker='X', color='darkviolet', linewidth=1.5, alpha=0.7, label='mul_fix_precision_12x_unfold')
     line_mul9, = plt.plot(data_x, data_y9, marker='H', color='yellow', linewidth=1.5, alpha=0.7, label='mul_fix_precision_16x_unfold')
+    line_mul_qua, = plt.plot(8, 1.25, marker='o', color='darkred', label='mul_quad_double') 
     plt.legend(handles=[line_mul1, line_mul2, line_mul3, line_mul4, line_mul5, line_mul6, line_mul7, line_mul8, line_mul9], fontsize='x-large')
-
+    plt.text(8*1.9, 3.0, 'mul_quad_double', color='darkred', fontsize='x-large')
+    plt.annotate("",
+            xy=(8, 1.25), xycoords='data',
+            xytext=(16, 3.0), textcoords='data',
+            arrowprops=dict(width=1, headwidth=5, shrink=0.07, facecolor='darkred', edgecolor='darkred', headlength=8),
+            fontsize='x-large'
+            )
     plt.xscale("log")
     # plt.yscale("log")
     plt.xticks(data_x, [r'$2^{' + str(i) + r'}$' for i in range(3, 17)], fontsize=14)
@@ -56,6 +63,8 @@ if __name__ == '__main__':
     # plt.text(524288*1.05, 4.3, 'L3 Cache', color='orange', fontsize='x-large')
     plt.axhline(y=12, linewidth=2, color='darkred')
     plt.text(2048*1.05, 12.1, 'Theoretical Maximum Performance', color='darkred', fontsize='x-large')
+    # plt.axhline(y=9.6, linewidth=2, color='darkred')
+    # plt.text(2048*1.05, 9.7, '80% Theoretical Maximum Performance', color='darkred', fontsize='x-large')
 
     plt.text((2**12)*1.4, 5.1, "                     16x Speedup                     ", ha="center", va="center", rotation=90, size=15, bbox=dict(boxstyle="darrow,pad=0.3", fc="floralwhite", ec="darkred", lw=2)) 
 
