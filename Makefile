@@ -1,5 +1,5 @@
 CC := gcc
-CFLAGS := -Wall -O3
+CFLAGS := -Wall -O3 -march=native
 ifeq ($(MAKECMDGOALS),debug)
 	CFLAGS := -Wall -g -ggdb -DDEBUG -O0
 else

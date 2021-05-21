@@ -41,8 +41,8 @@ double big_float_to_double(const BigFloat bf) {
     }
     int expo = (int) bf.power * 32; 
     int size = bf. mantissa.data.size;
-    unsigned int *bits = bf.mantissa.data.bits;
-    unsigned int bit0,bit1,bit2;
+    unsigned long *bits = bf.mantissa.data.bits;
+    unsigned long bit0,bit1,bit2;
     assert(size > 0);
     if (size >= 3) {
         bit0 = bits[size - 1];
@@ -57,7 +57,7 @@ double big_float_to_double(const BigFloat bf) {
         bit1 = 0;
         bit2 = 0;
     } 
-    unsigned long data1 = (unsigned long) bit0 << 32 | bit1, data2 = (unsigned long) bit1 << 32 | bit2;
+    unsigned long data1 = bit0 << 32 | bit1, data2 = bit1 << 32 | bit2;
     unsigned long mask1 = 0x8000000000000000, mask2 = 0xFFFFFFFFFFFFF000, mask3 = 0xFFFFFFFF00000000;
     if (bf.power == -32) {
         unsigned long res = data1 >> 2;
@@ -105,7 +105,7 @@ BigFloat double_to_big_float(double data) {
         return bf;
     } else if (d_c.parts.exponent == 0 && d_c.parts.mantissa != 0) {
         // denormalize  (−1)^s × 0.m × 2^−1022  
-        unsigned int data1 = (unsigned int) (d_c.parts.mantissa >> 50), data2 = (unsigned int) (d_c.parts.mantissa >> 18), data3 = (unsigned int) d_c.parts.mantissa & 0x0003FFFF;
+        unsigned long data1 = (unsigned long) (d_c.parts.mantissa >> 50), data2 = (unsigned long) ((d_c.parts.mantissa >> 18) & 0xFFFFFFFF), data3 = (unsigned long) d_c.parts.mantissa & 0x0003FFFF;
         long long power = -32;
         if (data1 != 0) {
             // left shift 32 bit
@@ -147,7 +147,7 @@ BigFloat double_to_big_float(double data) {
         unsigned long part1 = man >> 32, part2 = man;
         part1 <<= remainder;
         part2 <<= remainder;
-        unsigned int data1 = (unsigned int) (part1 >> 32), data2 = (unsigned int) (part2 >> 32), data3 = (unsigned int) (part2 & 0x00000000FFFFFFFF);
+        unsigned long data1 = part1 >> 32, data2 = part2 >> 32, data3 = part2 & 0x00000000FFFFFFFF;
         if (data1 != 0) {
             // left shift 32 bit
             power++;
@@ -179,12 +179,12 @@ void big_float_print(BigFloat bf) {
     if (bf.mantissa.sign < 0) {
         printf("-0. ");
     } else {
-        printf("0. ");
+        printf(" 0. ");
     }
     int i = bf.mantissa.data.size - 1, j;
-    printf("[%u]",bf.mantissa.data.bits[i]);
+    printf("[%u]", (unsigned int) bf.mantissa.data.bits[i]);
     for (j = i - 1; j >= i - print_precision + 1 && j >= 0; j--) {
-        printf(" -- [%u]",bf.mantissa.data.bits[j]);
+        printf(" -- [%u]", (unsigned int) bf.mantissa.data.bits[j]);
     }
     if (j >= 0) {
         printf(" -- ...");

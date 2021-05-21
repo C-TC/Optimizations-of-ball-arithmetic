@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "big_integer.h"
-#include "tsc_x86.h"
+#include "../test/tsc_x86.h"
 
 #define CYCLES_REQUIRED 1e8
 
