@@ -2976,20 +2976,20 @@ void big_integer_multiply_inplace_fixed_precision_verter_16x_unfold_reduce_intop
       carry16 = _mm256_add_epi64(carry16, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 60)));
 
       _mm256_storeu_si256((__m256i_u *)(tmp + idx), _mm256_and_si256(carry1, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 4), carry2);
       _mm256_storeu_si256((__m256i_u *)(tmp + idx + 8), _mm256_and_si256(carry3, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 12), carry4);
       _mm256_storeu_si256((__m256i_u *)(tmp + idx + 16), _mm256_and_si256(carry5, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 20), carry6);
       _mm256_storeu_si256((__m256i_u *)(tmp + idx + 24), _mm256_and_si256(carry7, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 28), carry8);
       _mm256_storeu_si256((__m256i_u *)(tmp + idx + 32), _mm256_and_si256(carry9, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 36), carry10);
       _mm256_storeu_si256((__m256i_u *)(tmp + idx + 40), _mm256_and_si256(carry11, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 44), carry12);
       _mm256_storeu_si256((__m256i_u *)(tmp + idx + 48), _mm256_and_si256(carry13, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 52), carry14);
       _mm256_storeu_si256((__m256i_u *)(tmp + idx + 56), _mm256_and_si256(carry15, bit_maskv));
+      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 4), carry2);
+      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 12), carry4);
+      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 20), carry6);
+      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 28), carry8);
+      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 36), carry10);
+      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 44), carry12);
+      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 52), carry14);
       _mm256_storeu_si256((__m256i_u *)(tmp + idx + 60), carry16);
       carry1 = _mm256_srli_epi64(carry1, UINT_NUM_BITS);
       carry3 = _mm256_srli_epi64(carry3, UINT_NUM_BITS);
@@ -3135,18 +3135,18 @@ void big_integer_multiply_inplace_fixed_precision_verter_16x_unfold_reduce_intop
       carry16 = _mm256_add_epi64(carry16, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 60)));
 
       _mm256_storeu_si256((__m256i_u *)(tmp + idx), _mm256_and_si256(carry1, bit_maskv));
+      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 16), _mm256_and_si256(carry5, bit_maskv));
+      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 32), _mm256_and_si256(carry9, bit_maskv));
+      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 48), _mm256_and_si256(carry13, bit_maskv));
       _mm256_storeu_si256((__m256i_u *)(tmp + idx + 4), carry2);
       _mm256_storeu_si256((__m256i_u *)(tmp + idx + 8), carry3);
       _mm256_storeu_si256((__m256i_u *)(tmp + idx + 12), carry4);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 16), _mm256_and_si256(carry5, bit_maskv));
       _mm256_storeu_si256((__m256i_u *)(tmp + idx + 20), carry6);
       _mm256_storeu_si256((__m256i_u *)(tmp + idx + 24), carry7);
       _mm256_storeu_si256((__m256i_u *)(tmp + idx + 28), carry8);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 32), _mm256_and_si256(carry9, bit_maskv));
       _mm256_storeu_si256((__m256i_u *)(tmp + idx + 36), carry10);
       _mm256_storeu_si256((__m256i_u *)(tmp + idx + 40), carry11);
       _mm256_storeu_si256((__m256i_u *)(tmp + idx + 44), carry12);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 48), _mm256_and_si256(carry13, bit_maskv));
       _mm256_storeu_si256((__m256i_u *)(tmp + idx + 52), carry14);
       _mm256_storeu_si256((__m256i_u *)(tmp + idx + 56), carry15);
       _mm256_storeu_si256((__m256i_u *)(tmp + idx + 60), carry16);
@@ -3284,6 +3284,7 @@ void big_integer_multiply_inplace_fixed_precision_verter_16x_unfold_reduce_intop
       carry16 = _mm256_add_epi64(carry16, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 60)));
 
       _mm256_storeu_si256((__m256i_u *)(tmp + idx), _mm256_and_si256(carry1, bit_maskv));
+      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 32), _mm256_and_si256(carry9, bit_maskv));
       _mm256_storeu_si256((__m256i_u *)(tmp + idx + 4), carry2);
       _mm256_storeu_si256((__m256i_u *)(tmp + idx + 8), carry3);
       _mm256_storeu_si256((__m256i_u *)(tmp + idx + 12), carry4);
@@ -3291,7 +3292,6 @@ void big_integer_multiply_inplace_fixed_precision_verter_16x_unfold_reduce_intop
       _mm256_storeu_si256((__m256i_u *)(tmp + idx + 20), carry6);
       _mm256_storeu_si256((__m256i_u *)(tmp + idx + 24), carry7);
       _mm256_storeu_si256((__m256i_u *)(tmp + idx + 28), carry8);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 32), _mm256_and_si256(carry9, bit_maskv));
       _mm256_storeu_si256((__m256i_u *)(tmp + idx + 36), carry10);
       _mm256_storeu_si256((__m256i_u *)(tmp + idx + 40), carry11);
       _mm256_storeu_si256((__m256i_u *)(tmp + idx + 44), carry12);

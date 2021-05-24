@@ -238,6 +238,110 @@ double rdtsc_big_integer_multiply_inplace_fixed_precision_verter_16x_unflod(BigI
   return (double)cycles / num_runs;
 }
 
+double rdtsc_big_integer_multiply_inplace_fixed_precision_verter_16x_unfold_reduce_intop_1x(BigInteger *left,
+                                                          BigInteger right,
+                                                          int precision) {
+  int i, num_runs = 1;
+  myInt64 cycles;
+  myInt64 start;
+
+  while (num_runs < (1 << 14)) {
+    start = start_tsc();
+    for (i = 0; i < num_runs; ++i) {
+      big_integer_multiply_inplace_fixed_precision_verter_16x_unfold_reduce_intop_1x(left, right, precision);
+    }
+    cycles = stop_tsc(start);
+    if (cycles >= CYCLES_REQUIRED)
+      break;
+    num_runs *= 2;
+  }
+
+  start = start_tsc();
+  for (i = 0; i < num_runs; ++i) {
+    big_integer_multiply_inplace_fixed_precision_verter_16x_unfold_reduce_intop_1x(left, right, precision);
+  }
+  cycles = stop_tsc(start);
+  return (double)cycles / num_runs;
+}
+
+double rdtsc_big_integer_multiply_inplace_fixed_precision_verter_16x_unfold_reduce_intop_2x(BigInteger *left,
+                                                          BigInteger right,
+                                                          int precision) {
+  int i, num_runs = 1;
+  myInt64 cycles;
+  myInt64 start;
+
+  while (num_runs < (1 << 14)) {
+    start = start_tsc();
+    for (i = 0; i < num_runs; ++i) {
+      big_integer_multiply_inplace_fixed_precision_verter_16x_unfold_reduce_intop_2x(left, right, precision);
+    }
+    cycles = stop_tsc(start);
+    if (cycles >= CYCLES_REQUIRED)
+      break;
+    num_runs *= 2;
+  }
+
+  start = start_tsc();
+  for (i = 0; i < num_runs; ++i) {
+    big_integer_multiply_inplace_fixed_precision_verter_16x_unfold_reduce_intop_2x(left, right, precision);
+  }
+  cycles = stop_tsc(start);
+  return (double)cycles / num_runs;
+}
+
+double rdtsc_big_integer_multiply_inplace_fixed_precision_verter_16x_unfold_reduce_intop_4x(BigInteger *left,
+                                                          BigInteger right,
+                                                          int precision) {
+  int i, num_runs = 1;
+  myInt64 cycles;
+  myInt64 start;
+
+  while (num_runs < (1 << 14)) {
+    start = start_tsc();
+    for (i = 0; i < num_runs; ++i) {
+      big_integer_multiply_inplace_fixed_precision_verter_16x_unfold_reduce_intop_4x(left, right, precision);
+    }
+    cycles = stop_tsc(start);
+    if (cycles >= CYCLES_REQUIRED)
+      break;
+    num_runs *= 2;
+  }
+
+  start = start_tsc();
+  for (i = 0; i < num_runs; ++i) {
+    big_integer_multiply_inplace_fixed_precision_verter_16x_unfold_reduce_intop_4x(left, right, precision);
+  }
+  cycles = stop_tsc(start);
+  return (double)cycles / num_runs;
+}
+
+double rdtsc_big_integer_multiply_inplace_fixed_precision_verter_16x_unfold_reduce_intop_8x(BigInteger *left,
+                                                          BigInteger right,
+                                                          int precision) {
+  int i, num_runs = 1;
+  myInt64 cycles;
+  myInt64 start;
+
+  while (num_runs < (1 << 14)) {
+    start = start_tsc();
+    for (i = 0; i < num_runs; ++i) {
+      big_integer_multiply_inplace_fixed_precision_verter_16x_unfold_reduce_intop_8x(left, right, precision);
+    }
+    cycles = stop_tsc(start);
+    if (cycles >= CYCLES_REQUIRED)
+      break;
+    num_runs *= 2;
+  }
+
+  start = start_tsc();
+  for (i = 0; i < num_runs; ++i) {
+    big_integer_multiply_inplace_fixed_precision_verter_16x_unfold_reduce_intop_8x(left, right, precision);
+  }
+  cycles = stop_tsc(start);
+  return (double)cycles / num_runs;
+}
+
 
 int main(){
 
@@ -305,7 +409,6 @@ int main(){
     memcpy(left7.data.bits, left.data.bits, 8 * n);
     memcpy(left8.data.bits, left.data.bits, 8 * n);
 
-    // big_integer_multiply_inplace_fixed_precision(&left, right, n);
 
     double cycles_mul_naive = 0;
     double cycles_mul_precision = 0;
@@ -337,6 +440,29 @@ int main(){
     cycles_mul_precision_vector_12x_unfold,
     cycles_mul_precision_vector_16x_unfold
     );
+
+/*
+    double cycles_mul_precision_vector_16x_unfold = 0;
+    double cycles_mul_precision_vector_16x_unfold_1x = 0;
+    double cycles_mul_precision_vector_16x_unfold_2x = 0;
+    double cycles_mul_precision_vector_16x_unfold_4x = 0;
+    double cycles_mul_precision_vector_16x_unfold_8x = 0;
+    cycles_mul_precision_vector_16x_unfold += rdtsc_big_integer_multiply_inplace_fixed_precision_verter_16x_unflod(&left, right, n);
+    cycles_mul_precision_vector_16x_unfold_1x += rdtsc_big_integer_multiply_inplace_fixed_precision_verter_16x_unfold_reduce_intop_1x(&left2, right, n);
+    cycles_mul_precision_vector_16x_unfold_2x += rdtsc_big_integer_multiply_inplace_fixed_precision_verter_16x_unfold_reduce_intop_2x(&left3, right, n);
+    cycles_mul_precision_vector_16x_unfold_4x += rdtsc_big_integer_multiply_inplace_fixed_precision_verter_16x_unfold_reduce_intop_4x(&left4, right, n);
+    cycles_mul_precision_vector_16x_unfold_8x += rdtsc_big_integer_multiply_inplace_fixed_precision_verter_16x_unfold_reduce_intop_8x(&left5, right, n);
+
+    printf("%d %.2lf %.2lf %.2lf %.2lf %.2lf\n", 
+    n, 
+    cycles_mul_precision_vector_16x_unfold,
+    cycles_mul_precision_vector_16x_unfold_1x,
+    cycles_mul_precision_vector_16x_unfold_2x,
+    cycles_mul_precision_vector_16x_unfold_4x,
+    cycles_mul_precision_vector_16x_unfold_8x
+    );
+*/
+
     big_integer_destroy(&left);
     big_integer_destroy(&left2);
     big_integer_destroy(&left3);
