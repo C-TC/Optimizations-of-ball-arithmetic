@@ -20,8 +20,8 @@
 
 
 const int UINT_NUM_BYTES = (sizeof(unsigned long));
-const int UINT_NUM_BITS = (sizeof(unsigned int) * 8);
-const unsigned long bit_mask = (1lu << 32) - 1;
+const int UINT_NUM_BITS = 32;
+const unsigned long bit_mask = (1lu << UINT_NUM_BITS) - 1;
 
 /* PRIVATE FUNCTIONS DECLARATIONS */
 
