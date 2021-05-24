@@ -143,6 +143,18 @@ void big_integer_multiply_inplace_fixed_precision_verter_16x_unfold(BigInteger *
                                                          const BigInteger right,
                                                          const int precision);
 void big_integer_multiply_inplace_quad_double(BigInteger *left, const BigInteger right);
+void big_integer_multiply_inplace_fixed_precision_verter_16x_unfold_reduce_intop_1x(BigInteger *left,
+                                                         const BigInteger right,
+                                                         const int precision);
+void big_integer_multiply_inplace_fixed_precision_verter_16x_unfold_reduce_intop_2x(BigInteger *left,
+                                                         const BigInteger right,
+                                                         const int precision);
+void big_integer_multiply_inplace_fixed_precision_verter_16x_unfold_reduce_intop_4x(BigInteger *left,
+                                                         const BigInteger right,
+                                                         const int precision);
+void big_integer_multiply_inplace_fixed_precision_verter_16x_unfold_reduce_intop_8x(BigInteger *left,
+                                                         const BigInteger right,
+                                                         const int precision);
 
 /* create a deep copy of a bigint/bigintdata */
 BigInteger big_integer_deepcopy(const BigInteger other);
