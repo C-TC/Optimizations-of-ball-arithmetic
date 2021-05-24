@@ -36,9 +36,9 @@ if __name__ == '__main__':
     plt.yticks(fontsize=14)
 
     plt.axvline(x=2048, linewidth=2, color='orange')
-    plt.text(2048*1.05, 5*10**10, 'L1 Cache', color='orange', fontsize='x-large')
+    plt.text(2048*1.05, 0.84, 'L1 Cache', color='orange', fontsize='x-large')
     plt.axvline(x=16384, linewidth=2, color='orange')
-    plt.text(16384*1.05, 5*10**10, 'L2 Cache', color='orange', fontsize='x-large')
+    plt.text(16384*1.05, 0.84, 'L2 Cache', color='orange', fontsize='x-large')
 
     plt.title("Intel® Core™ i5-7360U CPU @ 2.30GHz (Kabylake)\nL1: 32KB, L2: 256KB, L3: 4MB\nCompiler: clang 12.0.0\nFlag:-march=native -O3", loc='left', fontsize=16, fontweight=1, color='black')
     # plt.title("Intel® Core™ i7-9700K CPU @ 3.60GHz\nL1: 32KB, L2: 256KB, L3: 12MB\nCompiler: gcc 7.5.0", loc='left', fontsize=16, fontweight=1, color='black')
