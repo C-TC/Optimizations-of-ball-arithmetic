@@ -1,7 +1,8 @@
 import random
 import operator
 
-UINT_MAX_PLUS1 = 4294967295 + 1
+U_BITS = 27
+UINT_MAX_PLUS1 = 1 << U_BITS
 
 def generate_data(min_val, max_val, op, n, seed=0):
     op1s = []
@@ -29,7 +30,7 @@ def convert_to_bigint_format(val):
         val *= -1
     while (val > 0):
         bits.append(str(val % UINT_MAX_PLUS1))
-        val //= UINT_MAX_PLUS1
+        val >>= U_BITS
         size += 1
     return sign, size, bits
 
@@ -55,14 +56,15 @@ def save_to_file(f, op1s, op2s, results):
 def create_simple_test(filename, op):
     n = 1
     with open(filename, 'wt') as f:
-        for i in range(5, 11):
-            maxBits = 1 << i
+        for i in range(17):
+            maxBits = (1 << i) * U_BITS
             maxAbsVal = 2 ** maxBits
             op1s, op2s, results = generate_data(-maxAbsVal, maxAbsVal, op, n)
             save_to_file(f, op1s, op2s, results)
+            print(i, "done")
     return
 
 if __name__ == "__main__":
-    create_simple_test("data/simple_add.txt", operator.add)
-    create_simple_test("data/simple_sub.txt", operator.sub)
-    create_simple_test("data/simple_mul.txt", operator.mul)
+    # create_simple_test("data/simple_add.txt", operator.add)
+    # create_simple_test("data/simple_sub.txt", operator.sub)
+    create_simple_test("../data/hard_mul_27bit.txt", operator.mul)
