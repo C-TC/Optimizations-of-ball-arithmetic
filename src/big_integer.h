@@ -156,6 +156,26 @@ void big_integer_multiply_inplace_fixed_precision_verter_16x_unfold_reduce_intop
                                                          const BigInteger right,
                                                          const int precision);
 
+/* 
+ * Assumptions: 
+ * !!! input have same precision (length)
+ * !!! input have same sign
+ * !!! precision = input.size
+ * !!! res.size >= input.size + 1
+ * !!! data in res.bits are all zeros
+ */    
+void big_integer_sum_2(const BigInteger op1, const BigInteger op2, const int precision, BigInteger* res);                                                         
+void big_integer_sum_3(const BigInteger op1, const BigInteger op2, const BigInteger op3, const int precision, BigInteger* res);                                                         
+void big_integer_sum_3_unfold_1x(const BigInteger op1, const BigInteger op2, const BigInteger op3, const int precision, BigInteger* res);                                                         
+void big_integer_sum_3_unfold_2x(const BigInteger op1, const BigInteger op2, const BigInteger op3, const int precision, BigInteger* res);                                                         
+void big_integer_sum_3_unfold_4x(const BigInteger op1, const BigInteger op2, const BigInteger op3, const int precision, BigInteger* res);                                                         
+void big_integer_sum_3_unfold_8x(const BigInteger op1, const BigInteger op2, const BigInteger op3, const int precision, BigInteger* res);                                                         
+void big_integer_sum_5(const BigInteger op1, const BigInteger op2, const BigInteger op3, const BigInteger op4, const BigInteger op5, const int precision, BigInteger* res);                                                         
+void big_integer_sum_5_unfold_1x(const BigInteger op1, const BigInteger op2, const BigInteger op3, const BigInteger op4, const BigInteger op5, const int precision, BigInteger* res);                                                         
+void big_integer_sum_5_unfold_2x(const BigInteger op1, const BigInteger op2, const BigInteger op3, const BigInteger op4, const BigInteger op5, const int precision, BigInteger* res);                                                         
+void big_integer_sum_5_unfold_4x(const BigInteger op1, const BigInteger op2, const BigInteger op3, const BigInteger op4, const BigInteger op5, const int precision, BigInteger* res);                                                         
+void big_integer_sum_5_unfold_8x(const BigInteger op1, const BigInteger op2, const BigInteger op3, const BigInteger op4, const BigInteger op5, const int precision, BigInteger* res);                                                         
+
 /* create a deep copy of a bigint/bigintdata */
 BigInteger big_integer_deepcopy(const BigInteger other);
 
