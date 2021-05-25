@@ -4173,6 +4173,188 @@ void big_integer_sum(const BigInteger op[], int index_start, int index_end, cons
   }  
 }
 
+void big_integer_sum_4(
+  const BigInteger op1, const BigInteger op2, const BigInteger op3, const BigInteger op4, 
+  const int precision, BigInteger* res
+){
+  res->sign = op1.sign;
+  res->data.size = precision;
+
+  unsigned long* res_data = res->data.bits;
+  unsigned long* data1 = op1.data.bits;
+  unsigned long* data2 = op2.data.bits;
+  unsigned long* data3 = op3.data.bits;
+  unsigned long* data4 = op4.data.bits;
+
+  unsigned long sum = 0;
+  for(int i=0;i<precision;i++){
+    sum += data1[i];
+    sum += data2[i];
+    sum += data3[i];
+    sum += data4[i];
+    res_data[i] = sum & bit_mask;
+    sum >>= UINT_NUM_BITS;
+  }
+
+  if(sum){
+    res_data[precision] = sum;
+  }
+
+  if(res_data[precision]){
+    memmove(res_data, res_data + 1, precision * UINT_NUM_BYTES);
+  }  
+}
+
+void big_integer_sum_8(
+  const BigInteger op1, const BigInteger op2, const BigInteger op3, const BigInteger op4, 
+  const BigInteger op5, const BigInteger op6, const BigInteger op7, const BigInteger op8, 
+  const int precision, BigInteger* res
+){
+  res->sign = op1.sign;
+  res->data.size = precision;
+
+  unsigned long* res_data = res->data.bits;
+  unsigned long* data1 = op1.data.bits;
+  unsigned long* data2 = op2.data.bits;
+  unsigned long* data3 = op3.data.bits;
+  unsigned long* data4 = op4.data.bits;
+  unsigned long* data5 = op5.data.bits;
+  unsigned long* data6 = op6.data.bits;
+  unsigned long* data7 = op7.data.bits;
+  unsigned long* data8 = op8.data.bits;
+
+  unsigned long sum = 0;
+  for(int i=0;i<precision;i++){
+    sum += data1[i];
+    sum += data2[i];
+    sum += data3[i];
+    sum += data4[i];
+    sum += data5[i];
+    sum += data6[i];
+    sum += data7[i];
+    sum += data8[i];
+    res_data[i] = sum & bit_mask;
+    sum >>= UINT_NUM_BITS;
+  }
+
+  if(sum){
+    res_data[precision] = sum;
+  }
+
+  if(res_data[precision]){
+    memmove(res_data, res_data + 1, precision * UINT_NUM_BYTES);
+  }  
+}
+
+void big_integer_sum_12(
+  const BigInteger op1, const BigInteger op2, const BigInteger op3, const BigInteger op4, 
+  const BigInteger op5, const BigInteger op6, const BigInteger op7, const BigInteger op8, 
+  const BigInteger op9, const BigInteger op10, const BigInteger op11, const BigInteger op12, 
+  const int precision, BigInteger* res
+){
+  res->sign = op1.sign;
+  res->data.size = precision;
+
+  unsigned long* res_data = res->data.bits;
+  unsigned long* data1 = op1.data.bits;
+  unsigned long* data2 = op2.data.bits;
+  unsigned long* data3 = op3.data.bits;
+  unsigned long* data4 = op4.data.bits;
+  unsigned long* data5 = op5.data.bits;
+  unsigned long* data6 = op6.data.bits;
+  unsigned long* data7 = op7.data.bits;
+  unsigned long* data8 = op8.data.bits;
+  unsigned long* data9 = op9.data.bits;
+  unsigned long* data10 = op10.data.bits;
+  unsigned long* data11 = op11.data.bits;
+  unsigned long* data12 = op12.data.bits;
+
+  unsigned long sum = 0;
+  for(int i=0;i<precision;i++){
+    sum += data1[i];
+    sum += data2[i];
+    sum += data3[i];
+    sum += data4[i];
+    sum += data5[i];
+    sum += data6[i];
+    sum += data7[i];
+    sum += data8[i];
+    sum += data9[i];
+    sum += data10[i];
+    sum += data11[i];
+    sum += data12[i];
+    res_data[i] = sum & bit_mask;
+    sum >>= UINT_NUM_BITS;
+  }
+
+  if(sum){
+    res_data[precision] = sum;
+  }
+
+  if(res_data[precision]){
+    memmove(res_data, res_data + 1, precision * UINT_NUM_BYTES);
+  }  
+}
+
+void big_integer_sum_16(
+  const BigInteger op1, const BigInteger op2, const BigInteger op3, const BigInteger op4, 
+  const BigInteger op5, const BigInteger op6, const BigInteger op7, const BigInteger op8, 
+  const BigInteger op9, const BigInteger op10, const BigInteger op11, const BigInteger op12, 
+  const BigInteger op13, const BigInteger op14, const BigInteger op15, const BigInteger op16, 
+  const int precision, BigInteger* res
+){
+  res->sign = op1.sign;
+  res->data.size = precision;
+
+  unsigned long* res_data = res->data.bits;
+  unsigned long* data1 = op1.data.bits;
+  unsigned long* data2 = op2.data.bits;
+  unsigned long* data3 = op3.data.bits;
+  unsigned long* data4 = op4.data.bits;
+  unsigned long* data5 = op5.data.bits;
+  unsigned long* data6 = op6.data.bits;
+  unsigned long* data7 = op7.data.bits;
+  unsigned long* data8 = op8.data.bits;
+  unsigned long* data9 = op9.data.bits;
+  unsigned long* data10 = op10.data.bits;
+  unsigned long* data11 = op11.data.bits;
+  unsigned long* data12 = op12.data.bits;
+  unsigned long* data13 = op13.data.bits;
+  unsigned long* data14 = op14.data.bits;
+  unsigned long* data15 = op15.data.bits;
+  unsigned long* data16 = op16.data.bits;
+
+  unsigned long sum = 0;
+  for(int i=0;i<precision;i++){
+    sum += data1[i];
+    sum += data2[i];
+    sum += data3[i];
+    sum += data4[i];
+    sum += data5[i];
+    sum += data6[i];
+    sum += data7[i];
+    sum += data8[i];
+    sum += data9[i];
+    sum += data10[i];
+    sum += data11[i];
+    sum += data12[i];
+    sum += data13[i];
+    sum += data14[i];
+    sum += data15[i];
+    sum += data16[i];
+    res_data[i] = sum & bit_mask;
+    sum >>= UINT_NUM_BITS;
+  }
+
+  if(sum){
+    res_data[precision] = sum;
+  }
+
+  if(res_data[precision]){
+    memmove(res_data, res_data + 1, precision * UINT_NUM_BYTES);
+  }  
+}
+
 #ifdef DEBUG
 void big_integer_dump(const BigInteger bigInt) {
   printf("BigInteger:\n");
