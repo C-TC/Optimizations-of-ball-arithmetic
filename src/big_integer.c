@@ -4355,6 +4355,160 @@ void big_integer_sum_16(
   }  
 }
 
+void big_integer_sum_8_unfold_1x(
+  const BigInteger op1, const BigInteger op2, const BigInteger op3, const BigInteger op4, 
+  const BigInteger op5, const BigInteger op6, const BigInteger op7, const BigInteger op8, 
+  const int precision, BigInteger* res
+){
+  res->sign = op1.sign;
+  res->data.size = precision;
+
+  unsigned long* res_data = res->data.bits;
+  unsigned long* data1 = op1.data.bits;
+  unsigned long* data2 = op2.data.bits;
+  unsigned long* data3 = op3.data.bits;
+  unsigned long* data4 = op4.data.bits;
+  unsigned long* data5 = op5.data.bits;
+  unsigned long* data6 = op6.data.bits;
+  unsigned long* data7 = op7.data.bits;
+  unsigned long* data8 = op8.data.bits;
+
+  __m256i sum1;
+
+  int i = 0;
+  for(;i<precision-3;i+=4){
+    sum1 = _mm256_loadu_si256((const __m256i_u *)(data1 + i));
+
+    sum1 = _mm256_add_epi64(sum1, _mm256_loadu_si256((const __m256i_u *)(data2 + i)));
+
+    sum1 = _mm256_add_epi64(sum1, _mm256_loadu_si256((const __m256i_u *)(data3 + i)));
+    
+    sum1 = _mm256_add_epi64(sum1, _mm256_loadu_si256((const __m256i_u *)(data4 + i)));
+    
+    sum1 = _mm256_add_epi64(sum1, _mm256_loadu_si256((const __m256i_u *)(data5 + i)));
+
+    sum1 = _mm256_add_epi64(sum1, _mm256_loadu_si256((const __m256i_u *)(data6 + i)));
+    
+    sum1 = _mm256_add_epi64(sum1, _mm256_loadu_si256((const __m256i_u *)(data7 + i)));
+    
+    sum1 = _mm256_add_epi64(sum1, _mm256_loadu_si256((const __m256i_u *)(data8 + i)));
+
+    _mm256_storeu_si256((__m256i_u *)(res_data + i), sum1);
+  }
+
+  unsigned long carry = 0;
+  for(int i=0;i<precision;i++){
+    carry += res_data[i];
+    res_data[i] = carry & bit_mask;
+    carry >>= UINT_NUM_BITS;
+  }
+  res_data[precision] += carry;
+
+  unsigned long sum = 0;
+  for(;i<precision;i++){
+    sum += data1[i];
+    sum += data2[i];
+    sum += data3[i];
+    sum += data4[i];
+    sum += data5[i];
+    sum += data6[i];
+    sum += data7[i];
+    sum += data8[i];
+    res_data[i] = sum & bit_mask;
+    sum >>= UINT_NUM_BITS;
+  }
+
+  if(sum){
+    res_data[precision] = sum;
+  }
+
+  if(res_data[precision]){
+    memmove(res_data, res_data + 1, precision * UINT_NUM_BYTES);
+  }  
+}
+
+void big_integer_sum_8_unfold_2x(
+  const BigInteger op1, const BigInteger op2, const BigInteger op3, const BigInteger op4, 
+  const BigInteger op5, const BigInteger op6, const BigInteger op7, const BigInteger op8, 
+  const int precision, BigInteger* res
+){
+  res->sign = op1.sign;
+  res->data.size = precision;
+
+  unsigned long* res_data = res->data.bits;
+  unsigned long* data1 = op1.data.bits;
+  unsigned long* data2 = op2.data.bits;
+  unsigned long* data3 = op3.data.bits;
+  unsigned long* data4 = op4.data.bits;
+  unsigned long* data5 = op5.data.bits;
+  unsigned long* data6 = op6.data.bits;
+  unsigned long* data7 = op7.data.bits;
+  unsigned long* data8 = op8.data.bits;
+
+  __m256i sum1;
+  __m256i sum2;
+
+  int i = 0;
+  for(;i<precision-7;i+=8){
+    sum1 = _mm256_loadu_si256((const __m256i_u *)(data1 + i));
+    sum2 = _mm256_loadu_si256((const __m256i_u *)(data1 + i + 4));
+
+    sum1 = _mm256_add_epi64(sum1, _mm256_loadu_si256((const __m256i_u *)(data2 + i)));
+    sum2 = _mm256_add_epi64(sum2, _mm256_loadu_si256((const __m256i_u *)(data2 + i + 4)));
+
+    sum1 = _mm256_add_epi64(sum1, _mm256_loadu_si256((const __m256i_u *)(data3 + i)));
+    sum2 = _mm256_add_epi64(sum2, _mm256_loadu_si256((const __m256i_u *)(data3 + i + 4)));
+    
+    sum1 = _mm256_add_epi64(sum1, _mm256_loadu_si256((const __m256i_u *)(data4 + i)));
+    sum2 = _mm256_add_epi64(sum2, _mm256_loadu_si256((const __m256i_u *)(data4 + i + 4)));
+    
+    sum1 = _mm256_add_epi64(sum1, _mm256_loadu_si256((const __m256i_u *)(data5 + i)));
+    sum2 = _mm256_add_epi64(sum2, _mm256_loadu_si256((const __m256i_u *)(data5 + i + 4)));
+
+    sum1 = _mm256_add_epi64(sum1, _mm256_loadu_si256((const __m256i_u *)(data6 + i)));
+    sum2 = _mm256_add_epi64(sum2, _mm256_loadu_si256((const __m256i_u *)(data6 + i + 4)));
+    
+    sum1 = _mm256_add_epi64(sum1, _mm256_loadu_si256((const __m256i_u *)(data7 + i)));
+    sum2 = _mm256_add_epi64(sum2, _mm256_loadu_si256((const __m256i_u *)(data7 + i + 4)));
+    
+    sum1 = _mm256_add_epi64(sum1, _mm256_loadu_si256((const __m256i_u *)(data8 + i)));
+    sum2 = _mm256_add_epi64(sum2, _mm256_loadu_si256((const __m256i_u *)(data8 + i + 4)));
+
+    _mm256_storeu_si256((__m256i_u *)(res_data + i), sum1);
+    _mm256_storeu_si256((__m256i_u *)(res_data + i + 4), sum2);
+  }
+
+  unsigned long carry = 0;
+  for(int i=0;i<precision;i++){
+    carry += res_data[i];
+    res_data[i] = carry & bit_mask;
+    carry >>= UINT_NUM_BITS;
+  }
+  res_data[precision] += carry;
+
+  unsigned long sum = 0;
+  for(;i<precision;i++){
+    sum += data1[i];
+    sum += data2[i];
+    sum += data3[i];
+    sum += data4[i];
+    sum += data5[i];
+    sum += data6[i];
+    sum += data7[i];
+    sum += data8[i];
+    res_data[i] = sum & bit_mask;
+    sum >>= UINT_NUM_BITS;
+  }
+
+  if(sum){
+    res_data[precision] = sum;
+  }
+
+  if(res_data[precision]){
+    memmove(res_data, res_data + 1, precision * UINT_NUM_BYTES);
+  }  
+}
+
 #ifdef DEBUG
 void big_integer_dump(const BigInteger bigInt) {
   printf("BigInteger:\n");

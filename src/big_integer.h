@@ -201,6 +201,16 @@ void big_integer_sum_16(
   const BigInteger op9, const BigInteger op10, const BigInteger op11, const BigInteger op12, 
   const BigInteger op13, const BigInteger op14, const BigInteger op15, const BigInteger op16, 
   const int precision, BigInteger* res
+);
+void big_integer_sum_8_unfold_1x(
+  const BigInteger op1, const BigInteger op2, const BigInteger op3, const BigInteger op4, 
+  const BigInteger op5, const BigInteger op6, const BigInteger op7, const BigInteger op8, 
+  const int precision, BigInteger* res
+);  
+void big_integer_sum_8_unfold_2x(
+  const BigInteger op1, const BigInteger op2, const BigInteger op3, const BigInteger op4, 
+  const BigInteger op5, const BigInteger op6, const BigInteger op7, const BigInteger op8, 
+  const int precision, BigInteger* res
 );  
 
 /* create a deep copy of a bigint/bigintdata */
