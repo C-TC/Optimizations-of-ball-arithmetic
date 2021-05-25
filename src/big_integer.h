@@ -20,6 +20,10 @@ typedef struct BigInteger {
   BigIntegerData data;
 } BigInteger;
 
+const int UINT_NUM_BYTES = (sizeof(unsigned long));
+const int UINT_NUM_BITS = 32;
+const unsigned long bit_mask = (1lu << UINT_NUM_BITS) - 1;
+
 /* create a big integer number */
 BigInteger big_integer_create(long long value);
 /* set a big integer number with a long long value*/
@@ -51,6 +55,9 @@ long long big_integer_to_long_long(const BigInteger bigInt);
 int big_integer_compare(const BigInteger left, const BigInteger right);
 /* compare two unsigned bigints, return 1 if left > right, 0 if =, & -1 if < */
 int big_integer_compare_data(const BigIntegerData *, const BigIntegerData *);
+
+/* bigInt /= 2^nbits*/
+void big_integer_div_by_power_of_two_inplace_fixed_precision(BigInteger * bi, int nbits, const int precision);
 
 /* adds two big integers together ( left + right ) */
 BigInteger big_integer_add(const BigInteger left, const BigInteger right);
@@ -116,6 +123,9 @@ BigInteger big_integer_multiply_karatsuba(const BigInteger left,
 void big_integer_multiply_inplace_fixed_precision(BigInteger *left,
                                                   const BigInteger right,
                                                   const int precision);
+/* result size may > precision, only care about big end, powerdiff is helpful in calculating bigfloat power */
+BigInteger big_integer_multiply_fixed_precision(BigInteger left, BigInteger right, const int precision, int *powerdiff);
+void big_integer_multiply_toplace_fixed_precision(BigInteger left, BigInteger right, BigInteger *res, const int precision, int *powerdiff);
 /* 
  * Assumptions: 
  * !!! left.size >= precision

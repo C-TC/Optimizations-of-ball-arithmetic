@@ -13,6 +13,38 @@ BigFloat big_float_multiply(BigFloat lo, BigFloat ro) {
     return ans;
 }
 
+BigFloat big_float_mul_fixed_precision(BigFloat lo, BigFloat ro, const int precision) {
+    assert(lo.mantissa.data.size >= precision && ro.mantissa.data.size >= precision);
+    BigFloat ans;
+    ans.power = lo.power + ro.power;
+    int powerdiff;
+    ans.mantissa = big_integer_multiply_fixed_precision(lo.mantissa, ro.mantissa, precision, &powerdiff);
+    ans.power += powerdiff;
+    if (0 == ans.mantissa.sign) ans.power = 0;
+    return ans;
+}
+
+void big_float_div_by_power_of_two_inplace_fixed_precision(BigFloat *bf, int power, const int precision){
+    assert(power >= 0);
+    assert(bf->mantissa.data.size >= precision);
+    bf->power -= power / UINT_NUM_BITS;
+    power %= UINT_NUM_BITS;
+    if (power == 0) return;
+    unsigned long threshold = 1ul << power;
+    if (bf->mantissa.data.bits[bf->mantissa.data.size - 1] < threshold) bf->power--;
+    big_integer_div_by_power_of_two_inplace_fixed_precision(&bf->mantissa, power, precision);
+
+}
+
+void big_float_mul_toplace_fixed_precision(BigFloat lo, BigFloat ro, BigFloat *res, const int precision) {
+    assert(lo.mantissa.data.size >= precision && ro.mantissa.data.size >= precision);
+    res->power = lo.power + ro.power;
+    int powerdiff;
+    big_integer_multiply_toplace_fixed_precision(lo.mantissa, ro.mantissa, &res->mantissa, precision, &powerdiff);
+    res->power += powerdiff;
+    if (0 == res->mantissa.sign) res->power = 0;
+}
+
 void big_float_mul_inplace_fixed_precision(BigFloat *lo, BigFloat ro, const int precision) {
     int lo_size = lo->mantissa.data.size, ro_size = ro.mantissa.data.size;
     lo->power = lo->power + ro.power;
@@ -243,11 +275,11 @@ BigFloat big_float_div(BigFloat lo, BigFloat ro) {
     return ans;
 }
 
-BigFloat big_float_sqrt_fix_precision(BigFloat lo, const int precision, const int x_0) {
+BigFloat big_float_sqrt_fix_precision(BigFloat lo, const int precision, const unsigned int x_0) {
 
 }
 
-BigFloat big_float_reciprocal_sqrt_fix_precision(BigFloat lo, const int precision, const int x_0) {
+BigFloat big_float_reciprocal_sqrt_fix_precision(BigFloat lo, const int precision, const unsigned int x_0) {
     // output precision = working precision / 2
     int working_prec;
     assert(precision > 1);
@@ -258,10 +290,10 @@ BigFloat big_float_reciprocal_sqrt_fix_precision(BigFloat lo, const int precisio
     int num_Iter = 10 * log(precision);
     //unsigned long prev_last_bit = lo.mantissa.data.bits[working_prec / 2];
     // initial value x_0
-    BigFloat x = big_float_create(big_integer_create_fixed_precision(x_0, working_prec), 0);
+    BigFloat x = big_float_create_from_uint_fixed_precision(x_0, working_prec);
     // w = x_i ^ 2
     BigFloat w = big_float_mul_fixed_precision(x, x, working_prec);
-    BigFloat one = big_float_create(big_integer_create_fixed_precision(1, working_prec), 0);
+    BigFloat one = big_float_create_from_uint_fixed_precision(1, precision);
     // w * lo
     big_float_mul_inplace_fixed_precision(&w, lo, working_prec);
     // d = w * lo - 1
@@ -269,20 +301,66 @@ BigFloat big_float_reciprocal_sqrt_fix_precision(BigFloat lo, const int precisio
     // d * x_i
     big_float_mul_inplace_fixed_precision(&w, x, working_prec);
     // d * x_i / 2
-    big_float_div_by_two_inplace_fixed_precision(&w, working_prec);
+    big_float_div_by_power_of_two_inplace_fixed_precision(&w, 1, working_prec);
     // x_i+1 = x_i - d * x_i / 2
     big_float_sub_inplace_fixed_precision(&x, w, working_prec);
 
     // main loop
     for (int i = 0; i < num_Iter; i++) {
-        big_float_mul_toplace_fixed_precision(x, x, working_prec, &w); // TODO
+        big_float_mul_toplace_fixed_precision(x, x,&w, working_prec); 
         big_float_mul_inplace_fixed_precision(&w, lo, working_prec);
         big_float_sub_inplace_fixed_precision(&w, one, working_prec);
         big_float_mul_inplace_fixed_precision(&w, x, working_prec);
-        big_float_div_by_two_inplace_fixed_precision(&w, working_prec);
+        big_float_div_by_power_of_two_inplace_fixed_precision(&w, 1, working_prec);
         big_float_sub_inplace_fixed_precision(&x, w, working_prec);
     }
     big_float_destroy(&w);
     big_float_destroy(&one);
     return x;
+}
+
+
+BigFloat big_float_guided_reciprocal_sqrt_fix_precision(BigFloat lo, const int precision) {
+    // output precision = working precision / 2
+    int working_prec;
+    assert(precision > 1);
+    if (lo.mantissa.data.size >= 2 * precision) {working_prec = 2 * precision;}
+    else {working_prec = lo.mantissa.data.size;}
+    
+    //TODO: How to terminate?
+    int num_Iter = 10 * log(precision);
+    //unsigned long prev_last_bit = lo.mantissa.data.bits[working_prec / 2];
+    // initial value x_0
+    double guide = big_float_to_double(lo);
+    assert(guide > 0);
+    guide = 1 / sqrt(guide);
+    BigFloat x = double_to_big_float_fixed_precision(guide, precision);
+    // w = x_i ^ 2
+    BigFloat w = big_float_mul_fixed_precision(x, x, working_prec);
+    BigFloat one = big_float_create_from_uint_fixed_precision(1, precision);
+    // w * lo
+    big_float_mul_inplace_fixed_precision(&w, lo, working_prec);
+    // d = w * lo - 1
+    big_float_sub_inplace_fixed_precision(&w, one, working_prec);
+    // d * x_i
+    big_float_mul_inplace_fixed_precision(&w, x, working_prec);
+    // d * x_i / 2
+    big_float_div_by_power_of_two_inplace_fixed_precision(&w, 1, working_prec);
+    // x_i+1 = x_i - d * x_i / 2
+    big_float_sub_inplace_fixed_precision(&x, w, working_prec);
+
+    // main loop
+    for (int i = 0; i < num_Iter; i++) {
+        big_float_mul_toplace_fixed_precision(x, x,&w, working_prec); 
+        big_float_mul_inplace_fixed_precision(&w, lo, working_prec);
+        big_float_sub_inplace_fixed_precision(&w, one, working_prec);
+        big_float_mul_inplace_fixed_precision(&w, x, working_prec);
+        big_float_div_by_power_of_two_inplace_fixed_precision(&w, 1, working_prec);
+        big_float_sub_inplace_fixed_precision(&x, w, working_prec);
+    }
+    big_float_destroy(&w);
+    big_float_destroy(&one);
+    return x;
+    
+
 }

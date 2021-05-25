@@ -1,11 +1,23 @@
 #include "big_float_helper.h"
 #include "big_integer.h"
+#include <stdlib.h>
 #include <assert.h>
 BigFloat big_float_create(BigInteger bi, long long power) {
     BigFloat bf;
     bf.mantissa = bi;
     bf.power = power;
     return bf;
+}
+
+BigFloat big_float_create_from_uint_fixed_precision(unsigned int value, const int precision) {
+    BigFloat res;
+    res.mantissa.sign = 1;
+    res.mantissa.data.size = precision;
+    res.mantissa.data.capacity = precision;
+    res.mantissa.data.bits = (unsigned long *)calloc(precision, sizeof(unsigned long));
+    res.mantissa.data.bits[precision -1] = (unsigned long) value;
+    res.power = 1;
+    return res;
 }
 
 void big_float_destroy(BigFloat *bf) {
@@ -172,6 +184,10 @@ BigFloat double_to_big_float(double data) {
         }
     }
     assert(0); // input is NAN or INF!
+}
+
+BigFloat double_to_big_float_fixed_precision(double data, const int precision){
+    
 }
 
 void big_float_print(BigFloat bf) {

@@ -19,9 +19,6 @@
 #endif
 
 
-const int UINT_NUM_BYTES = (sizeof(unsigned long));
-const int UINT_NUM_BITS = 32;
-const unsigned long bit_mask = (1lu << UINT_NUM_BITS) - 1;
 
 /* PRIVATE FUNCTIONS DECLARATIONS */
 
@@ -1182,6 +1179,25 @@ void big_integer_decrement(BigInteger *bigInt, const unsigned int value) {
   }
 }
 
+void big_integer_div_by_power_of_two_inplace_fixed_precision(BigInteger * bi, int nbits, const int precision) {
+  assert(nbits < UINT_NUM_BITS);
+  int offset = 0;
+  unsigned long threshold = 1lu << nbits;
+  unsigned long bitmask = threshold - 1;
+  unsigned long buff_l = 0, buff_r = 0;
+  if (bi->data.bits[bi->data.size - 1] < threshold) offset++;
+  for(int idx = bi->data.size - 1; idx >= bi->data.size - precision - offset && idx >= 0; idx--) {
+    buff_r = bi->data.bits[idx] & bitmask;
+    bi->data.bits[idx] >>= nbits;
+    bi->data.bits[idx] += buff_l << (UINT_NUM_BITS - nbits);
+    buff_l = buff_r;
+  }
+  bi->data.size -= offset;
+  if (bi->data.size == 0) {
+    bi->sign = 0;
+  }
+}
+
 BigInteger big_integer_multiply(const BigInteger left, const BigInteger right) {
   if (left.sign == 0 || right.sign == 0)
     return big_integer_create(0);
@@ -1402,6 +1418,84 @@ void big_integer_multiply_inplace_fixed_precision(BigInteger *left,
     }
   }
   memmove(left->data.bits, tmp + offset, precision * 8);
+  free(tmp); // release temporal variable
+}
+
+BigInteger big_integer_multiply_fixed_precision(BigInteger left, BigInteger right, const int precision, int *powerdiff) {
+  if (left.sign == 0 || right.sign == 0) {
+    // answer is 0
+    BigInteger ans;
+    ans.sign = 0;
+    ans.data.size = precision;
+    ans.data.capacity = precision;
+    ans.data.bits = (unsigned long *)calloc(precision, sizeof(unsigned long));
+  }
+  BigInteger ans;
+  ans.data.bits = (unsigned long *)malloc(precision * sizeof(unsigned long));
+  unsigned long *tmp = (unsigned long *)calloc(2 * precision, sizeof(unsigned long));
+  int offset_left = left.data.size - precision;
+  int offset_right = right.data.size - precision;
+  for (int j = offset_right; j < right.data.size; j++) {
+    unsigned long carry = 0;
+    for (int i = offset_left; i < left.data.size; i++) {
+      int idx = j - offset_right + i - offset_left;
+      carry += left.data.bits[i] * right.data.bits[j] + tmp[idx];
+      tmp[idx] = carry & bit_mask;
+      carry >>= UINT_NUM_BITS;
+    }
+    int idx = j - offset_right + precision;
+    carry += tmp[idx];
+    tmp[idx] = carry & bit_mask;
+  }
+  ans.sign = left.sign * right.sign;
+  ans.data.size = precision;
+  ans.data.capacity = precision;
+  *powerdiff = 0;
+  for (int i = 2 * precision - 1; i >= precision; i--) {
+    if (tmp[i] != 0) {
+      break;
+    } else {
+      *powerdiff--;
+    }
+  }
+  memmove(ans.data.bits, tmp + precision + *powerdiff, precision * 8);
+  free(tmp); // release temporal variable
+  return ans;
+}
+
+void big_integer_multiply_toplace_fixed_precision(BigInteger left, BigInteger right, BigInteger *res, const int precision, int *powerdiff) {
+  if (left.sign == 0 || right.sign == 0) {
+    // answer is 0
+    res->sign = 0;
+    res->data.size = precision;
+    res->data.capacity = precision;
+  }
+  unsigned long *tmp = (unsigned long *)calloc(2 * precision, sizeof(unsigned long));
+  int offset_left = left.data.size - precision;
+  int offset_right = right.data.size - precision;
+  for (int j = offset_right; j < right.data.size; j++) {
+    unsigned long carry = 0;
+    for (int i = offset_left; i < left.data.size; i++) {
+      int idx = j - offset_right + i - offset_left;
+      carry += left.data.bits[i] * right.data.bits[j] + tmp[idx];
+      tmp[idx] = carry & bit_mask;
+      carry >>= UINT_NUM_BITS;
+    }
+    int idx = j - offset_right + precision;
+    carry += tmp[idx];
+    tmp[idx] = carry & bit_mask;
+  }
+  res->sign = left.sign * right.sign;
+  res->data.size = precision;
+  *powerdiff = 0;
+  for (int i = 2 * precision - 1; i >= precision; i--) {
+    if (tmp[i] != 0) {
+      break;
+    } else {
+      *powerdiff--;
+    }
+  }
+  memmove(res->data.bits, tmp + precision + *powerdiff, precision * 8);
   free(tmp); // release temporal variable
 }
 
