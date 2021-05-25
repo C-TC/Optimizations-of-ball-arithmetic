@@ -176,6 +176,8 @@ void big_integer_sum_5_unfold_2x(const BigInteger op1, const BigInteger op2, con
 void big_integer_sum_5_unfold_4x(const BigInteger op1, const BigInteger op2, const BigInteger op3, const BigInteger op4, const BigInteger op5, const int precision, BigInteger* res);                                                         
 void big_integer_sum_5_unfold_8x(const BigInteger op1, const BigInteger op2, const BigInteger op3, const BigInteger op4, const BigInteger op5, const int precision, BigInteger* res);                                                         
 
+void big_integer_sum(const BigInteger op[], int index_start, int index_end, const int precision, BigInteger* res);  
+
 /* create a deep copy of a bigint/bigintdata */
 BigInteger big_integer_deepcopy(const BigInteger other);
 

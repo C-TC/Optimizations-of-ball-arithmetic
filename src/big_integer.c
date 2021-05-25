@@ -4149,6 +4149,30 @@ void big_integer_sum_5_unfold_8x(const BigInteger op1, const BigInteger op2, con
   }
 }
 
+void big_integer_sum(const BigInteger op[], int index_start, int index_end, const int precision, BigInteger* res){
+  res->sign = op[0].sign;
+  res->data.size = precision;
+
+  unsigned long* res_data = res->data.bits;
+
+  unsigned long sum = 0;
+  for(int i=0;i<precision;i++){
+    for(int j=index_start;j<index_end;j++){
+      sum += op[j].data.bits[i];
+    }
+    res_data[i] = sum & bit_mask;
+    sum >>= UINT_NUM_BITS;
+  }
+
+  if(sum){
+    res_data[precision] = sum;
+  }
+
+  if(res_data[precision]){
+    memmove(res_data, res_data + 1, precision * UINT_NUM_BYTES);
+  }  
+}
+
 #ifdef DEBUG
 void big_integer_dump(const BigInteger bigInt) {
   printf("BigInteger:\n");
