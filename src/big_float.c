@@ -3,6 +3,7 @@
 #include <math.h>
 #include <stdio.h>
 #include "big_float_helper.h"
+#include <assert.h>
 BigFloat big_float_multiply(BigFloat lo, BigFloat ro) {
     BigFloat ans;
     ans.power = lo.power + ro.power;
@@ -240,4 +241,48 @@ BigFloat big_float_div(BigFloat lo, BigFloat ro) {
     free(tmp_point5.mantissa.data.bits);
     ans.mantissa.sign = lo.mantissa.sign * ro.mantissa.sign;
     return ans;
+}
+
+BigFloat big_float_sqrt_fix_precision(BigFloat lo, const int precision, const int x_0) {
+
+}
+
+BigFloat big_float_reciprocal_sqrt_fix_precision(BigFloat lo, const int precision, const int x_0) {
+    // output precision = working precision / 2
+    int working_prec;
+    assert(precision > 1);
+    if (lo.mantissa.data.size >= 2 * precision) {working_prec = 2 * precision;}
+    else {working_prec = lo.mantissa.data.size;}
+    
+    //TODO: How to terminate?
+    int num_Iter = 10 * log(precision);
+    //unsigned long prev_last_bit = lo.mantissa.data.bits[working_prec / 2];
+    // initial value x_0
+    BigFloat x = big_float_create(big_integer_create_fixed_precision(x_0, working_prec), 0);
+    // w = x_i ^ 2
+    BigFloat w = big_float_mul_fixed_precision(x, x, working_prec);
+    BigFloat one = big_float_create(big_integer_create_fixed_precision(1, working_prec), 0);
+    // w * lo
+    big_float_mul_inplace_fixed_precision(&w, lo, working_prec);
+    // d = w * lo - 1
+    big_float_sub_inplace_fixed_precision(&w, one, working_prec);
+    // d * x_i
+    big_float_mul_inplace_fixed_precision(&w, x, working_prec);
+    // d * x_i / 2
+    big_float_div_by_two_inplace_fixed_precision(&w, working_prec);
+    // x_i+1 = x_i - d * x_i / 2
+    big_float_sub_inplace_fixed_precision(&x, w, working_prec);
+
+    // main loop
+    for (int i = 0; i < num_Iter; i++) {
+        big_float_mul_toplace_fixed_precision(x, x, working_prec, &w); // TODO
+        big_float_mul_inplace_fixed_precision(&w, lo, working_prec);
+        big_float_sub_inplace_fixed_precision(&w, one, working_prec);
+        big_float_mul_inplace_fixed_precision(&w, x, working_prec);
+        big_float_div_by_two_inplace_fixed_precision(&w, working_prec);
+        big_float_sub_inplace_fixed_precision(&x, w, working_prec);
+    }
+    big_float_destroy(&w);
+    big_float_destroy(&one);
+    return x;
 }

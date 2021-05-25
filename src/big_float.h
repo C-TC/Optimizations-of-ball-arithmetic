@@ -21,4 +21,6 @@ void big_float_sub_inplace_fixed_precision(BigFloat *, BigFloat, const int);
 // lo = lo * ro
 void big_float_mul_inplace_fixed_precision(BigFloat *, BigFloat, const int);
 
+BigFloat big_float_sqrt_fix_precision(BigFloat, const int, const int);
+BigFloat big_float_reciprocal_sqrt_fix_precision(BigFloat, const int, const int);
 #endif /* BIG_FLOAT_H */
