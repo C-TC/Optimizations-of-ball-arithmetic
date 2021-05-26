@@ -26,6 +26,8 @@ void big_float_mul_toplace_fixed_precision(BigFloat, BigFloat, BigFloat *, const
 void big_float_div_by_power_of_two_inplace_fixed_precision(BigFloat *, int power_of_two, const int precision);
 
 BigFloat big_float_sqrt_fix_precision(BigFloat, const int, const unsigned int);
-BigFloat big_float_reciprocal_sqrt_fix_precision(BigFloat, const int, const unsigned int);
+/* heavily rely on x_0, use guided version instead */
+BigFloat big_float_reciprocal_sqrt_fix_precision(BigFloat lo, const int precision, double x_0);
+/* TODO: wrong value for high precision */
 BigFloat big_float_guided_reciprocal_sqrt_fix_precision(BigFloat, const int);
 #endif /* BIG_FLOAT_H */

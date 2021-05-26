@@ -20,10 +20,6 @@ typedef struct BigInteger {
   BigIntegerData data;
 } BigInteger;
 
-const int UINT_NUM_BYTES = (sizeof(unsigned long));
-const int UINT_NUM_BITS = 32;
-const unsigned long bit_mask = (1lu << UINT_NUM_BITS) - 1;
-
 /* create a big integer number */
 BigInteger big_integer_create(long long value);
 /* set a big integer number with a long long value*/
@@ -122,7 +118,8 @@ BigInteger big_integer_multiply_karatsuba(const BigInteger left,
  */
 void big_integer_multiply_inplace_fixed_precision(BigInteger *left,
                                                   const BigInteger right,
-                                                  const int precision);
+                                                  const int precision,
+                                                  int *powerdiff);
 /* result size may > precision, only care about big end, powerdiff is helpful in calculating bigfloat power */
 BigInteger big_integer_multiply_fixed_precision(BigInteger left, BigInteger right, const int precision, int *powerdiff);
 void big_integer_multiply_toplace_fixed_precision(BigInteger left, BigInteger right, BigInteger *res, const int precision, int *powerdiff);

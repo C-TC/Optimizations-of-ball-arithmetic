@@ -9,6 +9,15 @@ BigFloat big_float_create(BigInteger bi, long long power) {
     return bf;
 }
 
+BigFloat big_float_generate(const int precision, long long power) {
+    BigFloat res;
+    res.power = power;
+    res.mantissa.data.bits = (unsigned long *)malloc(precision * sizeof(unsigned long));
+    res.mantissa.data.size = precision;
+    res.mantissa.data.capacity = precision;
+    res.mantissa.sign = 1;
+    return res;
+}
 BigFloat big_float_create_from_uint_fixed_precision(unsigned int value, const int precision) {
     BigFloat res;
     res.mantissa.sign = 1;
@@ -187,7 +196,18 @@ BigFloat double_to_big_float(double data) {
 }
 
 BigFloat double_to_big_float_fixed_precision(double data, const int precision){
-    
+    BigFloat bf = double_to_big_float(data);
+    if (bf.mantissa.data.size >= precision) return bf;
+    unsigned long *newBits = (unsigned long *)calloc(precision, sizeof(unsigned long));
+    int offset = precision - bf.mantissa.data.size;
+    for (int i = 0; i < bf.mantissa.data.size; i++) {
+        newBits[i + offset] = bf.mantissa.data.bits[i];
+    } 
+    bf.mantissa.data.size = precision;
+    bf.mantissa.data.capacity = precision;
+    free(bf.mantissa.data.bits);
+    bf.mantissa.data.bits = newBits;
+    return bf;
 }
 
 void big_float_print(BigFloat bf) {
@@ -206,4 +226,9 @@ void big_float_print(BigFloat bf) {
         printf(" -- ...");
     }
     printf(" x 2^(32 x %lld) \n",bf.power);
+}
+
+void big_float_print_msg(BigFloat bf, const char* msg) {
+    printf("%s : ",msg);
+    big_float_print(bf);
 }

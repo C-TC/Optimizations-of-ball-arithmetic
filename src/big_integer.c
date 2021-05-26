@@ -18,7 +18,9 @@
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #endif
 
-
+const int UINT_NUM_BYTES = (sizeof(unsigned long));
+const int UINT_NUM_BITS = 32;
+const unsigned long bit_mask = (1lu << UINT_NUM_BITS) - 1;
 
 /* PRIVATE FUNCTIONS DECLARATIONS */
 
@@ -1333,7 +1335,8 @@ void big_integer_subtract_inplace_fixed_precision_data(
   *carried = 0;
   for (int i = left.size -1; i >= offset; i--) {
     if (result->bits[i] == 0) {
-      (*carried)++;
+      (*carried)--;
+      offset--;
     } else {
       break;
     }
@@ -1384,7 +1387,8 @@ void big_integer_add_inplace_fixed_precision_data(BigIntegerData *left,
  */
 void big_integer_multiply_inplace_fixed_precision(BigInteger *left,
                                                   const BigInteger right,
-                                                  const int precision) {
+                                                  const int precision,
+                                                  int *powerdiff) {
   if (left->sign == 0 || right.sign == 0) {
     // answer is 0
     left->sign = 0;
@@ -1409,12 +1413,14 @@ void big_integer_multiply_inplace_fixed_precision(BigInteger *left,
 
   left->sign *= right.sign;
   left->data.size = precision;
+  *powerdiff = 0;
   int offset = precision;
   for (int i = 2 * precision - 1; i >= precision; i--) {
     if (tmp[i] != 0) {
       break;
     } else {
       offset--;
+      (*powerdiff)--;
     }
   }
   memmove(left->data.bits, tmp + offset, precision * 8);
@@ -1429,6 +1435,7 @@ BigInteger big_integer_multiply_fixed_precision(BigInteger left, BigInteger righ
     ans.data.size = precision;
     ans.data.capacity = precision;
     ans.data.bits = (unsigned long *)calloc(precision, sizeof(unsigned long));
+    return ans;
   }
   BigInteger ans;
   ans.data.bits = (unsigned long *)malloc(precision * sizeof(unsigned long));
@@ -1455,7 +1462,7 @@ BigInteger big_integer_multiply_fixed_precision(BigInteger left, BigInteger righ
     if (tmp[i] != 0) {
       break;
     } else {
-      *powerdiff--;
+      (*powerdiff)--;
     }
   }
   memmove(ans.data.bits, tmp + precision + *powerdiff, precision * 8);
@@ -1492,7 +1499,7 @@ void big_integer_multiply_toplace_fixed_precision(BigInteger left, BigInteger ri
     if (tmp[i] != 0) {
       break;
     } else {
-      *powerdiff--;
+      (*powerdiff)--;
     }
   }
   memmove(res->data.bits, tmp + precision + *powerdiff, precision * 8);

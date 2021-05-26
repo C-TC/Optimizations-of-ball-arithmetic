@@ -22,7 +22,7 @@ BIG_INT_TEST := big_int_test
 
 .PHONY: all clean debug profile big_int_test
 $(MAIN): $(filter-out $(BUILD_DIR)/timing_add.o, $(OBJS))
-	$(CC) $(CFLAGS) $(INCLUDES) -o $(MAIN) $(filter-out $(BUILD_DIR)/timing_add.o, $(OBJS)) $(LFLAGS) $(LIBS)
+	$(CC) $(CFLAGS) $(INCLUDES) -o $(MAIN) $(filter-out $(BUILD_DIR)/timing_add.o $(wildcard $(BUILD_DIR)/big_integer_test*.o), $(OBJS)) $(LFLAGS) $(LIBS)
 
 $(PROF): $(filter-out $(BUILD_DIR)/test.o, $(OBJS))
 	$(CC) $(CFLAGS) $(INCLUDES) -o $(PROF) $(filter-out $(BUILD_DIR)/test.o, $(OBJS)) $(LFLAGS) $(LIBS)
