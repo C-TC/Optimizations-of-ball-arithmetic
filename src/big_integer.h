@@ -52,6 +52,9 @@ int big_integer_compare(const BigInteger left, const BigInteger right);
 /* compare two unsigned bigints, return 1 if left > right, 0 if =, & -1 if < */
 int big_integer_compare_data(const BigIntegerData *, const BigIntegerData *);
 
+/* bigInt /= 2^nbits*/
+void big_integer_div_by_power_of_two_inplace_fixed_precision(BigInteger * bi, int nbits, const int precision);
+
 /* adds two big integers together ( left + right ) */
 BigInteger big_integer_add(const BigInteger left, const BigInteger right);
 void big_integer_add_inplace(const BigInteger left, const BigInteger right,
@@ -115,7 +118,11 @@ BigInteger big_integer_multiply_karatsuba(const BigInteger left,
  */
 void big_integer_multiply_inplace_fixed_precision(BigInteger *left,
                                                   const BigInteger right,
-                                                  const int precision);
+                                                  const int precision,
+                                                  int *powerdiff);
+/* result size may > precision, only care about big end, powerdiff is helpful in calculating bigfloat power */
+BigInteger big_integer_multiply_fixed_precision(BigInteger left, BigInteger right, const int precision, int *powerdiff);
+void big_integer_multiply_toplace_fixed_precision(BigInteger left, BigInteger right, BigInteger *res, const int precision, int *powerdiff);
 /* 
  * Assumptions: 
  * !!! left.size >= precision

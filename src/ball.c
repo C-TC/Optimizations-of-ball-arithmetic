@@ -319,14 +319,34 @@ int main() {
     //test_ball(-1.0e3,1e3,BALL_DIV);
     //test_ball(1.0e30,2.1e50,BALL_DIV);
 
-    double testdata1 = 9.999e102,testdata2=-1e90;
-    int precision = 2;
-    BigFloat test1 = double_to_big_float(testdata1),test2 = double_to_big_float(testdata2);
+    /* double testdata1 = 1e2,testdata2=-0.9999;
+    int precision = 30;
+    BigFloat test1 = double_to_big_float_fixed_precision(testdata1, precision),test2 = double_to_big_float_fixed_precision(testdata2,precision);
     big_float_print(test1);
     big_float_print(test2);
-    big_float_add_inplace_fixed_precision(&test1,test2,precision);
+    //BigFloat out = big_float_mul_fixed_precision(test1,test2,precision);
+    //big_float_print(out);
+    //printf("transformed back to double: %e\n",big_float_to_double(out));
+    big_float_mul_inplace_fixed_precision(&test1,test2,precision);
     big_float_print(test1);
     printf("transformed back to double: %e\n",big_float_to_double(test1));
+    printf("reference: %e\n",testdata1 * testdata2);
     big_float_destroy(&test1);
     big_float_destroy(&test2);
+    //big_float_destroy(&out); */
+
+
+    double testdata = 2;
+    int precision = 80;
+    BigFloat bf1 = double_to_big_float_fixed_precision(testdata, 300);
+    big_float_print_msg(bf1,"input");
+    //BigFloat out2 = big_float_reciprocal_sqrt_fix_precision(bf1, precision, 1e-10);
+    BigFloat out3 = big_float_guided_reciprocal_sqrt_fix_precision(bf1, precision);
+    //big_float_print_msg(out2,"r sqrt");
+    big_float_print_msg(out3,"g r sqrt");
+    printf("transformed back to double: %e\n",big_float_to_double(out3));
+    printf("reference: %e\n",1/sqrt(testdata));
+    big_float_destroy(&bf1);
+    //big_float_destroy(&out2);
+    big_float_destroy(&out3);
 }

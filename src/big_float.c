@@ -3,6 +3,7 @@
 #include <math.h>
 #include <stdio.h>
 #include "big_float_helper.h"
+#include <assert.h>
 BigFloat big_float_multiply(BigFloat lo, BigFloat ro) {
     BigFloat ans;
     ans.power = lo.power + ro.power;
@@ -12,11 +13,43 @@ BigFloat big_float_multiply(BigFloat lo, BigFloat ro) {
     return ans;
 }
 
+BigFloat big_float_mul_fixed_precision(BigFloat lo, BigFloat ro, const int precision) {
+    assert(lo.mantissa.data.size >= precision && ro.mantissa.data.size >= precision);
+    BigFloat ans;
+    ans.power = lo.power + ro.power;
+    int powerdiff = 0;
+    ans.mantissa = big_integer_multiply_fixed_precision(lo.mantissa, ro.mantissa, precision, &powerdiff);
+    ans.power += powerdiff;
+    if (0 == ans.mantissa.sign) ans.power = 0;
+    return ans;
+}
+
+void big_float_div_by_power_of_two_inplace_fixed_precision(BigFloat *bf, int power, const int precision){
+    assert(power >= 0);
+    assert(bf->mantissa.data.size >= precision);
+    bf->power -= power / 32 ;
+    power %= 32;
+    if (power == 0) return;
+    unsigned long threshold = 1ul << power;
+    if (bf->mantissa.data.bits[bf->mantissa.data.size - 1] < threshold) bf->power--;
+    big_integer_div_by_power_of_two_inplace_fixed_precision(&bf->mantissa, power, precision);
+
+}
+
+void big_float_mul_toplace_fixed_precision(BigFloat lo, BigFloat ro, BigFloat *res, const int precision) {
+    assert(lo.mantissa.data.size >= precision && ro.mantissa.data.size >= precision);
+    res->power = lo.power + ro.power;
+    int powerdiff = 0;
+    big_integer_multiply_toplace_fixed_precision(lo.mantissa, ro.mantissa, &res->mantissa, precision, &powerdiff);
+    res->power += powerdiff;
+    if (0 == res->mantissa.sign) res->power = 0;
+}
+
 void big_float_mul_inplace_fixed_precision(BigFloat *lo, BigFloat ro, const int precision) {
-    int lo_size = lo->mantissa.data.size, ro_size = ro.mantissa.data.size;
     lo->power = lo->power + ro.power;
-    big_integer_multiply_inplace_fixed_precision(&lo->mantissa, ro.mantissa, precision);
-    if (lo->mantissa.data.size != lo_size + ro_size) lo->power--;
+    int powerdiff = 0;
+    big_integer_multiply_inplace_fixed_precision(&lo->mantissa, ro.mantissa, precision, &powerdiff);
+    lo->power += powerdiff;
     if (0 == lo->mantissa.sign) lo->power = 0;
 }
 
@@ -64,7 +97,7 @@ BigFloat big_float_add(BigFloat lo, BigFloat ro) {
 }
 
 void big_float_add_inplace_fixed_precision(BigFloat *lo, BigFloat ro, const int precision) {
-    int carried;
+    int carried = 0;
     long long res_power = lo->power > ro.power? lo->power: ro.power;
     //need to align mantissa to use BigInt add
     int num_zeros_add_to_lo = lo->power - ro.power - lo->mantissa.data.size + ro.mantissa.data.size;
@@ -240,4 +273,127 @@ BigFloat big_float_div(BigFloat lo, BigFloat ro) {
     free(tmp_point5.mantissa.data.bits);
     ans.mantissa.sign = lo.mantissa.sign * ro.mantissa.sign;
     return ans;
+}
+
+BigFloat big_float_sqrt_fix_precision(BigFloat lo, const int precision, const unsigned int x_0) {
+
+}
+
+BigFloat big_float_reciprocal_sqrt_fix_precision(BigFloat lo, const int precision, double x_0) {
+    // output precision = working precision / 2
+    int working_prec;
+    assert(precision > 1);
+    if (lo.mantissa.data.size >= 2 * precision) {working_prec = 2 * precision;}
+    else {working_prec = lo.mantissa.data.size;}
+    int output_precision = working_prec / 2;
+    //TODO: How to terminate?
+    int num_Iter = 10 * log(precision);
+    int min_iter = log(precision);
+    //unsigned long prev_last_bit = lo.mantissa.data.bits[working_prec / 2];
+    // initial value x_0
+    BigFloat x = double_to_big_float_fixed_precision(x_0, working_prec);
+    //big_float_print_msg(x,"x_0");
+    //printf("%e\n",big_float_to_double(x));
+    // w = x_i ^ 2
+    BigFloat w = big_float_mul_fixed_precision(x, x, working_prec);
+    BigFloat one = big_float_create_from_uint_fixed_precision(1, precision);
+    // w * lo
+    big_float_mul_inplace_fixed_precision(&w, lo, working_prec);
+    // d = w * lo - 1
+    big_float_sub_inplace_fixed_precision(&w, one, working_prec);
+    // d * x_i
+    big_float_mul_inplace_fixed_precision(&w, x, working_prec);
+    // d * x_i / 2
+    big_float_div_by_power_of_two_inplace_fixed_precision(&w, 1, working_prec);
+    // x_i+1 = x_i - d * x_i / 2
+    big_float_sub_inplace_fixed_precision(&x, w, working_prec);
+    //big_float_print_msg(x,"x_i+1 = x_i - d * x_i / 2");
+    //printf("double: %e\n",big_float_to_double(x));
+    unsigned int prev_value = x.mantissa.data.bits[x.mantissa.data.size - output_precision];
+    // main loop
+    for (int i = 0; i < num_Iter; i++) {
+        big_float_mul_toplace_fixed_precision(x, x,&w, working_prec); 
+        //big_float_print_msg(w,"w = x_i ^ 2");
+        //printf("double: %e\n",big_float_to_double(w));
+        big_float_mul_inplace_fixed_precision(&w, lo, working_prec);
+        //big_float_print_msg(w,"w * lo");
+        //printf("double: %e\n",big_float_to_double(w));
+        big_float_sub_inplace_fixed_precision(&w, one, working_prec);
+        //big_float_print_msg(w,"d = w * lo - 1");
+        //printf("double: %e\n",big_float_to_double(w));
+        big_float_mul_inplace_fixed_precision(&w, x, working_prec);
+        //big_float_print_msg(w,"d * x_i");
+        //printf("double: %e\n",big_float_to_double(w));
+        big_float_div_by_power_of_two_inplace_fixed_precision(&w, 1, working_prec);
+        //big_float_print_msg(w,"d * x_i / 2");
+        //printf("double: %e\n",big_float_to_double(w));
+        big_float_sub_inplace_fixed_precision(&x, w, working_prec);
+        //big_float_print_msg(x,"x_i+1 = x_i - d * x_i / 2");
+        //printf("double: %e\n",big_float_to_double(x));
+        //printf("deciding value: %lu\n",prev_value);
+        if (x.mantissa.data.bits[x.mantissa.data.size - output_precision] == prev_value && i > min_iter){
+            printf("reciprocal sqrt took %d iterations to converge.\n",i+2);
+            break;
+        }
+        else prev_value = x.mantissa.data.bits[x.mantissa.data.size - output_precision];
+    }
+    big_float_destroy(&w);
+    big_float_destroy(&one);
+    return x;
+}
+
+
+BigFloat big_float_guided_reciprocal_sqrt_fix_precision(BigFloat lo, const int precision) {
+    // output precision = working precision / 2
+    int working_prec;
+    assert(precision > 1);
+    if (lo.mantissa.data.size >= 2 * precision) {working_prec = 2 * precision;}
+    else {working_prec = lo.mantissa.data.size;}
+    int output_precision = working_prec / 2;
+    
+    //TODO: How to terminate?
+    int num_Iter = 3 * log(precision);
+    int min_iter = 1;
+    // initial value x_0
+    double guide = big_float_to_double(lo);
+    assert(guide > 0);
+    guide = 1 / sqrt(guide);
+    BigFloat x = double_to_big_float_fixed_precision(guide, working_prec);
+    // w = x_i ^ 2
+    BigFloat w = big_float_mul_fixed_precision(x, x, working_prec);
+    BigFloat one = big_float_create_from_uint_fixed_precision(1, working_prec);
+    // w * lo
+    big_float_mul_inplace_fixed_precision(&w, lo, working_prec);
+    // d = w * lo - 1
+    big_float_sub_inplace_fixed_precision(&w, one, working_prec);
+    // d * x_i
+    big_float_mul_inplace_fixed_precision(&w, x, working_prec);
+    // d * x_i / 2
+    big_float_div_by_power_of_two_inplace_fixed_precision(&w, 1, working_prec);
+    // x_i+1 = x_i - d * x_i / 2
+    big_float_sub_inplace_fixed_precision(&x, w, working_prec);
+
+    unsigned int prev_value = x.mantissa.data.bits[x.mantissa.data.size - output_precision];
+
+    // main loop
+    for (int i = 0; i < num_Iter; i++) {
+        big_float_mul_toplace_fixed_precision(x, x,&w, working_prec); 
+        big_float_mul_inplace_fixed_precision(&w, lo, working_prec);
+        big_float_sub_inplace_fixed_precision(&w, one, working_prec);
+        big_float_mul_inplace_fixed_precision(&w, x, working_prec);
+        big_float_div_by_power_of_two_inplace_fixed_precision(&w, 1, working_prec);
+        big_float_sub_inplace_fixed_precision(&x, w, working_prec);
+        big_float_print_msg(x,"x_i+1 = x_i - d * x_i / 2");
+        printf(" %e\n",big_float_to_double(x));
+        if (x.mantissa.data.bits[x.mantissa.data.size - output_precision] == prev_value && i > min_iter) {
+            printf("guided reciprocal sqrt took %d iterations to converge.\n",i+2);
+            break;
+        }
+        else prev_value = x.mantissa.data.bits[x.mantissa.data.size - output_precision];
+    }
+    big_float_destroy(&w);
+    big_float_destroy(&one);
+    return x;
+    
+
 }
