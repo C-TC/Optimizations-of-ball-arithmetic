@@ -12,10 +12,10 @@ def load_data(filename):
             x, cycle1, cycle2, cycle3, cycle4, cycle5  = line.strip().split()
             data_x.append(int(x))
             data_y1.append(float(cycle1) / float(cycle1))
-            data_y2.append(float(cycle2) / float(cycle1))
-            data_y3.append(float(cycle3) / float(cycle1))
-            data_y4.append(float(cycle4) / float(cycle1))
-            data_y5.append(float(cycle5) / float(cycle1))
+            data_y2.append(float(cycle1) / float(cycle2))
+            data_y3.append(float(cycle1) / float(cycle3))
+            data_y4.append(float(cycle1) / float(cycle4))
+            data_y5.append(float(cycle1) / float(cycle5))
     return data_x, data_y1, data_y2, data_y3, data_y4, data_y5
 
 if __name__ == '__main__':
@@ -32,7 +32,7 @@ if __name__ == '__main__':
 
     plt.xscale("log")
     # plt.yscale("log")
-    plt.xticks(data_x, [r'$2^{' + str(i) + r'}$' for i in range(3, 17)], fontsize=14)
+    plt.xticks(data_x, [r'$2^{' + str(i+5) + r'}$' for i in range(3, 17)], fontsize=14)
     plt.yticks(fontsize=14)
 
     plt.axvline(x=2048, linewidth=2, color='orange')
@@ -42,8 +42,8 @@ if __name__ == '__main__':
 
     plt.title("Intel® Core™ i5-7360U CPU @ 2.30GHz (Kabylake)\nL1: 32KB, L2: 256KB, L3: 4MB\nCompiler: clang 12.0.0\nFlag:-march=native -O3", loc='left', fontsize=16, fontweight=1, color='black')
     # plt.title("Intel® Core™ i7-9700K CPU @ 3.60GHz\nL1: 32KB, L2: 256KB, L3: 12MB\nCompiler: gcc 7.5.0", loc='left', fontsize=16, fontweight=1, color='black')
-    plt.xlabel("Input Size", fontsize=16)
-    plt.ylabel("Relative Runtime", fontsize=16)
+    plt.xlabel("Input Size / Precision [bit]", fontsize=16)
+    plt.ylabel("Speedup", fontsize=16)
     plt.savefig('timing_mul_vec_intop.pdf')
 
     # plt.show()
