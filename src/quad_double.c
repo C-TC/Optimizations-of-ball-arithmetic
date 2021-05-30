@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
-
 quad_double quad_double_create_from_double(double d0, double d1, double d2, double d3) {
     quad_double ans;
     ans.d[0] = d0;
@@ -225,6 +224,25 @@ qd_arr qd_arr_create_random(int size, double min, double max) {
   return ans;
 }
 
+qd_arr qd_arr_create_random_aligned(int size, double min, double max) {
+  assert(size > 0);
+  qd_arr ans;
+  ans.size = size;
+  ans.d0 = _mm_malloc(size * sizeof(double), ALIGNMENT);
+  ans.d1 = _mm_malloc(size * sizeof(double), ALIGNMENT);
+  ans.d2 = _mm_malloc(size * sizeof(double), ALIGNMENT);
+  ans.d3 = _mm_malloc(size * sizeof(double), ALIGNMENT);
+
+  for (int i = 0; i < size; i++) {
+    ans.d0[i] = (max - min) * ((double)rand() / (double)RAND_MAX) + min;
+    ans.d1[i] = 1e-16 * (2.0 * ((double)rand() / (double)RAND_MAX) - 1);
+    ans.d2[i] = 1e-32 * (2.0 * ((double)rand() / (double)RAND_MAX) - 1);
+    ans.d3[i] = 1e-48 * (2.0 * ((double)rand() / (double)RAND_MAX) - 1);
+  }
+
+  return ans;
+}
+
 void qd_destroy(qd_arr qda) {
   if (qda.d0) {free(qda.d0);}
   if (qda.d1) {free(qda.d1);}
@@ -232,8 +250,15 @@ void qd_destroy(qd_arr qda) {
   if (qda.d3) {free(qda.d3);}
 }
 
+void qd_destroy_aligned(qd_arr qda) {
+  if (qda.d0) {_mm_free(qda.d0);}
+  if (qda.d1) {_mm_free(qda.d1);}
+  if (qda.d2) {_mm_free(qda.d2);}
+  if (qda.d3) {_mm_free(qda.d3);}
+}
+
 qd_arr qd_arr_add(qd_arr lo, qd_arr ro) {
-  assert(lo.size == ro.size);
+  //assert(lo.size == ro.size);
   qd_arr ans;
   int size = lo.size;
   ans.size = size;
@@ -267,7 +292,7 @@ qd_arr qd_arr_add(qd_arr lo, qd_arr ro) {
 }
 
 qd_arr qd_arr_sub(qd_arr lo, qd_arr ro) {
-  assert(lo.size == ro.size);
+  //assert(lo.size == ro.size);
   qd_arr ans;
   int size = lo.size;
   ans.size = size;
@@ -302,7 +327,7 @@ qd_arr qd_arr_sub(qd_arr lo, qd_arr ro) {
 }
 
 qd_arr qd_arr_mul(qd_arr lo, qd_arr ro) {
-  assert(lo.size == ro.size);
+  //assert(lo.size == ro.size);
   qd_arr ans;
   int size = lo.size;
   ans.size = size;
@@ -380,7 +405,7 @@ qd_arr qd_arr_mul(qd_arr lo, qd_arr ro) {
 }
 
 qd_arr qd_arr_div(qd_arr lo, qd_arr ro) {
-  assert(lo.size == ro.size);
+  //assert(lo.size == ro.size);
   qd_arr ans;
   int size = lo.size;
   ans.size = size;
@@ -410,21 +435,140 @@ qd_arr qd_arr_div(qd_arr lo, qd_arr ro) {
   return ans;
 }
 
-int main() {
-/*   quad_double a=quad_double_create_from_double(1e30,2e10,3e-10,4e-30);
-  quad_double b=quad_double_create_from_double(5e30,3e10,2e-10,1e-30);
-  quad_double c=qd_sub_qd(&a,&b);
-  print_qd(a,"debug");
-  print_qd(b,"debug");
-  print_qd(c,"debug"); */
+
+void qd_arr_add_inplace(qd_arr lo, qd_arr ro) {
+  //assert(lo.size == ro.size);
+  int size = lo.size;
+
+  double s0, s1, s2, s3;
+  double t0, t1, t2, t3;
+
+  for (int i = 0; i < size; i++) {
+      
+    s0 = two_sum(lo.d0[i], ro.d0[i], &t0);
+    s1 = two_sum(lo.d1[i], ro.d1[i], &t1);
+    s2 = two_sum(lo.d2[i], ro.d2[i], &t2);
+    s3 = two_sum(lo.d3[i], ro.d3[i], &t3);
+
+    s1 = two_sum(s1, t0, &t0);
+    three_sum(&s2, &t0, &t1);
+    three_sum2(&s3, &t0, &t2);
+    t0 = t0 + t1 + t3;
+
+    renorm5(&s0, &s1, &s2, &s3, &t0);
+    lo.d0[i] = s0;
+    lo.d1[i] = s1;
+    lo.d2[i] = s2;
+    lo.d3[i] = s3;
+  }
+}
+
+void qd_arr_add_inplace_inline(qd_arr lo, qd_arr ro) {
+  //assert(lo.size == ro.size);
+  int size = lo.size;
+
+  double s0, s1, s2, s3;
+  double t0, t1, t2, t3;
+
+  for (int i = 0; i < size; i++) {
+      
+    s0 = two_sum(lo.d0[i], ro.d0[i], &t0);
+    s1 = two_sum(lo.d1[i], ro.d1[i], &t1);
+    s2 = two_sum(lo.d2[i], ro.d2[i], &t2);
+    s3 = two_sum(lo.d3[i], ro.d3[i], &t3);
+
+    s1 = two_sum(s1, t0, &t0);
+    three_sum_inline(&s2, &t0, &t1);
+    three_sum2_inline(&s3, &t0, &t2);
+    t0 = t0 + t1 + t3;
+
+    renorm5(&s0, &s1, &s2, &s3, &t0);
+    lo.d0[i] = s0;
+    lo.d1[i] = s1;
+    lo.d2[i] = s2;
+    lo.d3[i] = s3;
+  }
+}
+
+void qd_arr_add_inplace_vec(qd_arr lo, qd_arr ro) {
+  //assert(lo.size == ro.size);
+  int size = lo.size;
+
+  double s0, s1, s2, s3;
+  double t0, t1, t2, t3;
+  __m256d vs0, vs1, vs2, vs3;
+  __m256d vt0, vt1, vt2, vt3;
+  __m256d ld0, ld1, ld2, ld3;
+  __m256d rd0, rd1, rd2, rd3;
+  double *tmp_vt0 = (double *)_mm_malloc(4 * sizeof(double), ALIGNMENT);
+  int i;
+  for (i = 0; i + 3 < size; i += 4) {
+    ld0 = _mm256_load_pd(lo.d0 + i);
+    ld1 = _mm256_load_pd(lo.d1 + i);
+    ld2 = _mm256_load_pd(lo.d2 + i);
+    ld3 = _mm256_load_pd(lo.d3 + i);
+    rd0 = _mm256_load_pd(ro.d0 + i);
+    rd1 = _mm256_load_pd(ro.d1 + i);
+    rd2 = _mm256_load_pd(ro.d2 + i);
+    rd3 = _mm256_load_pd(ro.d3 + i);
+
+    vs0 = two_sum_vec(ld0, rd0, &vt0);
+    vs0 = two_sum_vec(ld1, rd1, &vt1);
+    vs0 = two_sum_vec(ld2, rd2, &vt2);
+    vs0 = two_sum_vec(ld3, rd3, &vt3);
+
+    vs1 = two_sum_vec(vs1, vt0, &vt0);
+    three_sum_vec(&vs2, &vt0, &vt1);
+    three_sum2_vec(&vs3, &vt0, &vt2);
+    vt0 = _mm256_add_pd(_mm256_add_pd(vt0, vt1), vt3);
+
+    renorm5(&s0, &s1, &s2, &s3, &t0);
+    _mm256_store_pd(lo.d0 + i, vs0);
+    _mm256_store_pd(lo.d1 + i, vs1);
+    _mm256_store_pd(lo.d2 + i, vs2);
+    _mm256_store_pd(lo.d3 + i, vs3);
+    _mm256_store_pd(tmp_vt0, vt0);
+    renorm5(lo.d0 + i, lo.d1 + i, lo.d2 + i, lo.d3 + i, tmp_vt0);
+    renorm5(lo.d0 + i + 1, lo.d1 + i + 1, lo.d2 + i + 1, lo.d3 + i + 1, tmp_vt0 + 1);
+    renorm5(lo.d0 + i + 2, lo.d1 + i + 2, lo.d2 + i + 2, lo.d3 + i + 2, tmp_vt0 + 2);
+    renorm5(lo.d0 + i + 3, lo.d1 + i + 3, lo.d2 + i + 3, lo.d3 + i + 3, tmp_vt0 + 3);
+  }
+
+  for (; i < size; i++) {
+      
+    s0 = two_sum(lo.d0[i], ro.d0[i], &t0);
+    s1 = two_sum(lo.d1[i], ro.d1[i], &t1);
+    s2 = two_sum(lo.d2[i], ro.d2[i], &t2);
+    s3 = two_sum(lo.d3[i], ro.d3[i], &t3);
+
+    s1 = two_sum(s1, t0, &t0);
+    three_sum(&s2, &t0, &t1);
+    three_sum2(&s3, &t0, &t2);
+    t0 = t0 + t1 + t3;
+
+    renorm5(&s0, &s1, &s2, &s3, &t0);
+    lo.d0[i] = s0;
+    lo.d1[i] = s1;
+    lo.d2[i] = s2;
+    lo.d3[i] = s3;
+  }
+  _mm_free(tmp_vt0);
+}
+
+
+/* int main() {
 
   srand(11);
-  qd_arr a=qd_arr_create_random(5,-1,1);
-  qd_arr b=qd_arr_create_random(5,-1,1);
-  print_qd_arr(a,3,"a");
-  print_qd_arr(b,3,"b");
-  qd_arr c=qd_arr_div(a,b);
-  print_qd_arr(c,3,"c");
-
+  qd_arr a=qd_arr_create_random(2,-1,1);
+  qd_arr b=qd_arr_create_random(2,-1,1);
+  print_qd_arr(a,2,"a");
+  print_qd_arr(b,2,"b");
+  qd_arr c=qd_arr_add(a,b);
+  qd_arr_add_inplace_inline(a,b);
+  print_qd_arr(c,2,"ref");
+  print_qd_arr(a,2,"ans");
+  qd_destroy(a);
+  qd_destroy(b);
+  qd_destroy(c);
   return 0;
-}
+} */
