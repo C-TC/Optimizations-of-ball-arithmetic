@@ -6,3 +6,4 @@ prog_*
 *.out
 big_int*
 **/*.pdf
+qd_test

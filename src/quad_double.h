@@ -21,18 +21,34 @@ typedef struct quad_double
   double d[4];
 } quad_double;
 
+typedef struct qd_arr
+{
+  int size;
+  double *d0;
+  double *d1;
+  double *d2;
+  double *d3;
+}qd_arr;
+
 quad_double quad_double_create_from_double(double d0, double d1, double d2, double d3);
+qd_arr qd_arr_create_from_double_arr(double *data, int size);
+qd_arr qd_arr_create_random(int size, double min, double max);
+void qd_destroy(qd_arr qda);
 void print_qd(quad_double qd, const char* msg);
+void print_qd_arr(qd_arr qda, int num, const char* msg);
 
 quad_double qd_add_qd(quad_double *a, quad_double *b);
 quad_double qd_sub_qd(quad_double *a, quad_double *b);
 quad_double qd_mul_qd(quad_double *a, quad_double *b);
 quad_double qd_div_qd(quad_double *a, quad_double *b);
 
-
+qd_arr qd_arr_add(qd_arr lo, qd_arr ro);
+qd_arr qd_arr_sub(qd_arr lo, qd_arr ro);
+qd_arr qd_arr_mul(qd_arr lo, qd_arr ro);
+qd_arr qd_arr_div(qd_arr lo, qd_arr ro);
 
 /* Computes fl(a+b) and err(a+b).  Assumes |a| >= |b|. */
-inline double quick_two_sum(double a, double b, double *err)
+double quick_two_sum(double a, double b, double *err)
 {
   double s = a + b;
   *err = b - (s - a);
@@ -40,7 +56,7 @@ inline double quick_two_sum(double a, double b, double *err)
 }
 
 /* Computes fl(a-b) and err(a-b).  Assumes |a| >= |b| */
-inline double quick_two_diff(double a, double b, double *err)
+double quick_two_diff(double a, double b, double *err)
 {
   double s = a - b;
   *err = (a - s) - b;
@@ -48,7 +64,7 @@ inline double quick_two_diff(double a, double b, double *err)
 }
 
 /* Computes fl(a+b) and err(a+b).  */
-inline double two_sum(double a, double b, double *err)
+double two_sum(double a, double b, double *err)
 {
   double s = a + b;
   double bb = s - a;
@@ -56,14 +72,14 @@ inline double two_sum(double a, double b, double *err)
   return s;
 }
 
-inline void three_sum(double *a, double *b, double *c) {
+void three_sum(double *a, double *b, double *c) {
   double t1, t2, t3;
   t1 = two_sum(*a, *b, &t2);
   *a  = two_sum(*c, t1, &t3);
   *b  = two_sum(t2, t3, c);
 }
 
-inline void three_sum2(double *a, double *b, double *c) {
+void three_sum2(double *a, double *b, double *c) {
   double t1, t2, t3;
   t1 = two_sum(*a, *b, &t2);
   *a  = two_sum(*c, t1, &t3);
@@ -71,7 +87,7 @@ inline void three_sum2(double *a, double *b, double *c) {
 }
 
 /* Computes fl(a-b) and err(a-b).  */
-inline double two_diff(double a, double b, double *err)
+double two_diff(double a, double b, double *err)
 {
   double s = a - b;
   double bb = s - a;
@@ -81,7 +97,7 @@ inline double two_diff(double a, double b, double *err)
 
 #ifndef QD_FMS
 /* Computes high word and lo word of a */
-inline void split(double a, double *hi, double *lo)
+void split(double a, double *hi, double *lo)
 {
   double temp;
   if (a > _QD_SPLIT_THRESH || a < -_QD_SPLIT_THRESH)
@@ -103,7 +119,7 @@ inline void split(double a, double *hi, double *lo)
 #endif
 
 /* Computes fl(a*b) and err(a*b). */
-inline double two_prod(double a, double b, double *err)
+double two_prod(double a, double b, double *err)
 {
 #ifdef QD_FMS
   double p = a * b;
@@ -120,7 +136,7 @@ inline double two_prod(double a, double b, double *err)
 }
 
 /* Computes fl(a*a) and err(a*a).  Faster than the above method. */
-inline double two_sqr(double a, double *err)
+double two_sqr(double a, double *err)
 {
 #ifdef QD_FMS
   double p = a * a;
@@ -135,7 +151,7 @@ inline double two_sqr(double a, double *err)
 #endif
 }
 
-inline void renorm4(double *c0, double *c1,
+void renorm4(double *c0, double *c1,
                    double *c2, double *c3)
 {
   double s0, s1, s2 = 0.0, s3 = 0.0;
@@ -172,7 +188,7 @@ inline void renorm4(double *c0, double *c1,
   *c3 = s3;
 }
 
-inline void renorm5(double *c0, double *c1,
+void renorm5(double *c0, double *c1,
                    double *c2, double *c3, double *c4)
 {
   double s0, s1, s2 = 0.0, s3 = 0.0;

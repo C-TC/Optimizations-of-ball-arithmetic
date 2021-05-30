@@ -59,3 +59,6 @@ $(TEST_DIR)/$(BIG_FLOAT_BENCHMARK): $(BIG_FLOAT_BENCHMARK_OBJS)
 $(BUILD_DIR)/test/%.o: $(TEST_DIR)/%.c
 	mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
+
+qd:
+	$(CC) $(CFLAGS) $(INCLUDES) -o qd_test ./src/quad_double.c $(LFLAGS) $(LIBS)
