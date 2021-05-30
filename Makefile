@@ -65,4 +65,4 @@ qd_s:
 	$(CC) -Wall -O3 -fno-tree-vectorize -march=native $(INCLUDES) -o qd_test_add ./src/qd_test_speed_add.c quad_double.o $(LFLAGS) $(LIBS)
 
 qd_c: 
-	$(CC) -Wall -O3 -fno-tree-vectorize $(INCLUDES) -o qd_test_correctness ./src/quad_double.c $(LFLAGS) $(LIBS)
+	$(CC) -Wall -O3 -fno-tree-vectorize  -march=native $(INCLUDES) -o qd_test_correctness ./src/quad_double.c $(LFLAGS) $(LIBS)

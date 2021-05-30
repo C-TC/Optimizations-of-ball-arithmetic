@@ -513,9 +513,9 @@ void qd_arr_add_inplace_vec(qd_arr lo, qd_arr ro) {
     rd3 = _mm256_load_pd(ro.d3 + i);
 
     vs0 = two_sum_vec(ld0, rd0, &vt0);
-    vs0 = two_sum_vec(ld1, rd1, &vt1);
-    vs0 = two_sum_vec(ld2, rd2, &vt2);
-    vs0 = two_sum_vec(ld3, rd3, &vt3);
+    vs1 = two_sum_vec(ld1, rd1, &vt1);
+    vs2 = two_sum_vec(ld2, rd2, &vt2);
+    vs3 = two_sum_vec(ld3, rd3, &vt3);
 
     vs1 = two_sum_vec(vs1, vt0, &vt0);
     three_sum_vec(&vs2, &vt0, &vt1);
@@ -559,16 +559,16 @@ void qd_arr_add_inplace_vec(qd_arr lo, qd_arr ro) {
 /* int main() {
 
   srand(11);
-  qd_arr a=qd_arr_create_random(2,-1,1);
-  qd_arr b=qd_arr_create_random(2,-1,1);
+  qd_arr a=qd_arr_create_random_aligned(10,-1,1);
+  qd_arr b=qd_arr_create_random_aligned(10,-1,1);
   print_qd_arr(a,2,"a");
   print_qd_arr(b,2,"b");
   qd_arr c=qd_arr_add(a,b);
-  qd_arr_add_inplace_inline(a,b);
+  qd_arr_add_inplace_vec(a,b);
   print_qd_arr(c,2,"ref");
   print_qd_arr(a,2,"ans");
-  qd_destroy(a);
-  qd_destroy(b);
+  qd_destroy_aligned(a);
+  qd_destroy_aligned(b);
   qd_destroy(c);
   return 0;
 } */
