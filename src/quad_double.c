@@ -522,7 +522,7 @@ void qd_arr_add_inplace_vec(qd_arr lo, qd_arr ro) {
     three_sum2_vec(&vs3, &vt0, &vt2);
     vt0 = _mm256_add_pd(_mm256_add_pd(vt0, vt1), vt3);
 
-    renorm5(&s0, &s1, &s2, &s3, &t0);
+    //renorm5(&s0, &s1, &s2, &s3, &t0);
     _mm256_store_pd(lo.d0 + i, vs0);
     _mm256_store_pd(lo.d1 + i, vs1);
     _mm256_store_pd(lo.d2 + i, vs2);
@@ -555,6 +555,154 @@ void qd_arr_add_inplace_vec(qd_arr lo, qd_arr ro) {
   _mm_free(tmp_vt0);
 }
 
+void qd_arr_add_inplace_vec_inline(qd_arr lo, qd_arr ro) {
+  //assert(lo.size == ro.size);
+  int size = lo.size;
+
+  double s0, s1, s2, s3;
+  double t0, t1, t2, t3;
+  __m256d vs0, vs1, vs2, vs3;
+  __m256d vt0, vt1, vt2, vt3;
+  __m256d ld0, ld1, ld2, ld3;
+  __m256d rd0, rd1, rd2, rd3;
+  __m256d tmp_s, tmp_t1, tmp_t2, tmp_t3, tmp_bb, tmp0, tmp1;
+  double *tmp_vt0 = (double *)_mm_malloc(4 * sizeof(double), ALIGNMENT);
+  int i;
+  for (i = 0; i + 3 < size; i += 4) {
+    ld0 = _mm256_load_pd(lo.d0 + i);
+    ld1 = _mm256_load_pd(lo.d1 + i);
+    ld2 = _mm256_load_pd(lo.d2 + i);
+    ld3 = _mm256_load_pd(lo.d3 + i);
+    rd0 = _mm256_load_pd(ro.d0 + i);
+    rd1 = _mm256_load_pd(ro.d1 + i);
+    rd2 = _mm256_load_pd(ro.d2 + i);
+    rd3 = _mm256_load_pd(ro.d3 + i);
+
+    //vs0 = two_sum_vec(ld0, rd0, &vt0);
+    tmp_s = _mm256_add_pd(ld0, rd0);
+    tmp_bb = _mm256_sub_pd(tmp_s, ld0);
+    tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
+    tmp1 = _mm256_sub_pd(rd0, tmp_bb);
+    tmp0 = _mm256_sub_pd(ld0, tmp0);
+    vt0 = _mm256_add_pd(tmp0, tmp1);
+    vs0 = tmp_s;
+
+    //vs1 = two_sum_vec(ld1, rd1, &vt1);
+    tmp_s = _mm256_add_pd(ld1, rd1);
+    tmp_bb = _mm256_sub_pd(tmp_s, ld1);
+    tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
+    tmp1 = _mm256_sub_pd(rd1, tmp_bb);
+    tmp0 = _mm256_sub_pd(ld1, tmp0);
+    vt1 = _mm256_add_pd(tmp0, tmp1);
+    vs1 = tmp_s;
+
+    //vs2 = two_sum_vec(ld2, rd2, &vt2);
+    tmp_s = _mm256_add_pd(ld2, rd2);
+    tmp_bb = _mm256_sub_pd(tmp_s, ld2);
+    tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
+    tmp1 = _mm256_sub_pd(rd2, tmp_bb);
+    tmp0 = _mm256_sub_pd(ld2, tmp0);
+    vt2 = _mm256_add_pd(tmp0, tmp1);
+    vs2 = tmp_s;
+
+    //vs3 = two_sum_vec(ld3, rd3, &vt3);
+    tmp_s = _mm256_add_pd(ld3, rd3);
+    tmp_bb = _mm256_sub_pd(tmp_s, ld3);
+    tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
+    tmp1 = _mm256_sub_pd(rd3, tmp_bb);
+    tmp0 = _mm256_sub_pd(ld3, tmp0);
+    vt3 = _mm256_add_pd(tmp0, tmp1);
+    vs3 = tmp_s;
+
+    //vs1 = two_sum_vec(vs1, vt0, &vt0);
+    tmp_s = _mm256_add_pd(vs1, vt0);
+    tmp_bb = _mm256_sub_pd(tmp_s, vs1);
+    tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
+    tmp1 = _mm256_sub_pd(vt0, tmp_bb);
+    tmp0 = _mm256_sub_pd(vs1, tmp0);
+    vt0 = _mm256_add_pd(tmp0, tmp1);
+    vs1 = tmp_s;
+
+    //three_sum_vec(&vs2, &vt0, &vt1);
+    tmp_s = _mm256_add_pd(vs2, vt0);
+    tmp_bb = _mm256_sub_pd(tmp_s, vs2);
+    tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
+    tmp1 = _mm256_sub_pd(vt0, tmp_bb);
+    tmp0 = _mm256_sub_pd(vs2, tmp0);
+    tmp_t2 = _mm256_add_pd(tmp0, tmp1);
+    tmp_t1 = tmp_s;
+    tmp_s = _mm256_add_pd(vt1, tmp_t1);
+    tmp_bb = _mm256_sub_pd(tmp_s, vt1);
+    tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
+    tmp1 = _mm256_sub_pd(tmp_t1, tmp_bb);
+    tmp0 = _mm256_sub_pd(vt1, tmp0);
+    tmp_t3 = _mm256_add_pd(tmp0, tmp1);
+    vs2 = tmp_s;
+    tmp_s = _mm256_add_pd(tmp_t2, tmp_t3);
+    tmp_bb = _mm256_sub_pd(tmp_s, tmp_t2);
+    tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
+    tmp1 = _mm256_sub_pd(tmp_t3, tmp_bb);
+    tmp0 = _mm256_sub_pd(tmp_t2, tmp0);
+    vt1 = _mm256_add_pd(tmp0, tmp1);
+    vt0 = tmp_s;
+
+    //three_sum2_vec(&vs3, &vt0, &vt2);
+    tmp_s = _mm256_add_pd(vs3, vt0);
+    tmp_bb = _mm256_sub_pd(tmp_s, vs3);
+    tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
+    tmp1 = _mm256_sub_pd(vt0, tmp_bb);
+    tmp0 = _mm256_sub_pd(vs3, tmp0);
+    tmp_t2 = _mm256_add_pd(tmp0, tmp1);
+    tmp_t1 = tmp_s;
+    tmp_s = _mm256_add_pd(vt2, tmp_t1);
+    tmp_bb = _mm256_sub_pd(tmp_s, vt2);
+    tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
+    tmp1 = _mm256_sub_pd(tmp_t1, tmp_bb);
+    tmp0 = _mm256_sub_pd(vt2, tmp0);
+    tmp_t3 = _mm256_add_pd(tmp0, tmp1);
+    vs3 = tmp_s;
+    vt0 = _mm256_add_pd(tmp_t2, tmp_t3);
+
+    //vt0 = _mm256_add_pd(_mm256_add_pd(vt0, vt1), vt3);
+    tmp0 = _mm256_add_pd(vt0, vt1);
+    vt0 = _mm256_add_pd(tmp0, vt3);
+
+    //renorm5(&s0, &s1, &s2, &s3, &t0);
+    _mm256_store_pd(lo.d0 + i, vs0);
+    _mm256_store_pd(lo.d1 + i, vs1);
+    _mm256_store_pd(lo.d2 + i, vs2);
+    _mm256_store_pd(lo.d3 + i, vs3);
+    _mm256_store_pd(tmp_vt0, vt0);
+    renorm5_inline(lo.d0 + i, lo.d1 + i, lo.d2 + i, lo.d3 + i, tmp_vt0);
+    renorm5_inline(lo.d0 + i + 1, lo.d1 + i + 1, lo.d2 + i + 1, lo.d3 + i + 1, tmp_vt0 + 1);
+    renorm5_inline(lo.d0 + i + 2, lo.d1 + i + 2, lo.d2 + i + 2, lo.d3 + i + 2, tmp_vt0 + 2);
+    renorm5_inline(lo.d0 + i + 3, lo.d1 + i + 3, lo.d2 + i + 3, lo.d3 + i + 3, tmp_vt0 + 3);
+  }
+
+  for (; i < size; i++) {
+      
+    s0 = two_sum(lo.d0[i], ro.d0[i], &t0);
+    s1 = two_sum(lo.d1[i], ro.d1[i], &t1);
+    s2 = two_sum(lo.d2[i], ro.d2[i], &t2);
+    s3 = two_sum(lo.d3[i], ro.d3[i], &t3);
+
+    s1 = two_sum(s1, t0, &t0);
+    three_sum(&s2, &t0, &t1);
+    three_sum2(&s3, &t0, &t2);
+    t0 = t0 + t1 + t3;
+
+    renorm5_inline(&s0, &s1, &s2, &s3, &t0);
+    lo.d0[i] = s0;
+    lo.d1[i] = s1;
+    lo.d2[i] = s2;
+    lo.d3[i] = s3;
+  }
+  _mm_free(tmp_vt0);
+}
+
+// hand inline serial no effect
+// static inline func no use! complier refuse to inline.
+// TODO: unfold in some way, more vec, inline simple func then unfold?
 
 /* int main() {
 
@@ -564,7 +712,7 @@ void qd_arr_add_inplace_vec(qd_arr lo, qd_arr ro) {
   print_qd_arr(a,2,"a");
   print_qd_arr(b,2,"b");
   qd_arr c=qd_arr_add(a,b);
-  qd_arr_add_inplace_vec(a,b);
+  qd_arr_add_inplace_vec_inline(a,b);
   print_qd_arr(c,2,"ref");
   print_qd_arr(a,2,"ans");
   qd_destroy_aligned(a);

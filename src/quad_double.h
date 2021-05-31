@@ -53,18 +53,24 @@ qd_arr qd_arr_div(qd_arr lo, qd_arr ro);
 void qd_arr_add_inplace(qd_arr lo, qd_arr ro);
 void qd_arr_add_inplace_inline(qd_arr lo, qd_arr ro);
 void qd_arr_add_inplace_vec(qd_arr lo, qd_arr ro);
-
+void qd_arr_add_inplace_vec_inline(qd_arr lo, qd_arr ro);
 
 /* Computes fl(a+b) and err(a+b).  Assumes |a| >= |b|. */
-static inline double quick_two_sum(double a, double b, double *err)
+inline double quick_two_sum(double a, double b, double *err)
 {
   double s = a + b;
   *err = b - (s - a);
   return s;
 }
+/*  
+tmp_s = in1 + in2;
+tmp0 = tmp_s - in1;
+err = in2 - tmp0;
+out = tmp_s;
+ */
 
 /* Computes fl(a-b) and err(a-b).  Assumes |a| >= |b| */
-static inline double quick_two_diff(double a, double b, double *err)
+inline double quick_two_diff(double a, double b, double *err)
 {
   double s = a - b;
   *err = (a - s) - b;
@@ -72,7 +78,7 @@ static inline double quick_two_diff(double a, double b, double *err)
 }
 
 /* Computes fl(a+b) and err(a+b).  */
-static inline double two_sum(double a, double b, double *err)
+inline double two_sum(double a, double b, double *err)
 {
   double s = a + b;
   double bb = s - a;
@@ -86,15 +92,24 @@ err = (a - (tmp_s - tmp_bb)) + (b - tmp_bb);
 out = tmp_s;
  */
 
-static inline __m256d two_sum_vec(__m256d a, __m256d b, __m256d *err)
+inline __m256d two_sum_vec(__m256d a, __m256d b, __m256d *err)
 {
   __m256d s = _mm256_add_pd(a, b);
   __m256d bb = _mm256_sub_pd(s, a);
   *err = _mm256_add_pd(_mm256_sub_pd(a, _mm256_sub_pd(s, bb)), _mm256_sub_pd(b, bb));
   return s;
 }
+/*   
+tmp_s = _mm256_add_pd(in1, in2);
+tmp_bb = _mm256_sub_pd(tmp_s, in1);
+tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
+tmp1 = _mm256_sub_pd(in2, tmp_bb);
+tmp0 = _mm256_sub_pd(in1, tmp0);
+err = _mm256_add_pd(tmp0, tmp1);
+out = tmp_s;
+*/
 
-static inline void three_sum(double *a, double *b, double *c) {
+inline void three_sum(double *a, double *b, double *c) {
   double t1, t2, t3;
   t1 = two_sum(*a, *b, &t2);
   *a  = two_sum(*c, t1, &t3);
@@ -114,7 +129,7 @@ tmp_bb=tmp_s-tmp_t2;
 c = (tmp_t2 - (tmp_s - tmp_bb)) + (tmp_t3 - tmp_bb);
 b = tmp_s;
  */
-static inline void three_sum_inline(double *a, double *b, double *c) {
+inline void three_sum_inline(double *a, double *b, double *c) {
   double t1, t2, t3;
   double tmp_s,tmp_bb;
 
@@ -139,21 +154,61 @@ static inline void three_sum_inline(double *a, double *b, double *c) {
   *a=val_a;*b=val_b;*c=val_c;
 }
 
-static inline void three_sum_vec(__m256d *a, __m256d *b, __m256d *c) {
+inline void three_sum_vec(__m256d *a, __m256d *b, __m256d *c) {
   __m256d t1, t2, t3;
   t1 = two_sum_vec(*a, *b, &t2);
   *a  = two_sum_vec(*c, t1, &t3);
   *b  = two_sum_vec(t2, t3, c);
 }
+/* 
+tmp_s = _mm256_add_pd(in1, in2);
+tmp_bb = _mm256_sub_pd(tmp_s, in1);
+tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
+tmp1 = _mm256_sub_pd(in2, tmp_bb);
+tmp0 = _mm256_sub_pd(in1, tmp0);
+tmp_t2 = _mm256_add_pd(tmp0, tmp1);
+tmp_t1 = tmp_s;
+tmp_s = _mm256_add_pd(in3, tmp_t1);
+tmp_bb = _mm256_sub_pd(tmp_s, in3);
+tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
+tmp1 = _mm256_sub_pd(tmp_t1, tmp_bb);
+tmp0 = _mm256_sub_pd(in3, tmp0);
+tmp_t3 = _mm256_add_pd(tmp0, tmp1);
+in1 = tmp_s;
+tmp_s = _mm256_add_pd(tmp_t2, tmp_t3);
+tmp_bb = _mm256_sub_pd(tmp_s, tmp_t2);
+tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
+tmp1 = _mm256_sub_pd(tmp_t3, tmp_bb);
+tmp0 = _mm256_sub_pd(tmp_t2, tmp0);
+in3 = _mm256_add_pd(tmp0, tmp1);
+in2 = tmp_s;
+*/
 
-static inline void three_sum2(double *a, double *b, double *c) {
+inline void three_sum2(double *a, double *b, double *c) {
   double t1, t2, t3;
   t1 = two_sum(*a, *b, &t2);
   *a  = two_sum(*c, t1, &t3);
   *b = t2 + t3;
 }
+/* 
+tmp_s = _mm256_add_pd(in1, in2);
+tmp_bb = _mm256_sub_pd(tmp_s, in1);
+tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
+tmp1 = _mm256_sub_pd(in2, tmp_bb);
+tmp0 = _mm256_sub_pd(in1, tmp0);
+tmp_t2 = _mm256_add_pd(tmp0, tmp1);
+tmp_t1 = tmp_s;
+tmp_s = _mm256_add_pd(in3, tmp_t1);
+tmp_bb = _mm256_sub_pd(tmp_s, in3);
+tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
+tmp1 = _mm256_sub_pd(tmp_t1, tmp_bb);
+tmp0 = _mm256_sub_pd(in3, tmp0);
+tmp_t3 = _mm256_add_pd(tmp0, tmp1);
+in1 = tmp_s;
+in2 = _mm256_add_pd(tmp_t2, tmp_t3);
+ */
 
-static inline void three_sum2_inline(double *a, double *b, double *c) {
+inline void three_sum2_inline(double *a, double *b, double *c) {
   double t1, t2, t3;
   double tmp_s,tmp_bb;
 
@@ -175,14 +230,14 @@ static inline void three_sum2_inline(double *a, double *b, double *c) {
   *a=val_a;*b=val_b;*c=val_c;
 }
 
-static inline void three_sum2_vec(__m256d *a, __m256d *b, __m256d *c) {
+inline void three_sum2_vec(__m256d *a, __m256d *b, __m256d *c) {
   __m256d t1, t2, t3;
   t1 = two_sum_vec(*a, *b, &t2);
   *a  = two_sum_vec(*c, t1, &t3);
   *b = t2 + t3;
 }
 /* Computes fl(a-b) and err(a-b).  */
-static inline double two_diff(double a, double b, double *err)
+inline double two_diff(double a, double b, double *err)
 {
   double s = a - b;
   double bb = s - a;
@@ -192,7 +247,7 @@ static inline double two_diff(double a, double b, double *err)
 
 #ifndef QD_FMS
 /* Computes high word and lo word of a */
-static inline void split(double a, double *hi, double *lo)
+inline void split(double a, double *hi, double *lo)
 {
   double temp;
   if (a > _QD_SPLIT_THRESH || a < -_QD_SPLIT_THRESH)
@@ -214,7 +269,7 @@ static inline void split(double a, double *hi, double *lo)
 #endif
 
 /* Computes fl(a*b) and err(a*b). */
-static inline double two_prod(double a, double b, double *err)
+inline double two_prod(double a, double b, double *err)
 {
 #ifdef QD_FMS
   double p = a * b;
@@ -231,7 +286,7 @@ static inline double two_prod(double a, double b, double *err)
 }
 
 /* Computes fl(a*a) and err(a*a).  Faster than the above method. */
-static inline double two_sqr(double a, double *err)
+inline double two_sqr(double a, double *err)
 {
 #ifdef QD_FMS
   double p = a * a;
@@ -246,7 +301,7 @@ static inline double two_sqr(double a, double *err)
 #endif
 }
 
-static inline void renorm4(double *c0, double *c1,
+inline void renorm4(double *c0, double *c1,
                    double *c2, double *c3)
 {
   double s0, s1, s2 = 0.0, s3 = 0.0;
@@ -283,7 +338,7 @@ static inline void renorm4(double *c0, double *c1,
   *c3 = s3;
 }
 
-static inline void renorm5(double *c0, double *c1,
+inline void renorm5(double *c0, double *c1,
                    double *c2, double *c3, double *c4)
 {
   double s0, s1, s2 = 0.0, s3 = 0.0;
@@ -346,4 +401,150 @@ static inline void renorm5(double *c0, double *c1,
   *c3 = s3;
 }
 
+inline void renorm5_inline(double *c0, double *c1,
+                   double *c2, double *c3, double *c4)
+{
+  double s0, s1, s2 = 0.0, s3 = 0.0;
+  double in_c0 = *c0;
+  double in_c1 = *c1;
+  double in_c2 = *c2;
+  double in_c3 = *c3;
+  double in_c4 = *c4;
+  double tmp_s, tmp0;
+  if (isinf(in_c0))
+    return;
+
+  //s0 = quick_two_sum(*c3, *c4, c4);
+  tmp_s = in_c3 + in_c4;
+  tmp0 = tmp_s - in_c3;
+  in_c4 = in_c4 - tmp0;
+  s0 = tmp_s;
+  //s0 = quick_two_sum(*c2, s0, c3);
+  tmp_s = in_c2 + s0;
+  tmp0 = tmp_s - in_c2;
+  in_c3 = s0 - tmp0;
+  s0 = tmp_s;
+  //s0 = quick_two_sum(*c1, s0, c2);
+  tmp_s = in_c1 + s0;
+  tmp0 = tmp_s - in_c1;
+  in_c2 = s0 - tmp0;
+  s0 = tmp_s;
+  //*c0 = quick_two_sum(*c0, s0, c1);
+  tmp_s = in_c0 + s0;
+  tmp0 = tmp_s - in_c0;
+  in_c1 = s0 - tmp0;
+  in_c0 = tmp_s;
+
+  //s0 = *c0;
+  s0 = in_c0;
+  //s1 = *c1;
+  s1 = in_c1;
+
+  if (s1 != 0.0)
+  {
+    //s1 = quick_two_sum(s1, *c2, &s2);
+    tmp_s = s1 + in_c2;
+    tmp0 = tmp_s - s1;
+    s2 = in_c2 - tmp0;
+    s1 = tmp_s;
+    if (s2 != 0.0)
+    {
+      //s2 = quick_two_sum(s2, *c3, &s3);
+      tmp_s = s2 + in_c3;
+      tmp0 = tmp_s - s2;
+      s3 = in_c3 - tmp0;
+      s2 = tmp_s;
+      if (s3 != 0.0) {
+        //s3 += *c4;
+        s3 += in_c4;
+      }
+      else {
+        //s2 = quick_two_sum(s2, *c4, &s3);
+        tmp_s = s2 + in_c4;
+        tmp0 = tmp_s - s2;
+        s3 = in_c4 - tmp0;
+        s2 = tmp_s;
+      }
+    }
+    else
+    {
+      //s1 = quick_two_sum(s1, *c3, &s2);
+      tmp_s = s1 + in_c3;
+      tmp0 = tmp_s - s1;
+      s2 = in_c3 - tmp0;
+      s1 = tmp_s;
+      if (s2 != 0.0) {
+        //s2 = quick_two_sum(s2, *c4, &s3);
+        tmp_s = s2 + in_c4;
+        tmp0 = tmp_s - s2;
+        s3 = in_c4 - tmp0;
+        s2 = tmp_s;
+      }
+      else {
+        //s1 = quick_two_sum(s1, *c4, &s2);
+        tmp_s = s1 + in_c4;
+        tmp0 = tmp_s - s1;
+        s2 = in_c4 - tmp0;
+        s1 = tmp_s;
+      }
+    }
+  }
+  else
+  {
+    //s0 = quick_two_sum(s0, *c2, &s1);
+    tmp_s = s0 + in_c2;
+    tmp0 = tmp_s - s0;
+    s1 = in_c2 - tmp0;
+    s0 = tmp_s;
+    if (s1 != 0.0)
+    {
+      //s1 = quick_two_sum(s1, *c3, &s2);
+      tmp_s = s1 + in_c3;
+      tmp0 = tmp_s - s1;
+      s2 = in_c3 - tmp0;
+      s1 = tmp_s;
+      if (s2 != 0.0) {
+        //s2 = quick_two_sum(s2, *c4, &s3);
+        tmp_s = s2 + in_c4;
+        tmp0 = tmp_s - s2;
+        s3 = in_c4 - tmp0;
+        s2 = tmp_s;
+      }
+      else {
+        //s1 = quick_two_sum(s1, *c4, &s2);
+        tmp_s = s1 + in_c4;
+        tmp0 = tmp_s - s1;
+        s2 = in_c4 - tmp0;
+        s1 = tmp_s;
+      }
+    }
+    else
+    {
+      //s0 = quick_two_sum(s0, *c3, &s1);
+      tmp_s = s0 + in_c3;
+      tmp0 = tmp_s - s0;
+      s1 = in_c3 - tmp0;
+      s0 = tmp_s;
+      if (s1 != 0.0) {
+        //s1 = quick_two_sum(s1, *c4, &s2);
+        tmp_s = s1 + in_c4;
+        tmp0 = tmp_s - s1;
+        s2 = in_c4 - tmp0;
+        s1 = tmp_s;
+      }
+      else {
+        //s0 = quick_two_sum(s0, *c4, &s1);
+        tmp_s = s0 + in_c4;
+        tmp0 = tmp_s - s0;
+        s1 = in_c4 - tmp0;
+        s0 = tmp_s;
+      }
+    }
+  }
+
+  *c0 = s0;
+  *c1 = s1;
+  *c2 = s2;
+  *c3 = s3;
+}
 #endif

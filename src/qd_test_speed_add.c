@@ -106,6 +106,30 @@ double rdtsc_qd_add_inplace_vec(qd_arr left, qd_arr right) {
   return (double)cycles / num_runs;
 }
 
+double rdtsc_qd_add_inplace_vec_inline(qd_arr left, qd_arr right) {
+  int i, num_runs = 1;
+  myInt64 cycles;
+  myInt64 start;
+
+  while (num_runs < (1 << 14)) {
+    start = start_tsc();
+    for (i = 0; i < num_runs; ++i) {
+      qd_arr_add_inplace_vec_inline(left, right);
+    }
+    cycles = stop_tsc(start);
+    if (cycles >= CYCLES_REQUIRED)
+      break;
+    num_runs *= 2;
+  }
+
+  start = start_tsc();
+  for (i = 0; i < num_runs; ++i) {
+    qd_arr_add_inplace_vec_inline(left, right);
+  }
+  cycles = stop_tsc(start);
+  return (double)cycles / num_runs;
+}
+
 int main() {
   // testing
   for (int i = 3; i <= 14; i++) { //18 -> out of L3
@@ -118,6 +142,7 @@ int main() {
     double cycles_qd_add_inplace = 0;
     double cycles_qd_add_inplace_inline = 0;
     double cycles_qd_add_inplace_vec = 0;
+    double cycles_qd_add_inplace_vec_inline = 0;
     for (int j = 0; j < REP_COUNT; j++) {
       cycles_qd_add += rdtsc_qd_add(left,right);
     }
@@ -130,12 +155,16 @@ int main() {
     for (int j = 0; j < REP_COUNT; j++) {
       cycles_qd_add_inplace_vec += rdtsc_qd_add_inplace_vec(left,right);
     }
-    printf("%d %.2f %.2f %.2f %.2f\n",
+    for (int j = 0; j < REP_COUNT; j++) {
+      cycles_qd_add_inplace_vec_inline += rdtsc_qd_add_inplace_vec_inline(left,right);
+    }
+    printf("%d %.2f %.2f %.2f %.2f %.2f\n",
     n, 
     cycles_qd_add / REP_COUNT, 
     cycles_qd_add_inplace / REP_COUNT,
     cycles_qd_add_inplace_inline / REP_COUNT,
-    cycles_qd_add_inplace_vec / REP_COUNT);
+    cycles_qd_add_inplace_vec / REP_COUNT,
+    cycles_qd_add_inplace_vec_inline / REP_COUNT);
     qd_destroy_aligned(left);
     qd_destroy_aligned(right);
   }
