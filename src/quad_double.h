@@ -63,6 +63,7 @@ void qd_arr_add_inplace_vec_inline_x6(qd_arr lo, qd_arr ro);
 void qd_arr_add_inplace_vec_inline_x8(qd_arr lo, qd_arr ro);
 
 void qd_arr_mul_inplace(qd_arr lo, qd_arr ro);
+void qd_arr_mul_inplace_vec(qd_arr lo, qd_arr ro);
 
 /* Computes fl(a+b) and err(a+b).  Assumes |a| >= |b|. */
 static inline double quick_two_sum(double a, double b, double *err)
@@ -111,10 +112,10 @@ static inline __m256d two_sum_vec(__m256d a, __m256d b, __m256d *err)
 /*   
 tmp_s = _mm256_add_pd(in1, in2);
 tmp_bb = _mm256_sub_pd(tmp_s, in1);
-tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
-tmp1 = _mm256_sub_pd(in2, tmp_bb);
-tmp0 = _mm256_sub_pd(in1, tmp0);
-err = _mm256_add_pd(tmp0, tmp1);
+tmp_0 = _mm256_sub_pd(tmp_s, tmp_bb);
+tmp_1 = _mm256_sub_pd(in2, tmp_bb);
+tmp_0 = _mm256_sub_pd(in1, tmp_0);
+err = _mm256_add_pd(tmp_0, tmp_1);
 out = tmp_s;
 */
 
@@ -170,27 +171,27 @@ static inline void three_sum_vec(__m256d *a, __m256d *b, __m256d *c) {
   *b  = two_sum_vec(t2, t3, c);
 }
 /* 
-tmp_s = _mm256_add_pd(in1, in2);
-tmp_bb = _mm256_sub_pd(tmp_s, in1);
-tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
-tmp1 = _mm256_sub_pd(in2, tmp_bb);
-tmp0 = _mm256_sub_pd(in1, tmp0);
-tmp_t2 = _mm256_add_pd(tmp0, tmp1);
-tmp_t1 = tmp_s;
-tmp_s = _mm256_add_pd(in3, tmp_t1);
-tmp_bb = _mm256_sub_pd(tmp_s, in3);
-tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
-tmp1 = _mm256_sub_pd(tmp_t1, tmp_bb);
-tmp0 = _mm256_sub_pd(in3, tmp0);
-tmp_t3 = _mm256_add_pd(tmp0, tmp1);
-in1 = tmp_s;
-tmp_s = _mm256_add_pd(tmp_t2, tmp_t3);
-tmp_bb = _mm256_sub_pd(tmp_s, tmp_t2);
-tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
-tmp1 = _mm256_sub_pd(tmp_t3, tmp_bb);
-tmp0 = _mm256_sub_pd(tmp_t2, tmp0);
-in3 = _mm256_add_pd(tmp0, tmp1);
-in2 = tmp_s;
+tmp0_s = _mm256_add_pd(in1, in2);
+tmp0_bb = _mm256_sub_pd(tmp0_s, in1);
+tmp0_0 = _mm256_sub_pd(tmp0_s, tmp0_bb);
+tmp0_1 = _mm256_sub_pd(in2, tmp0_bb);
+tmp0_0 = _mm256_sub_pd(in1, tmp0_0);
+tmp_t2 = _mm256_add_pd(tmp0_0, tmp0_1);
+tmp_t1 = tmp0_s;
+tmp1_s = _mm256_add_pd(in3, tmp_t1);
+tmp1_bb = _mm256_sub_pd(tmp1_s, in3);
+tmp1_0 = _mm256_sub_pd(tmp1_s, tmp1_bb);
+tmp1_1 = _mm256_sub_pd(tmp_t1, tmp1_bb);
+tmp1_0 = _mm256_sub_pd(in3, tmp1_0);
+tmp_t3 = _mm256_add_pd(tmp1_0, tmp1_1);
+in1 = tmp1_s;
+tmp2_s = _mm256_add_pd(tmp_t2, tmp_t3);
+tmp2_bb = _mm256_sub_pd(tmp2_s, tmp_t2);
+tmp2_0 = _mm256_sub_pd(tmp2_s, tmp2_bb);
+tmp2_1 = _mm256_sub_pd(tmp_t3, tmp2_bb);
+tmp2_0 = _mm256_sub_pd(tmp_t2, tmp2_0);
+in3 = _mm256_add_pd(tmp2_0, tmp2_1);
+in2 = tmp2_s;
 */
 
 static inline void three_sum2(double *a, double *b, double *c) {
