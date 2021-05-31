@@ -4524,21 +4524,94 @@ void qd_arr_add_inplace_vec_inline_x8(qd_arr lo, qd_arr ro) {
 }
 // hand inline serial no effect
 // static inline func no use! complier refuse to inline.
-// TODO: unfold in some way, more vec, inline simple func then unfold?
+// TODO: unfold in some way, more vec, inline simple func then unfold? done
 
-/* int main() {
+
+void qd_arr_mul_inplace(qd_arr lo, qd_arr ro) {
+  //assert(lo.size == ro.size);
+  int size = lo.size;
+
+  double p0, p1, p2, p3, p4, p5;
+  double q0, q1, q2, q3, q4, q5;
+  double p6, p7, p8, p9;
+  double q6, q7, q8, q9;
+  double r0, r1;
+  double t0, t1;
+  double s0, s1, s2;
+
+  for (int i = 0; i < size; i++) {
+    p0 = two_prod(lo.d0[i], ro.d0[i], &q0);
+
+    p1 = two_prod(lo.d0[i], ro.d1[i], &q1);
+    p2 = two_prod(lo.d1[i], ro.d0[i], &q2);
+
+    p3 = two_prod(lo.d0[i], ro.d2[i], &q3);
+    p4 = two_prod(lo.d1[i], ro.d1[i], &q4);
+    p5 = two_prod(lo.d2[i], ro.d0[i], &q5);
+
+    /* Start Accumulation */
+    three_sum(&p1, &p2, &q0);
+
+    /* Six-Three Sum  of p2, q1, q2, p3, p4, p5. */
+    three_sum(&p2, &q1, &q2);
+    three_sum(&p3, &p4, &p5);
+    /* compute (s0, s1, s2) = (p2, q1, q2) + (p3, p4, p5). */
+    s0 = two_sum(p2, p3, &t0);
+    s1 = two_sum(q1, p4, &t1);
+    s2 = q2 + p5;
+    s1 = two_sum(s1, t0, &t0);
+    s2 += (t0 + t1);
+
+    /* O(eps^3) order terms */
+    p6 = two_prod(lo.d0[i], ro.d3[i], &q6);
+    p7 = two_prod(lo.d1[i], ro.d2[i], &q7);
+    p8 = two_prod(lo.d2[i], ro.d1[i], &q8);
+    p9 = two_prod(lo.d3[i], ro.d0[i], &q9);
+
+    /* Nine-Two-Sum of q0, s1, q3, q4, q5, p6, p7, p8, p9. */
+    q0 = two_sum(q0, q3, &q3);
+    q4 = two_sum(q4, q5, &q5);
+    p6 = two_sum(p6, p7, &p7);
+    p8 = two_sum(p8, p9, &p9);
+    /* Compute (t0, t1) = (q0, q3) + (q4, q5). */
+    t0 = two_sum(q0, q4, &t1);
+    t1 += (q3 + q5);
+    /* Compute (r0, r1) = (p6, p7) + (p8, p9). */
+    r0 = two_sum(p6, p8, &r1);
+    r1 += (p7 + p9);
+    /* Compute (q3, q4) = (t0, t1) + (r0, r1). */
+    q3 = two_sum(t0, r0, &q4);
+    q4 += (t1 + r1);
+    /* Compute (t0, t1) = (q3, q4) + s1. */
+    t0 = two_sum(q3, s1, &t1);
+    t1 += q4;
+
+    /* O(eps^4) terms -- Nine-One-Sum */
+    t1 += lo.d1[i] * ro.d3[i] + lo.d2[i] * ro.d2[i] + lo.d3[i] * ro.d1[i] + q6 + q7 + q8 + q9 + s2;
+
+    renorm5(&p0, &p1, &s0, &t0, &t1);
+    lo.d0[i] = p0;
+    lo.d1[i] = p1;
+    lo.d2[i] = s0;
+    lo.d3[i] = t0;
+  }
+}
+
+
+
+int main() {
 
   srand(11);
   qd_arr a=qd_arr_create_random_aligned(20,-1,1);
   qd_arr b=qd_arr_create_random_aligned(20,-1,1);
   print_qd_arr(a,2,"a");
   print_qd_arr(b,2,"b");
-  qd_arr c=qd_arr_add(a,b);
-  qd_arr_add_inplace_vec_inline_x4(a,b);
+  qd_arr c=qd_arr_mul(a,b);
+  qd_arr_mul_inplace(a,b);
   print_qd_arr(c,2,"ref");
   print_qd_arr(a,2,"ans");
   qd_destroy_aligned(a);
   qd_destroy_aligned(b);
   qd_destroy(c);
   return 0;
-} */
+}

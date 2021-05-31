@@ -61,8 +61,8 @@ $(BUILD_DIR)/test/%.o: $(TEST_DIR)/%.c
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
 
 qd_s: 
-	$(CC) -Wall -O3 -fno-tree-vectorize -march=native $(INCLUDES) -c ./src/quad_double.c $(LFLAGS) $(LIBS)
-	$(CC) -Wall -O3 -fno-tree-vectorize -march=native $(INCLUDES) -o qd_test_add ./src/qd_test_speed_add.c quad_double.o $(LFLAGS) $(LIBS)
+	$(CC) -Wall -O3 -march=native $(INCLUDES) -c ./src/quad_double.c $(LFLAGS) $(LIBS)
+	$(CC) -Wall -O3 -march=native $(INCLUDES) -o qd_test_add ./src/qd_test_speed_add.c quad_double.o $(LFLAGS) $(LIBS)
 
 qd_c: 
 	$(CC) -Wall -O3 -fno-tree-vectorize  -march=native $(INCLUDES) -o qd_test_correctness ./src/quad_double.c $(LFLAGS) $(LIBS)

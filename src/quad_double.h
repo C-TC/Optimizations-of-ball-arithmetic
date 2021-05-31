@@ -62,8 +62,10 @@ void qd_arr_add_inplace_vec_inline_x4(qd_arr lo, qd_arr ro);
 void qd_arr_add_inplace_vec_inline_x6(qd_arr lo, qd_arr ro);
 void qd_arr_add_inplace_vec_inline_x8(qd_arr lo, qd_arr ro);
 
+void qd_arr_mul_inplace(qd_arr lo, qd_arr ro);
+
 /* Computes fl(a+b) and err(a+b).  Assumes |a| >= |b|. */
-inline double quick_two_sum(double a, double b, double *err)
+static inline double quick_two_sum(double a, double b, double *err)
 {
   double s = a + b;
   *err = b - (s - a);
@@ -77,7 +79,7 @@ out = tmp_s;
  */
 
 /* Computes fl(a-b) and err(a-b).  Assumes |a| >= |b| */
-inline double quick_two_diff(double a, double b, double *err)
+static inline double quick_two_diff(double a, double b, double *err)
 {
   double s = a - b;
   *err = (a - s) - b;
@@ -85,7 +87,7 @@ inline double quick_two_diff(double a, double b, double *err)
 }
 
 /* Computes fl(a+b) and err(a+b).  */
-inline double two_sum(double a, double b, double *err)
+static inline double two_sum(double a, double b, double *err)
 {
   double s = a + b;
   double bb = s - a;
@@ -99,7 +101,7 @@ err = (a - (tmp_s - tmp_bb)) + (b - tmp_bb);
 out = tmp_s;
  */
 
-inline __m256d two_sum_vec(__m256d a, __m256d b, __m256d *err)
+static inline __m256d two_sum_vec(__m256d a, __m256d b, __m256d *err)
 {
   __m256d s = _mm256_add_pd(a, b);
   __m256d bb = _mm256_sub_pd(s, a);
@@ -116,7 +118,7 @@ err = _mm256_add_pd(tmp0, tmp1);
 out = tmp_s;
 */
 
-inline void three_sum(double *a, double *b, double *c) {
+static inline void three_sum(double *a, double *b, double *c) {
   double t1, t2, t3;
   t1 = two_sum(*a, *b, &t2);
   *a  = two_sum(*c, t1, &t3);
@@ -136,7 +138,7 @@ tmp_bb=tmp_s-tmp_t2;
 c = (tmp_t2 - (tmp_s - tmp_bb)) + (tmp_t3 - tmp_bb);
 b = tmp_s;
  */
-inline void three_sum_inline(double *a, double *b, double *c) {
+static inline void three_sum_inline(double *a, double *b, double *c) {
   double t1, t2, t3;
   double tmp_s,tmp_bb;
 
@@ -161,7 +163,7 @@ inline void three_sum_inline(double *a, double *b, double *c) {
   *a=val_a;*b=val_b;*c=val_c;
 }
 
-inline void three_sum_vec(__m256d *a, __m256d *b, __m256d *c) {
+static inline void three_sum_vec(__m256d *a, __m256d *b, __m256d *c) {
   __m256d t1, t2, t3;
   t1 = two_sum_vec(*a, *b, &t2);
   *a  = two_sum_vec(*c, t1, &t3);
@@ -191,7 +193,7 @@ in3 = _mm256_add_pd(tmp0, tmp1);
 in2 = tmp_s;
 */
 
-inline void three_sum2(double *a, double *b, double *c) {
+static inline void three_sum2(double *a, double *b, double *c) {
   double t1, t2, t3;
   t1 = two_sum(*a, *b, &t2);
   *a  = two_sum(*c, t1, &t3);
@@ -215,7 +217,7 @@ in1 = tmp_s;
 in2 = _mm256_add_pd(tmp_t2, tmp_t3);
  */
 
-inline void three_sum2_inline(double *a, double *b, double *c) {
+static inline void three_sum2_inline(double *a, double *b, double *c) {
   double t1, t2, t3;
   double tmp_s,tmp_bb;
 
@@ -237,7 +239,7 @@ inline void three_sum2_inline(double *a, double *b, double *c) {
   *a=val_a;*b=val_b;*c=val_c;
 }
 
-inline void three_sum2_vec(__m256d *a, __m256d *b, __m256d *c) {
+static inline void three_sum2_vec(__m256d *a, __m256d *b, __m256d *c) {
   __m256d t1, t2, t3;
   t1 = two_sum_vec(*a, *b, &t2);
   *a  = two_sum_vec(*c, t1, &t3);
@@ -254,7 +256,7 @@ inline double two_diff(double a, double b, double *err)
 
 #ifndef QD_FMS
 /* Computes high word and lo word of a */
-inline void split(double a, double *hi, double *lo)
+static inline void split(double a, double *hi, double *lo)
 {
   double temp;
   if (a > _QD_SPLIT_THRESH || a < -_QD_SPLIT_THRESH)
@@ -276,7 +278,7 @@ inline void split(double a, double *hi, double *lo)
 #endif
 
 /* Computes fl(a*b) and err(a*b). */
-inline double two_prod(double a, double b, double *err)
+static inline double two_prod(double a, double b, double *err)
 {
 #ifdef QD_FMS
   double p = a * b;
@@ -291,9 +293,14 @@ inline double two_prod(double a, double b, double *err)
   return p;
 #endif
 }
+/* with fms
+p = in1 * in2;
+err = fmsub(a, b, p);
+out = p;
+  */
 
 /* Computes fl(a*a) and err(a*a).  Faster than the above method. */
-inline double two_sqr(double a, double *err)
+static inline double two_sqr(double a, double *err)
 {
 #ifdef QD_FMS
   double p = a * a;
@@ -308,7 +315,7 @@ inline double two_sqr(double a, double *err)
 #endif
 }
 
-inline void renorm4(double *c0, double *c1,
+static inline void renorm4(double *c0, double *c1,
                    double *c2, double *c3)
 {
   double s0, s1, s2 = 0.0, s3 = 0.0;
@@ -345,7 +352,7 @@ inline void renorm4(double *c0, double *c1,
   *c3 = s3;
 }
 
-inline void renorm5(double *c0, double *c1,
+static inline void renorm5(double *c0, double *c1,
                    double *c2, double *c3, double *c4)
 {
   double s0, s1, s2 = 0.0, s3 = 0.0;
