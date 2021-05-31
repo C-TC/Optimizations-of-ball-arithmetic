@@ -700,6 +700,829 @@ void qd_arr_add_inplace_vec_inline(qd_arr lo, qd_arr ro) {
   _mm_free(tmp_vt0);
 }
 
+void qd_arr_add_inplace_vec_inline_reorder(qd_arr lo, qd_arr ro) {
+  //assert(lo.size == ro.size);
+  int size = lo.size;
+
+  double s0, s1, s2, s3;
+  double t0, t1, t2, t3;
+  __m256d vs0, vs1, vs2, vs3;
+  __m256d vt0, vt1, vt2, vt3;
+  __m256d ld0, ld1, ld2, ld3;
+  __m256d rd0, rd1, rd2, rd3;
+  __m256d tmp_s, tmp_t1, tmp_t2, tmp_t3, tmp_bb, tmp0, tmp1;
+  __m256d tmp_s_0, tmp_bb_0, tmp0_0, tmp1_0;
+  __m256d tmp_s_1, tmp_bb_1, tmp0_1, tmp1_1;
+  __m256d tmp_s_2, tmp_bb_2, tmp0_2, tmp1_2;
+  __m256d tmp_s_3, tmp_bb_3, tmp0_3, tmp1_3;
+  double *tmp_vt0 = (double *)_mm_malloc(4 * sizeof(double), ALIGNMENT);
+  int i;
+  for (i = 0; i + 3 < size; i += 4) {
+    ld0 = _mm256_load_pd(lo.d0 + i);
+    ld1 = _mm256_load_pd(lo.d1 + i);
+    ld2 = _mm256_load_pd(lo.d2 + i);
+    ld3 = _mm256_load_pd(lo.d3 + i);
+    rd0 = _mm256_load_pd(ro.d0 + i);
+    rd1 = _mm256_load_pd(ro.d1 + i);
+    rd2 = _mm256_load_pd(ro.d2 + i);
+    rd3 = _mm256_load_pd(ro.d3 + i);
+
+    //vs0 = two_sum_vec(ld0, rd0, &vt0);
+    //vs1 = two_sum_vec(ld1, rd1, &vt1);
+    //vs2 = two_sum_vec(ld2, rd2, &vt2);
+    //vs3 = two_sum_vec(ld3, rd3, &vt3);
+    tmp_s_0 = _mm256_add_pd(ld0, rd0);
+    tmp_s_1 = _mm256_add_pd(ld1, rd1);
+    tmp_s_2 = _mm256_add_pd(ld2, rd2);
+    tmp_s_3 = _mm256_add_pd(ld3, rd3);
+    tmp_bb_0 = _mm256_sub_pd(tmp_s_0, ld0);
+    tmp_bb_1 = _mm256_sub_pd(tmp_s_1, ld1);
+    tmp_bb_2 = _mm256_sub_pd(tmp_s_2, ld2);
+    tmp_bb_3 = _mm256_sub_pd(tmp_s_3, ld3);
+    tmp0_0 = _mm256_sub_pd(tmp_s_0, tmp_bb_0);
+    tmp0_1 = _mm256_sub_pd(tmp_s_1, tmp_bb_1);
+    tmp0_2 = _mm256_sub_pd(tmp_s_2, tmp_bb_2);
+    tmp0_3 = _mm256_sub_pd(tmp_s_3, tmp_bb_3);
+    tmp1_0 = _mm256_sub_pd(rd0, tmp_bb_0);
+    tmp1_1 = _mm256_sub_pd(rd1, tmp_bb_1);
+    tmp1_2 = _mm256_sub_pd(rd2, tmp_bb_2);
+    tmp1_3 = _mm256_sub_pd(rd3, tmp_bb_3);
+    tmp0_0 = _mm256_sub_pd(ld0, tmp0_0);
+    tmp0_1 = _mm256_sub_pd(ld1, tmp0_1);
+    tmp0_2 = _mm256_sub_pd(ld2, tmp0_2);
+    tmp0_3 = _mm256_sub_pd(ld3, tmp0_3);
+    vt0 = _mm256_add_pd(tmp0_0, tmp1_0);
+    vt1 = _mm256_add_pd(tmp0_1, tmp1_1);
+    vt2 = _mm256_add_pd(tmp0_2, tmp1_2);
+    vt3 = _mm256_add_pd(tmp0_3, tmp1_3);
+    vs0 = tmp_s_0;
+    vs1 = tmp_s_1;
+    vs2 = tmp_s_2;
+    vs3 = tmp_s_3;
+
+    //vs1 = two_sum_vec(vs1, vt0, &vt0);
+    tmp_s = _mm256_add_pd(vs1, vt0);
+    tmp_bb = _mm256_sub_pd(tmp_s, vs1);
+    tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
+    tmp1 = _mm256_sub_pd(vt0, tmp_bb);
+    tmp0 = _mm256_sub_pd(vs1, tmp0);
+    vt0 = _mm256_add_pd(tmp0, tmp1);
+    vs1 = tmp_s;
+
+    //three_sum_vec(&vs2, &vt0, &vt1);
+    tmp_s = _mm256_add_pd(vs2, vt0);
+    tmp_bb = _mm256_sub_pd(tmp_s, vs2);
+    tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
+    tmp1 = _mm256_sub_pd(vt0, tmp_bb);
+    tmp0 = _mm256_sub_pd(vs2, tmp0);
+    tmp_t2 = _mm256_add_pd(tmp0, tmp1);
+    tmp_t1 = tmp_s;
+    tmp_s = _mm256_add_pd(vt1, tmp_t1);
+    tmp_bb = _mm256_sub_pd(tmp_s, vt1);
+    tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
+    tmp1 = _mm256_sub_pd(tmp_t1, tmp_bb);
+    tmp0 = _mm256_sub_pd(vt1, tmp0);
+    tmp_t3 = _mm256_add_pd(tmp0, tmp1);
+    vs2 = tmp_s;
+    tmp_s = _mm256_add_pd(tmp_t2, tmp_t3);
+    tmp_bb = _mm256_sub_pd(tmp_s, tmp_t2);
+    tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
+    tmp1 = _mm256_sub_pd(tmp_t3, tmp_bb);
+    tmp0 = _mm256_sub_pd(tmp_t2, tmp0);
+    vt1 = _mm256_add_pd(tmp0, tmp1);
+    vt0 = tmp_s;
+
+    //three_sum2_vec(&vs3, &vt0, &vt2);
+    tmp_s = _mm256_add_pd(vs3, vt0);
+    tmp_bb = _mm256_sub_pd(tmp_s, vs3);
+    tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
+    tmp1 = _mm256_sub_pd(vt0, tmp_bb);
+    tmp0 = _mm256_sub_pd(vs3, tmp0);
+    tmp_t2 = _mm256_add_pd(tmp0, tmp1);
+    tmp_t1 = tmp_s;
+    tmp_s = _mm256_add_pd(vt2, tmp_t1);
+    tmp_bb = _mm256_sub_pd(tmp_s, vt2);
+    tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
+    tmp1 = _mm256_sub_pd(tmp_t1, tmp_bb);
+    tmp0 = _mm256_sub_pd(vt2, tmp0);
+    tmp_t3 = _mm256_add_pd(tmp0, tmp1);
+    vs3 = tmp_s;
+    vt0 = _mm256_add_pd(tmp_t2, tmp_t3);
+
+    //vt0 = _mm256_add_pd(_mm256_add_pd(vt0, vt1), vt3);
+    tmp0 = _mm256_add_pd(vt0, vt1);
+    vt0 = _mm256_add_pd(tmp0, vt3);
+
+    //renorm5(&s0, &s1, &s2, &s3, &t0);
+    _mm256_store_pd(lo.d0 + i, vs0);
+    _mm256_store_pd(lo.d1 + i, vs1);
+    _mm256_store_pd(lo.d2 + i, vs2);
+    _mm256_store_pd(lo.d3 + i, vs3);
+    _mm256_store_pd(tmp_vt0, vt0);
+    renorm5_inline(lo.d0 + i, lo.d1 + i, lo.d2 + i, lo.d3 + i, tmp_vt0);
+    renorm5_inline(lo.d0 + i + 1, lo.d1 + i + 1, lo.d2 + i + 1, lo.d3 + i + 1, tmp_vt0 + 1);
+    renorm5_inline(lo.d0 + i + 2, lo.d1 + i + 2, lo.d2 + i + 2, lo.d3 + i + 2, tmp_vt0 + 2);
+    renorm5_inline(lo.d0 + i + 3, lo.d1 + i + 3, lo.d2 + i + 3, lo.d3 + i + 3, tmp_vt0 + 3);
+  }
+
+  for (; i < size; i++) {
+      
+    s0 = two_sum(lo.d0[i], ro.d0[i], &t0);
+    s1 = two_sum(lo.d1[i], ro.d1[i], &t1);
+    s2 = two_sum(lo.d2[i], ro.d2[i], &t2);
+    s3 = two_sum(lo.d3[i], ro.d3[i], &t3);
+
+    s1 = two_sum(s1, t0, &t0);
+    three_sum(&s2, &t0, &t1);
+    three_sum2(&s3, &t0, &t2);
+    t0 = t0 + t1 + t3;
+
+    renorm5_inline(&s0, &s1, &s2, &s3, &t0);
+    lo.d0[i] = s0;
+    lo.d1[i] = s1;
+    lo.d2[i] = s2;
+    lo.d3[i] = s3;
+  }
+  _mm_free(tmp_vt0);
+}
+
+void qd_arr_add_inplace_vec_inline_x4(qd_arr lo, qd_arr ro) {
+  //assert(lo.size == ro.size);
+  int size = lo.size;
+
+  double s0, s1, s2, s3;
+  double t0, t1, t2, t3;
+  __m256d vs0, vs1, vs2, vs3;
+  __m256d vs0_x0, vs1_x0, vs2_x0, vs3_x0;
+  __m256d vs0_x1, vs1_x1, vs2_x1, vs3_x1;
+  __m256d vs0_x2, vs1_x2, vs2_x2, vs3_x2;
+  __m256d vs0_x3, vs1_x3, vs2_x3, vs3_x3;
+
+  __m256d vt0, vt1, vt2, vt3;
+  __m256d vt0_x0, vt1_x0, vt2_x0, vt3_x0;
+  __m256d vt0_x1, vt1_x1, vt2_x1, vt3_x1;
+  __m256d vt0_x2, vt1_x2, vt2_x2, vt3_x2;
+  __m256d vt0_x3, vt1_x3, vt2_x3, vt3_x3;
+
+  __m256d ld0, ld1, ld2, ld3;
+  __m256d ld0_x0, ld1_x0, ld2_x0, ld3_x0;
+  __m256d ld0_x1, ld1_x1, ld2_x1, ld3_x1;
+  __m256d ld0_x2, ld1_x2, ld2_x2, ld3_x2;
+  __m256d ld0_x3, ld1_x3, ld2_x3, ld3_x3;
+
+  __m256d rd0, rd1, rd2, rd3;
+  __m256d rd0_x0, rd1_x0, rd2_x0, rd3_x0;
+  __m256d rd0_x1, rd1_x1, rd2_x1, rd3_x1;
+  __m256d rd0_x2, rd1_x2, rd2_x2, rd3_x2;
+  __m256d rd0_x3, rd1_x3, rd2_x3, rd3_x3;
+
+  __m256d tmp_s, tmp_t1, tmp_t2, tmp_t3, tmp_bb, tmp0, tmp1;
+  __m256d tmp_s_x0, tmp_t1_x0, tmp_t2_x0, tmp_t3_x0, tmp_bb_x0, tmp0_x0, tmp1_x0;
+  __m256d tmp_s_x1, tmp_t1_x1, tmp_t2_x1, tmp_t3_x1, tmp_bb_x1, tmp0_x1, tmp1_x1;
+  __m256d tmp_s_x2, tmp_t1_x2, tmp_t2_x2, tmp_t3_x2, tmp_bb_x2, tmp0_x2, tmp1_x2;
+  __m256d tmp_s_x3, tmp_t1_x3, tmp_t2_x3, tmp_t3_x3, tmp_bb_x3, tmp0_x3, tmp1_x3;
+  double *tmp_vt0 = (double *)_mm_malloc(4 * sizeof(double), ALIGNMENT);
+  double *tmp_vt0_x0 = (double *)_mm_malloc(4 * sizeof(double), ALIGNMENT);
+  double *tmp_vt0_x1 = (double *)_mm_malloc(4 * sizeof(double), ALIGNMENT);
+  double *tmp_vt0_x2 = (double *)_mm_malloc(4 * sizeof(double), ALIGNMENT);
+  double *tmp_vt0_x3 = (double *)_mm_malloc(4 * sizeof(double), ALIGNMENT);
+  int i;
+  for (i = 0; i + 15 < size; i += 16) {
+    ld0_x0 = _mm256_load_pd(lo.d0 + i);
+    ld0_x1 = _mm256_load_pd(lo.d0 + i + 4);
+    ld0_x2 = _mm256_load_pd(lo.d0 + i + 8);
+    ld0_x3 = _mm256_load_pd(lo.d0 + i + 12);
+    ld1_x0 = _mm256_load_pd(lo.d1 + i);
+    ld1_x1 = _mm256_load_pd(lo.d1 + i + 4);
+    ld1_x2 = _mm256_load_pd(lo.d1 + i + 8);
+    ld1_x3 = _mm256_load_pd(lo.d1 + i + 12);
+    ld2_x0 = _mm256_load_pd(lo.d2 + i);
+    ld2_x1 = _mm256_load_pd(lo.d2 + i + 4);
+    ld2_x2 = _mm256_load_pd(lo.d2 + i + 8);
+    ld2_x3 = _mm256_load_pd(lo.d2 + i + 12);
+    ld3_x0 = _mm256_load_pd(lo.d3 + i);
+    ld3_x1 = _mm256_load_pd(lo.d3 + i + 4);
+    ld3_x2 = _mm256_load_pd(lo.d3 + i + 8);
+    ld3_x3 = _mm256_load_pd(lo.d3 + i + 12);
+    
+    rd0_x0 = _mm256_load_pd(ro.d0 + i);
+    rd0_x1 = _mm256_load_pd(ro.d0 + i + 4);
+    rd0_x2 = _mm256_load_pd(ro.d0 + i + 8);
+    rd0_x3 = _mm256_load_pd(ro.d0 + i + 12);
+    rd1_x0 = _mm256_load_pd(ro.d1 + i);
+    rd1_x1 = _mm256_load_pd(ro.d1 + i + 4);
+    rd1_x2 = _mm256_load_pd(ro.d1 + i + 8);
+    rd1_x3 = _mm256_load_pd(ro.d1 + i + 12);
+    rd2_x0 = _mm256_load_pd(ro.d2 + i);
+    rd2_x1 = _mm256_load_pd(ro.d2 + i + 4);
+    rd2_x2 = _mm256_load_pd(ro.d2 + i + 8);
+    rd2_x3 = _mm256_load_pd(ro.d2 + i + 12);
+    rd3_x0 = _mm256_load_pd(ro.d3 + i);
+    rd3_x1 = _mm256_load_pd(ro.d3 + i + 4);
+    rd3_x2 = _mm256_load_pd(ro.d3 + i + 8);
+    rd3_x3 = _mm256_load_pd(ro.d3 + i + 12);
+
+    //vs0 = two_sum_vec(ld0, rd0, &vt0);
+    tmp_s_x0 = _mm256_add_pd(ld0_x0, rd0_x0);
+    tmp_s_x1 = _mm256_add_pd(ld0_x1, rd0_x1);
+    tmp_s_x2 = _mm256_add_pd(ld0_x2, rd0_x2);
+    tmp_s_x3 = _mm256_add_pd(ld0_x3, rd0_x3);
+
+    tmp_bb_x0 = _mm256_sub_pd(tmp_s_x0, ld0_x0);
+    tmp_bb_x1 = _mm256_sub_pd(tmp_s_x1, ld0_x1);
+    tmp_bb_x2 = _mm256_sub_pd(tmp_s_x2, ld0_x2);
+    tmp_bb_x3 = _mm256_sub_pd(tmp_s_x3, ld0_x3);
+
+    tmp0_x0 = _mm256_sub_pd(tmp_s_x0, tmp_bb_x0);
+    tmp0_x1 = _mm256_sub_pd(tmp_s_x1, tmp_bb_x1);
+    tmp0_x2 = _mm256_sub_pd(tmp_s_x2, tmp_bb_x2);
+    tmp0_x3 = _mm256_sub_pd(tmp_s_x3, tmp_bb_x3);
+    
+    tmp1_x0 = _mm256_sub_pd(rd0_x0, tmp_bb_x0);
+    tmp1_x1 = _mm256_sub_pd(rd0_x1, tmp_bb_x1);
+    tmp1_x2 = _mm256_sub_pd(rd0_x2, tmp_bb_x2);
+    tmp1_x3 = _mm256_sub_pd(rd0_x3, tmp_bb_x3);
+    
+    tmp0_x0 = _mm256_sub_pd(ld0_x0, tmp0_x0);
+    tmp0_x1 = _mm256_sub_pd(ld0_x1, tmp0_x1);
+    tmp0_x2 = _mm256_sub_pd(ld0_x2, tmp0_x2);
+    tmp0_x3 = _mm256_sub_pd(ld0_x3, tmp0_x3);
+
+    vt0_x0 = _mm256_add_pd(tmp0_x0, tmp1_x0);
+    vt0_x1 = _mm256_add_pd(tmp0_x1, tmp1_x1);
+    vt0_x2 = _mm256_add_pd(tmp0_x2, tmp1_x2);
+    vt0_x3 = _mm256_add_pd(tmp0_x3, tmp1_x3);
+
+    vs0_x0 = tmp_s_x0;
+    vs0_x1 = tmp_s_x1;
+    vs0_x2 = tmp_s_x2;
+    vs0_x3 = tmp_s_x3;
+
+    //vs1 = two_sum_vec(ld1, rd1, &vt1);
+    tmp_s_x0 = _mm256_add_pd(ld1_x0, rd1_x0);
+    tmp_s_x1 = _mm256_add_pd(ld1_x1, rd1_x1);
+    tmp_s_x2 = _mm256_add_pd(ld1_x2, rd1_x2);
+    tmp_s_x3 = _mm256_add_pd(ld1_x3, rd1_x3);
+
+    tmp_bb_x0 = _mm256_sub_pd(tmp_s_x0, ld1_x0);
+    tmp_bb_x1 = _mm256_sub_pd(tmp_s_x1, ld1_x1);
+    tmp_bb_x2 = _mm256_sub_pd(tmp_s_x2, ld1_x2);
+    tmp_bb_x3 = _mm256_sub_pd(tmp_s_x3, ld1_x3);
+
+    tmp0_x0 = _mm256_sub_pd(tmp_s_x0, tmp_bb_x0);
+    tmp0_x1 = _mm256_sub_pd(tmp_s_x1, tmp_bb_x1);
+    tmp0_x2 = _mm256_sub_pd(tmp_s_x2, tmp_bb_x2);
+    tmp0_x3 = _mm256_sub_pd(tmp_s_x3, tmp_bb_x3);
+    
+    tmp1_x0 = _mm256_sub_pd(rd1_x0, tmp_bb_x0);
+    tmp1_x1 = _mm256_sub_pd(rd1_x1, tmp_bb_x1);
+    tmp1_x2 = _mm256_sub_pd(rd1_x2, tmp_bb_x2);
+    tmp1_x3 = _mm256_sub_pd(rd1_x3, tmp_bb_x3);
+    
+    tmp0_x0 = _mm256_sub_pd(ld1_x0, tmp0_x0);
+    tmp0_x1 = _mm256_sub_pd(ld1_x1, tmp0_x1);
+    tmp0_x2 = _mm256_sub_pd(ld1_x2, tmp0_x2);
+    tmp0_x3 = _mm256_sub_pd(ld1_x3, tmp0_x3);
+
+    vt1_x0 = _mm256_add_pd(tmp0_x0, tmp1_x0);
+    vt1_x1 = _mm256_add_pd(tmp0_x1, tmp1_x1);
+    vt1_x2 = _mm256_add_pd(tmp0_x2, tmp1_x2);
+    vt1_x3 = _mm256_add_pd(tmp0_x3, tmp1_x3);
+
+    vs1_x0 = tmp_s_x0;
+    vs1_x1 = tmp_s_x1;
+    vs1_x2 = tmp_s_x2;
+    vs1_x3 = tmp_s_x3;
+
+    //vs2 = two_sum_vec(ld2, rd2, &vt2);
+    tmp_s_x0 = _mm256_add_pd(ld2_x0, rd2_x0);
+    tmp_s_x1 = _mm256_add_pd(ld2_x1, rd2_x1);
+    tmp_s_x2 = _mm256_add_pd(ld2_x2, rd2_x2);
+    tmp_s_x3 = _mm256_add_pd(ld2_x3, rd2_x3);
+
+    tmp_bb_x0 = _mm256_sub_pd(tmp_s_x0, ld2_x0);
+    tmp_bb_x1 = _mm256_sub_pd(tmp_s_x1, ld2_x1);
+    tmp_bb_x2 = _mm256_sub_pd(tmp_s_x2, ld2_x2);
+    tmp_bb_x3 = _mm256_sub_pd(tmp_s_x3, ld2_x3);
+
+    tmp0_x0 = _mm256_sub_pd(tmp_s_x0, tmp_bb_x0);
+    tmp0_x1 = _mm256_sub_pd(tmp_s_x1, tmp_bb_x1);
+    tmp0_x2 = _mm256_sub_pd(tmp_s_x2, tmp_bb_x2);
+    tmp0_x3 = _mm256_sub_pd(tmp_s_x3, tmp_bb_x3);
+    
+    tmp1_x0 = _mm256_sub_pd(rd2_x0, tmp_bb_x0);
+    tmp1_x1 = _mm256_sub_pd(rd2_x1, tmp_bb_x1);
+    tmp1_x2 = _mm256_sub_pd(rd2_x2, tmp_bb_x2);
+    tmp1_x3 = _mm256_sub_pd(rd2_x3, tmp_bb_x3);
+    
+    tmp0_x0 = _mm256_sub_pd(ld2_x0, tmp0_x0);
+    tmp0_x1 = _mm256_sub_pd(ld2_x1, tmp0_x1);
+    tmp0_x2 = _mm256_sub_pd(ld2_x2, tmp0_x2);
+    tmp0_x3 = _mm256_sub_pd(ld2_x3, tmp0_x3);
+
+    vt2_x0 = _mm256_add_pd(tmp0_x0, tmp1_x0);
+    vt2_x1 = _mm256_add_pd(tmp0_x1, tmp1_x1);
+    vt2_x2 = _mm256_add_pd(tmp0_x2, tmp1_x2);
+    vt2_x3 = _mm256_add_pd(tmp0_x3, tmp1_x3);
+
+    vs2_x0 = tmp_s_x0;
+    vs2_x1 = tmp_s_x1;
+    vs2_x2 = tmp_s_x2;
+    vs2_x3 = tmp_s_x3;
+
+    //vs3 = two_sum_vec(ld3, rd3, &vt3);
+    tmp_s_x0 = _mm256_add_pd(ld3_x0, rd3_x0);
+    tmp_s_x1 = _mm256_add_pd(ld3_x1, rd3_x1);
+    tmp_s_x2 = _mm256_add_pd(ld3_x2, rd3_x2);
+    tmp_s_x3 = _mm256_add_pd(ld3_x3, rd3_x3);
+
+    tmp_bb_x0 = _mm256_sub_pd(tmp_s_x0, ld3_x0);
+    tmp_bb_x1 = _mm256_sub_pd(tmp_s_x1, ld3_x1);
+    tmp_bb_x2 = _mm256_sub_pd(tmp_s_x2, ld3_x2);
+    tmp_bb_x3 = _mm256_sub_pd(tmp_s_x3, ld3_x3);
+
+    tmp0_x0 = _mm256_sub_pd(tmp_s_x0, tmp_bb_x0);
+    tmp0_x1 = _mm256_sub_pd(tmp_s_x1, tmp_bb_x1);
+    tmp0_x2 = _mm256_sub_pd(tmp_s_x2, tmp_bb_x2);
+    tmp0_x3 = _mm256_sub_pd(tmp_s_x3, tmp_bb_x3);
+    
+    tmp1_x0 = _mm256_sub_pd(rd3_x0, tmp_bb_x0);
+    tmp1_x1 = _mm256_sub_pd(rd3_x1, tmp_bb_x1);
+    tmp1_x2 = _mm256_sub_pd(rd3_x2, tmp_bb_x2);
+    tmp1_x3 = _mm256_sub_pd(rd3_x3, tmp_bb_x3);
+    
+    tmp0_x0 = _mm256_sub_pd(ld3_x0, tmp0_x0);
+    tmp0_x1 = _mm256_sub_pd(ld3_x1, tmp0_x1);
+    tmp0_x2 = _mm256_sub_pd(ld3_x2, tmp0_x2);
+    tmp0_x3 = _mm256_sub_pd(ld3_x3, tmp0_x3);
+
+    vt3_x0 = _mm256_add_pd(tmp0_x0, tmp1_x0);
+    vt3_x1 = _mm256_add_pd(tmp0_x1, tmp1_x1);
+    vt3_x2 = _mm256_add_pd(tmp0_x2, tmp1_x2);
+    vt3_x3 = _mm256_add_pd(tmp0_x3, tmp1_x3);
+
+    vs3_x0 = tmp_s_x0;
+    vs3_x1 = tmp_s_x1;
+    vs3_x2 = tmp_s_x2;
+    vs3_x3 = tmp_s_x3;
+
+    //vs1 = two_sum_vec(vs1, vt0, &vt0);
+    tmp_s_x0 = _mm256_add_pd(vs1_x0, vt0_x0);
+    tmp_s_x1 = _mm256_add_pd(vs1_x1, vt0_x1);
+    tmp_s_x2 = _mm256_add_pd(vs1_x2, vt0_x2);
+    tmp_s_x3 = _mm256_add_pd(vs1_x3, vt0_x3);
+
+    tmp_bb_x0 = _mm256_sub_pd(tmp_s_x0, vs1_x0);
+    tmp_bb_x1 = _mm256_sub_pd(tmp_s_x1, vs1_x1);
+    tmp_bb_x2 = _mm256_sub_pd(tmp_s_x2, vs1_x2);
+    tmp_bb_x3 = _mm256_sub_pd(tmp_s_x3, vs1_x3);
+
+    tmp0_x0 = _mm256_sub_pd(tmp_s_x0, tmp_bb_x0);
+    tmp0_x1 = _mm256_sub_pd(tmp_s_x1, tmp_bb_x1);
+    tmp0_x2 = _mm256_sub_pd(tmp_s_x2, tmp_bb_x2);
+    tmp0_x3 = _mm256_sub_pd(tmp_s_x3, tmp_bb_x3);
+    
+    tmp1_x0 = _mm256_sub_pd(vt0_x0, tmp_bb_x0);
+    tmp1_x1 = _mm256_sub_pd(vt0_x1, tmp_bb_x1);
+    tmp1_x2 = _mm256_sub_pd(vt0_x2, tmp_bb_x2);
+    tmp1_x3 = _mm256_sub_pd(vt0_x3, tmp_bb_x3);
+    
+    tmp0_x0 = _mm256_sub_pd(vs1_x0, tmp0_x0);
+    tmp0_x1 = _mm256_sub_pd(vs1_x1, tmp0_x1);
+    tmp0_x2 = _mm256_sub_pd(vs1_x2, tmp0_x2);
+    tmp0_x3 = _mm256_sub_pd(vs1_x3, tmp0_x3);
+
+    vt0_x0 = _mm256_add_pd(tmp0_x0, tmp1_x0);
+    vt0_x1 = _mm256_add_pd(tmp0_x1, tmp1_x1);
+    vt0_x2 = _mm256_add_pd(tmp0_x2, tmp1_x2);
+    vt0_x3 = _mm256_add_pd(tmp0_x3, tmp1_x3);
+
+    vs1_x0 = tmp_s_x0;
+    vs1_x1 = tmp_s_x1;
+    vs1_x2 = tmp_s_x2;
+    vs1_x3 = tmp_s_x3;
+
+    //three_sum_vec(&vs2, &vt0, &vt1);
+
+    /* tmp_s = _mm256_add_pd(vs2, vt0);
+    tmp_bb = _mm256_sub_pd(tmp_s, vs2);
+    tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
+    tmp1 = _mm256_sub_pd(vt0, tmp_bb);
+    tmp0 = _mm256_sub_pd(vs2, tmp0);
+    tmp_t2 = _mm256_add_pd(tmp0, tmp1);
+    tmp_t1 = tmp_s; */
+    tmp_s_x0 = _mm256_add_pd(vs2_x0, vt0_x0);
+    tmp_s_x1 = _mm256_add_pd(vs2_x1, vt0_x1);
+    tmp_s_x2 = _mm256_add_pd(vs2_x2, vt0_x2);
+    tmp_s_x3 = _mm256_add_pd(vs2_x3, vt0_x3);
+
+    tmp_bb_x0 = _mm256_sub_pd(tmp_s_x0, vs2_x0);
+    tmp_bb_x1 = _mm256_sub_pd(tmp_s_x1, vs2_x1);
+    tmp_bb_x2 = _mm256_sub_pd(tmp_s_x2, vs2_x2);
+    tmp_bb_x3 = _mm256_sub_pd(tmp_s_x3, vs2_x3);
+
+    tmp0_x0 = _mm256_sub_pd(tmp_s_x0, tmp_bb_x0);
+    tmp0_x1 = _mm256_sub_pd(tmp_s_x1, tmp_bb_x1);
+    tmp0_x2 = _mm256_sub_pd(tmp_s_x2, tmp_bb_x2);
+    tmp0_x3 = _mm256_sub_pd(tmp_s_x3, tmp_bb_x3);
+    
+    tmp1_x0 = _mm256_sub_pd(vt0_x0, tmp_bb_x0);
+    tmp1_x1 = _mm256_sub_pd(vt0_x1, tmp_bb_x1);
+    tmp1_x2 = _mm256_sub_pd(vt0_x2, tmp_bb_x2);
+    tmp1_x3 = _mm256_sub_pd(vt0_x3, tmp_bb_x3);
+    
+    tmp0_x0 = _mm256_sub_pd(vs2_x0, tmp0_x0);
+    tmp0_x1 = _mm256_sub_pd(vs2_x1, tmp0_x1);
+    tmp0_x2 = _mm256_sub_pd(vs2_x2, tmp0_x2);
+    tmp0_x3 = _mm256_sub_pd(vs2_x3, tmp0_x3);
+
+    tmp_t2_x0 = _mm256_add_pd(tmp0_x0, tmp1_x0);
+    tmp_t2_x1 = _mm256_add_pd(tmp0_x1, tmp1_x1);
+    tmp_t2_x2 = _mm256_add_pd(tmp0_x2, tmp1_x2);
+    tmp_t2_x3 = _mm256_add_pd(tmp0_x3, tmp1_x3);
+
+    tmp_t1_x0 = tmp_s_x0;
+    tmp_t1_x1 = tmp_s_x1;
+    tmp_t1_x2 = tmp_s_x2;
+    tmp_t1_x3 = tmp_s_x3;
+
+    /* tmp_s = _mm256_add_pd(vt1, tmp_t1);
+    tmp_bb = _mm256_sub_pd(tmp_s, vt1);
+    tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
+    tmp1 = _mm256_sub_pd(tmp_t1, tmp_bb);
+    tmp0 = _mm256_sub_pd(vt1, tmp0);
+    tmp_t3 = _mm256_add_pd(tmp0, tmp1);
+    vs2 = tmp_s; */
+
+    tmp_s_x0 = _mm256_add_pd(vt1_x0, tmp_t1_x0);
+    tmp_s_x1 = _mm256_add_pd(vt1_x1, tmp_t1_x1);
+    tmp_s_x2 = _mm256_add_pd(vt1_x2, tmp_t1_x2);
+    tmp_s_x3 = _mm256_add_pd(vt1_x3, tmp_t1_x3);
+
+    tmp_bb_x0 = _mm256_sub_pd(tmp_s_x0, vt1_x0);
+    tmp_bb_x1 = _mm256_sub_pd(tmp_s_x1, vt1_x1);
+    tmp_bb_x2 = _mm256_sub_pd(tmp_s_x2, vt1_x2);
+    tmp_bb_x3 = _mm256_sub_pd(tmp_s_x3, vt1_x3);
+
+    tmp0_x0 = _mm256_sub_pd(tmp_s_x0, tmp_bb_x0);
+    tmp0_x1 = _mm256_sub_pd(tmp_s_x1, tmp_bb_x1);
+    tmp0_x2 = _mm256_sub_pd(tmp_s_x2, tmp_bb_x2);
+    tmp0_x3 = _mm256_sub_pd(tmp_s_x3, tmp_bb_x3);
+    
+    tmp1_x0 = _mm256_sub_pd(tmp_t1_x0, tmp_bb_x0);
+    tmp1_x1 = _mm256_sub_pd(tmp_t1_x1, tmp_bb_x1);
+    tmp1_x2 = _mm256_sub_pd(tmp_t1_x2, tmp_bb_x2);
+    tmp1_x3 = _mm256_sub_pd(tmp_t1_x3, tmp_bb_x3);
+    
+    tmp0_x0 = _mm256_sub_pd(vt1_x0, tmp0_x0);
+    tmp0_x1 = _mm256_sub_pd(vt1_x1, tmp0_x1);
+    tmp0_x2 = _mm256_sub_pd(vt1_x2, tmp0_x2);
+    tmp0_x3 = _mm256_sub_pd(vt1_x3, tmp0_x3);
+
+    tmp_t3_x0 = _mm256_add_pd(tmp0_x0, tmp1_x0);
+    tmp_t3_x1 = _mm256_add_pd(tmp0_x1, tmp1_x1);
+    tmp_t3_x2 = _mm256_add_pd(tmp0_x2, tmp1_x2);
+    tmp_t3_x3 = _mm256_add_pd(tmp0_x3, tmp1_x3);
+
+    vs2_x0 = tmp_s_x0;
+    vs2_x1 = tmp_s_x1;
+    vs2_x2 = tmp_s_x2;
+    vs2_x3 = tmp_s_x3;
+
+
+    /* tmp_s = _mm256_add_pd(tmp_t2, tmp_t3);
+    tmp_bb = _mm256_sub_pd(tmp_s, tmp_t2);
+    tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
+    tmp1 = _mm256_sub_pd(tmp_t3, tmp_bb);
+    tmp0 = _mm256_sub_pd(tmp_t2, tmp0);
+    vt1 = _mm256_add_pd(tmp0, tmp1);
+    vt0 = tmp_s; */
+
+    tmp_s_x0 = _mm256_add_pd(tmp_t2_x0, tmp_t3_x0);
+    tmp_s_x1 = _mm256_add_pd(tmp_t2_x1, tmp_t3_x1);
+    tmp_s_x2 = _mm256_add_pd(tmp_t2_x2, tmp_t3_x2);
+    tmp_s_x3 = _mm256_add_pd(tmp_t2_x3, tmp_t3_x3);
+
+    tmp_bb_x0 = _mm256_sub_pd(tmp_s_x0, tmp_t2_x0);
+    tmp_bb_x1 = _mm256_sub_pd(tmp_s_x1, tmp_t2_x1);
+    tmp_bb_x2 = _mm256_sub_pd(tmp_s_x2, tmp_t2_x2);
+    tmp_bb_x3 = _mm256_sub_pd(tmp_s_x3, tmp_t2_x3);
+
+    tmp0_x0 = _mm256_sub_pd(tmp_s_x0, tmp_bb_x0);
+    tmp0_x1 = _mm256_sub_pd(tmp_s_x1, tmp_bb_x1);
+    tmp0_x2 = _mm256_sub_pd(tmp_s_x2, tmp_bb_x2);
+    tmp0_x3 = _mm256_sub_pd(tmp_s_x3, tmp_bb_x3);
+    
+    tmp1_x0 = _mm256_sub_pd(tmp_t3_x0, tmp_bb_x0);
+    tmp1_x1 = _mm256_sub_pd(tmp_t3_x1, tmp_bb_x1);
+    tmp1_x2 = _mm256_sub_pd(tmp_t3_x2, tmp_bb_x2);
+    tmp1_x3 = _mm256_sub_pd(tmp_t3_x3, tmp_bb_x3);
+    
+    tmp0_x0 = _mm256_sub_pd(tmp_t2_x0, tmp0_x0);
+    tmp0_x1 = _mm256_sub_pd(tmp_t2_x1, tmp0_x1);
+    tmp0_x2 = _mm256_sub_pd(tmp_t2_x2, tmp0_x2);
+    tmp0_x3 = _mm256_sub_pd(tmp_t2_x3, tmp0_x3);
+
+    vt1_x0 = _mm256_add_pd(tmp0_x0, tmp1_x0);
+    vt1_x1 = _mm256_add_pd(tmp0_x1, tmp1_x1);
+    vt1_x2 = _mm256_add_pd(tmp0_x2, tmp1_x2);
+    vt1_x3 = _mm256_add_pd(tmp0_x3, tmp1_x3);
+
+    vt0_x0 = tmp_s_x0;
+    vt0_x1 = tmp_s_x1;
+    vt0_x2 = tmp_s_x2;
+    vt0_x3 = tmp_s_x3;
+
+
+
+    //three_sum2_vec(&vs3, &vt0, &vt2);
+
+    /* tmp_s = _mm256_add_pd(vs3, vt0);
+    tmp_bb = _mm256_sub_pd(tmp_s, vs3);
+    tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
+    tmp1 = _mm256_sub_pd(vt0, tmp_bb);
+    tmp0 = _mm256_sub_pd(vs3, tmp0);
+    tmp_t2 = _mm256_add_pd(tmp0, tmp1);
+    tmp_t1 = tmp_s; */
+    tmp_s_x0 = _mm256_add_pd(vs3_x0, vt0_x0);
+    tmp_s_x1 = _mm256_add_pd(vs3_x1, vt0_x1);
+    tmp_s_x2 = _mm256_add_pd(vs3_x2, vt0_x2);
+    tmp_s_x3 = _mm256_add_pd(vs3_x3, vt0_x3);
+
+    tmp_bb_x0 = _mm256_sub_pd(tmp_s_x0, vs3_x0);
+    tmp_bb_x1 = _mm256_sub_pd(tmp_s_x1, vs3_x1);
+    tmp_bb_x2 = _mm256_sub_pd(tmp_s_x2, vs3_x2);
+    tmp_bb_x3 = _mm256_sub_pd(tmp_s_x3, vs3_x3);
+
+    tmp0_x0 = _mm256_sub_pd(tmp_s_x0, tmp_bb_x0);
+    tmp0_x1 = _mm256_sub_pd(tmp_s_x1, tmp_bb_x1);
+    tmp0_x2 = _mm256_sub_pd(tmp_s_x2, tmp_bb_x2);
+    tmp0_x3 = _mm256_sub_pd(tmp_s_x3, tmp_bb_x3);
+    
+    tmp1_x0 = _mm256_sub_pd(vt0_x0, tmp_bb_x0);
+    tmp1_x1 = _mm256_sub_pd(vt0_x1, tmp_bb_x1);
+    tmp1_x2 = _mm256_sub_pd(vt0_x2, tmp_bb_x2);
+    tmp1_x3 = _mm256_sub_pd(vt0_x3, tmp_bb_x3);
+    
+    tmp0_x0 = _mm256_sub_pd(vs3_x0, tmp0_x0);
+    tmp0_x1 = _mm256_sub_pd(vs3_x1, tmp0_x1);
+    tmp0_x2 = _mm256_sub_pd(vs3_x2, tmp0_x2);
+    tmp0_x3 = _mm256_sub_pd(vs3_x3, tmp0_x3);
+
+    tmp_t2_x0 = _mm256_add_pd(tmp0_x0, tmp1_x0);
+    tmp_t2_x1 = _mm256_add_pd(tmp0_x1, tmp1_x1);
+    tmp_t2_x2 = _mm256_add_pd(tmp0_x2, tmp1_x2);
+    tmp_t2_x3 = _mm256_add_pd(tmp0_x3, tmp1_x3);
+
+    tmp_t1_x0 = tmp_s_x0;
+    tmp_t1_x1 = tmp_s_x1;
+    tmp_t1_x2 = tmp_s_x2;
+    tmp_t1_x3 = tmp_s_x3;
+    /* tmp_s = _mm256_add_pd(vt2, tmp_t1);
+    tmp_bb = _mm256_sub_pd(tmp_s, vt2);
+    tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
+    tmp1 = _mm256_sub_pd(tmp_t1, tmp_bb);
+    tmp0 = _mm256_sub_pd(vt2, tmp0);
+    tmp_t3 = _mm256_add_pd(tmp0, tmp1);
+    vs3 = tmp_s; */
+    tmp_s_x0 = _mm256_add_pd(vt2_x0, tmp_t1_x0);
+    tmp_s_x1 = _mm256_add_pd(vt2_x1, tmp_t1_x1);
+    tmp_s_x2 = _mm256_add_pd(vt2_x2, tmp_t1_x2);
+    tmp_s_x3 = _mm256_add_pd(vt2_x3, tmp_t1_x3);
+
+    tmp_bb_x0 = _mm256_sub_pd(tmp_s_x0, vt2_x0);
+    tmp_bb_x1 = _mm256_sub_pd(tmp_s_x1, vt2_x1);
+    tmp_bb_x2 = _mm256_sub_pd(tmp_s_x2, vt2_x2);
+    tmp_bb_x3 = _mm256_sub_pd(tmp_s_x3, vt2_x3);
+
+    tmp0_x0 = _mm256_sub_pd(tmp_s_x0, tmp_bb_x0);
+    tmp0_x1 = _mm256_sub_pd(tmp_s_x1, tmp_bb_x1);
+    tmp0_x2 = _mm256_sub_pd(tmp_s_x2, tmp_bb_x2);
+    tmp0_x3 = _mm256_sub_pd(tmp_s_x3, tmp_bb_x3);
+    
+    tmp1_x0 = _mm256_sub_pd(tmp_t1_x0, tmp_bb_x0);
+    tmp1_x1 = _mm256_sub_pd(tmp_t1_x1, tmp_bb_x1);
+    tmp1_x2 = _mm256_sub_pd(tmp_t1_x2, tmp_bb_x2);
+    tmp1_x3 = _mm256_sub_pd(tmp_t1_x3, tmp_bb_x3);
+    
+    tmp0_x0 = _mm256_sub_pd(vt2_x0, tmp0_x0);
+    tmp0_x1 = _mm256_sub_pd(vt2_x1, tmp0_x1);
+    tmp0_x2 = _mm256_sub_pd(vt2_x2, tmp0_x2);
+    tmp0_x3 = _mm256_sub_pd(vt2_x3, tmp0_x3);
+
+    tmp_t3_x0 = _mm256_add_pd(tmp0_x0, tmp1_x0);
+    tmp_t3_x1 = _mm256_add_pd(tmp0_x1, tmp1_x1);
+    tmp_t3_x2 = _mm256_add_pd(tmp0_x2, tmp1_x2);
+    tmp_t3_x3 = _mm256_add_pd(tmp0_x3, tmp1_x3);
+
+    vs3_x0 = tmp_s_x0;
+    vs3_x1 = tmp_s_x1;
+    vs3_x2 = tmp_s_x2;
+    vs3_x3 = tmp_s_x3;
+
+    /* vt0 = _mm256_add_pd(tmp_t2, tmp_t3); */
+    vt0_x0 = _mm256_add_pd(tmp_t2_x0, tmp_t3_x0);
+    vt0_x1 = _mm256_add_pd(tmp_t2_x1, tmp_t3_x1);
+    vt0_x2 = _mm256_add_pd(tmp_t2_x2, tmp_t3_x2);
+    vt0_x3 = _mm256_add_pd(tmp_t2_x3, tmp_t3_x3);
+
+    //vt0 = _mm256_add_pd(_mm256_add_pd(vt0, vt1), vt3);
+    /* tmp0 = _mm256_add_pd(vt0, vt1); */
+    tmp0_x0 = _mm256_add_pd(vt0_x0, vt1_x0);
+    tmp0_x1 = _mm256_add_pd(vt0_x1, vt1_x1);
+    tmp0_x2 = _mm256_add_pd(vt0_x2, vt1_x2);
+    tmp0_x3 = _mm256_add_pd(vt0_x3, vt1_x3);
+
+    /* vt0 = _mm256_add_pd(tmp0, vt3); */
+    vt0_x0 = _mm256_add_pd(tmp0_x0, vt3_x0);
+    vt0_x1 = _mm256_add_pd(tmp0_x1, vt3_x1);
+    vt0_x2 = _mm256_add_pd(tmp0_x2, vt3_x2);
+    vt0_x3 = _mm256_add_pd(tmp0_x3, vt3_x3);
+
+    //renorm5(&s0, &s1, &s2, &s3, &t0);
+    /* _mm256_store_pd(lo.d0 + i, vs0);
+    _mm256_store_pd(lo.d1 + i, vs1);
+    _mm256_store_pd(lo.d2 + i, vs2);
+    _mm256_store_pd(lo.d3 + i, vs3);
+    _mm256_store_pd(tmp_vt0, vt0); */
+    _mm256_store_pd(lo.d0 + i, vs0_x0);
+    _mm256_store_pd(lo.d0 + i + 4, vs0_x1);
+    _mm256_store_pd(lo.d0 + i + 8, vs0_x2);
+    _mm256_store_pd(lo.d0 + i + 12, vs0_x3);
+    _mm256_store_pd(lo.d1 + i, vs1_x0);
+    _mm256_store_pd(lo.d1 + i + 4, vs1_x1);
+    _mm256_store_pd(lo.d1 + i + 8, vs1_x2);
+    _mm256_store_pd(lo.d1 + i + 12, vs1_x3);
+    _mm256_store_pd(lo.d2 + i, vs2_x0);
+    _mm256_store_pd(lo.d2 + i + 4, vs2_x1);
+    _mm256_store_pd(lo.d2 + i + 8, vs2_x2);
+    _mm256_store_pd(lo.d2 + i + 12, vs2_x3);
+    _mm256_store_pd(lo.d3 + i, vs3_x0);
+    _mm256_store_pd(lo.d3 + i + 4, vs3_x1);
+    _mm256_store_pd(lo.d3 + i + 8, vs3_x2);
+    _mm256_store_pd(lo.d3 + i + 12, vs3_x3);
+    _mm256_store_pd(tmp_vt0_x0, vt0_x0);
+    _mm256_store_pd(tmp_vt0_x1, vt0_x1);
+    _mm256_store_pd(tmp_vt0_x2, vt0_x2);
+    _mm256_store_pd(tmp_vt0_x3, vt0_x3);
+    /* renorm5_inline(lo.d0 + i, lo.d1 + i, lo.d2 + i, lo.d3 + i, tmp_vt0);
+    renorm5_inline(lo.d0 + i + 1, lo.d1 + i + 1, lo.d2 + i + 1, lo.d3 + i + 1, tmp_vt0 + 1);
+    renorm5_inline(lo.d0 + i + 2, lo.d1 + i + 2, lo.d2 + i + 2, lo.d3 + i + 2, tmp_vt0 + 2);
+    renorm5_inline(lo.d0 + i + 3, lo.d1 + i + 3, lo.d2 + i + 3, lo.d3 + i + 3, tmp_vt0 + 3); */
+    renorm5_inline(lo.d0 + i, lo.d1 + i, lo.d2 + i, lo.d3 + i, tmp_vt0_x0);
+    renorm5_inline(lo.d0 + i + 1, lo.d1 + i + 1, lo.d2 + i + 1, lo.d3 + i + 1, tmp_vt0_x0 + 1);
+    renorm5_inline(lo.d0 + i + 2, lo.d1 + i + 2, lo.d2 + i + 2, lo.d3 + i + 2, tmp_vt0_x0 + 2);
+    renorm5_inline(lo.d0 + i + 3, lo.d1 + i + 3, lo.d2 + i + 3, lo.d3 + i + 3, tmp_vt0_x0 + 3);
+    renorm5_inline(lo.d0 + i + 4, lo.d1 + i + 4, lo.d2 + i + 4, lo.d3 + i + 4, tmp_vt0_x1);
+    renorm5_inline(lo.d0 + i + 5, lo.d1 + i + 5, lo.d2 + i + 5, lo.d3 + i + 5, tmp_vt0_x1 + 1);
+    renorm5_inline(lo.d0 + i + 6, lo.d1 + i + 6, lo.d2 + i + 6, lo.d3 + i + 6, tmp_vt0_x1 + 2);
+    renorm5_inline(lo.d0 + i + 7, lo.d1 + i + 7, lo.d2 + i + 7, lo.d3 + i + 7, tmp_vt0_x1 + 3);
+    renorm5_inline(lo.d0 + i + 8, lo.d1 + i + 8, lo.d2 + i + 8, lo.d3 + i + 8, tmp_vt0_x2);
+    renorm5_inline(lo.d0 + i + 9, lo.d1 + i + 9, lo.d2 + i + 9, lo.d3 + i + 9, tmp_vt0_x2 + 1);
+    renorm5_inline(lo.d0 + i + 10, lo.d1 + i + 10, lo.d2 + i + 10, lo.d3 + i + 10, tmp_vt0_x2 + 2);
+    renorm5_inline(lo.d0 + i + 11, lo.d1 + i + 11, lo.d2 + i + 11, lo.d3 + i + 11, tmp_vt0_x2 + 3);
+    renorm5_inline(lo.d0 + i + 12, lo.d1 + i + 12, lo.d2 + i + 12, lo.d3 + i + 12, tmp_vt0_x3);
+    renorm5_inline(lo.d0 + i + 13, lo.d1 + i + 13, lo.d2 + i + 13, lo.d3 + i + 13, tmp_vt0_x3 + 1);
+    renorm5_inline(lo.d0 + i + 14, lo.d1 + i + 14, lo.d2 + i + 14, lo.d3 + i + 14, tmp_vt0_x3 + 2);
+    renorm5_inline(lo.d0 + i + 15, lo.d1 + i + 15, lo.d2 + i + 15, lo.d3 + i + 15, tmp_vt0_x3 + 3);
+  }
+
+  for (; i + 3 < size; i += 4) {
+    ld0 = _mm256_load_pd(lo.d0 + i);
+    ld1 = _mm256_load_pd(lo.d1 + i);
+    ld2 = _mm256_load_pd(lo.d2 + i);
+    ld3 = _mm256_load_pd(lo.d3 + i);
+    rd0 = _mm256_load_pd(ro.d0 + i);
+    rd1 = _mm256_load_pd(ro.d1 + i);
+    rd2 = _mm256_load_pd(ro.d2 + i);
+    rd3 = _mm256_load_pd(ro.d3 + i);
+
+    //vs0 = two_sum_vec(ld0, rd0, &vt0);
+    tmp_s = _mm256_add_pd(ld0, rd0);
+    tmp_bb = _mm256_sub_pd(tmp_s, ld0);
+    tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
+    tmp1 = _mm256_sub_pd(rd0, tmp_bb);
+    tmp0 = _mm256_sub_pd(ld0, tmp0);
+    vt0 = _mm256_add_pd(tmp0, tmp1);
+    vs0 = tmp_s;
+
+    //vs1 = two_sum_vec(ld1, rd1, &vt1);
+    tmp_s = _mm256_add_pd(ld1, rd1);
+    tmp_bb = _mm256_sub_pd(tmp_s, ld1);
+    tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
+    tmp1 = _mm256_sub_pd(rd1, tmp_bb);
+    tmp0 = _mm256_sub_pd(ld1, tmp0);
+    vt1 = _mm256_add_pd(tmp0, tmp1);
+    vs1 = tmp_s;
+
+    //vs2 = two_sum_vec(ld2, rd2, &vt2);
+    tmp_s = _mm256_add_pd(ld2, rd2);
+    tmp_bb = _mm256_sub_pd(tmp_s, ld2);
+    tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
+    tmp1 = _mm256_sub_pd(rd2, tmp_bb);
+    tmp0 = _mm256_sub_pd(ld2, tmp0);
+    vt2 = _mm256_add_pd(tmp0, tmp1);
+    vs2 = tmp_s;
+
+    //vs3 = two_sum_vec(ld3, rd3, &vt3);
+    tmp_s = _mm256_add_pd(ld3, rd3);
+    tmp_bb = _mm256_sub_pd(tmp_s, ld3);
+    tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
+    tmp1 = _mm256_sub_pd(rd3, tmp_bb);
+    tmp0 = _mm256_sub_pd(ld3, tmp0);
+    vt3 = _mm256_add_pd(tmp0, tmp1);
+    vs3 = tmp_s;
+
+    //vs1 = two_sum_vec(vs1, vt0, &vt0);
+    tmp_s = _mm256_add_pd(vs1, vt0);
+    tmp_bb = _mm256_sub_pd(tmp_s, vs1);
+    tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
+    tmp1 = _mm256_sub_pd(vt0, tmp_bb);
+    tmp0 = _mm256_sub_pd(vs1, tmp0);
+    vt0 = _mm256_add_pd(tmp0, tmp1);
+    vs1 = tmp_s;
+
+    //three_sum_vec(&vs2, &vt0, &vt1);
+    tmp_s = _mm256_add_pd(vs2, vt0);
+    tmp_bb = _mm256_sub_pd(tmp_s, vs2);
+    tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
+    tmp1 = _mm256_sub_pd(vt0, tmp_bb);
+    tmp0 = _mm256_sub_pd(vs2, tmp0);
+    tmp_t2 = _mm256_add_pd(tmp0, tmp1);
+    tmp_t1 = tmp_s;
+    tmp_s = _mm256_add_pd(vt1, tmp_t1);
+    tmp_bb = _mm256_sub_pd(tmp_s, vt1);
+    tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
+    tmp1 = _mm256_sub_pd(tmp_t1, tmp_bb);
+    tmp0 = _mm256_sub_pd(vt1, tmp0);
+    tmp_t3 = _mm256_add_pd(tmp0, tmp1);
+    vs2 = tmp_s;
+    tmp_s = _mm256_add_pd(tmp_t2, tmp_t3);
+    tmp_bb = _mm256_sub_pd(tmp_s, tmp_t2);
+    tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
+    tmp1 = _mm256_sub_pd(tmp_t3, tmp_bb);
+    tmp0 = _mm256_sub_pd(tmp_t2, tmp0);
+    vt1 = _mm256_add_pd(tmp0, tmp1);
+    vt0 = tmp_s;
+
+    //three_sum2_vec(&vs3, &vt0, &vt2);
+    tmp_s = _mm256_add_pd(vs3, vt0);
+    tmp_bb = _mm256_sub_pd(tmp_s, vs3);
+    tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
+    tmp1 = _mm256_sub_pd(vt0, tmp_bb);
+    tmp0 = _mm256_sub_pd(vs3, tmp0);
+    tmp_t2 = _mm256_add_pd(tmp0, tmp1);
+    tmp_t1 = tmp_s;
+    tmp_s = _mm256_add_pd(vt2, tmp_t1);
+    tmp_bb = _mm256_sub_pd(tmp_s, vt2);
+    tmp0 = _mm256_sub_pd(tmp_s, tmp_bb);
+    tmp1 = _mm256_sub_pd(tmp_t1, tmp_bb);
+    tmp0 = _mm256_sub_pd(vt2, tmp0);
+    tmp_t3 = _mm256_add_pd(tmp0, tmp1);
+    vs3 = tmp_s;
+    vt0 = _mm256_add_pd(tmp_t2, tmp_t3);
+
+    //vt0 = _mm256_add_pd(_mm256_add_pd(vt0, vt1), vt3);
+    tmp0 = _mm256_add_pd(vt0, vt1);
+    vt0 = _mm256_add_pd(tmp0, vt3);
+
+    //renorm5(&s0, &s1, &s2, &s3, &t0);
+    _mm256_store_pd(lo.d0 + i, vs0);
+    _mm256_store_pd(lo.d1 + i, vs1);
+    _mm256_store_pd(lo.d2 + i, vs2);
+    _mm256_store_pd(lo.d3 + i, vs3);
+    _mm256_store_pd(tmp_vt0, vt0);
+    renorm5_inline(lo.d0 + i, lo.d1 + i, lo.d2 + i, lo.d3 + i, tmp_vt0);
+    renorm5_inline(lo.d0 + i + 1, lo.d1 + i + 1, lo.d2 + i + 1, lo.d3 + i + 1, tmp_vt0 + 1);
+    renorm5_inline(lo.d0 + i + 2, lo.d1 + i + 2, lo.d2 + i + 2, lo.d3 + i + 2, tmp_vt0 + 2);
+    renorm5_inline(lo.d0 + i + 3, lo.d1 + i + 3, lo.d2 + i + 3, lo.d3 + i + 3, tmp_vt0 + 3);
+  }
+
+  for (; i < size; i++) {
+      
+    s0 = two_sum(lo.d0[i], ro.d0[i], &t0);
+    s1 = two_sum(lo.d1[i], ro.d1[i], &t1);
+    s2 = two_sum(lo.d2[i], ro.d2[i], &t2);
+    s3 = two_sum(lo.d3[i], ro.d3[i], &t3);
+
+    s1 = two_sum(s1, t0, &t0);
+    three_sum(&s2, &t0, &t1);
+    three_sum2(&s3, &t0, &t2);
+    t0 = t0 + t1 + t3;
+
+    renorm5_inline(&s0, &s1, &s2, &s3, &t0);
+    lo.d0[i] = s0;
+    lo.d1[i] = s1;
+    lo.d2[i] = s2;
+    lo.d3[i] = s3;
+  }
+  _mm_free(tmp_vt0);
+  _mm_free(tmp_vt0_x0);
+  _mm_free(tmp_vt0_x1);
+  _mm_free(tmp_vt0_x2);
+  _mm_free(tmp_vt0_x3);
+}
+
 // hand inline serial no effect
 // static inline func no use! complier refuse to inline.
 // TODO: unfold in some way, more vec, inline simple func then unfold?
@@ -707,12 +1530,12 @@ void qd_arr_add_inplace_vec_inline(qd_arr lo, qd_arr ro) {
 /* int main() {
 
   srand(11);
-  qd_arr a=qd_arr_create_random_aligned(10,-1,1);
-  qd_arr b=qd_arr_create_random_aligned(10,-1,1);
+  qd_arr a=qd_arr_create_random_aligned(20,-1,1);
+  qd_arr b=qd_arr_create_random_aligned(20,-1,1);
   print_qd_arr(a,2,"a");
   print_qd_arr(b,2,"b");
   qd_arr c=qd_arr_add(a,b);
-  qd_arr_add_inplace_vec_inline(a,b);
+  qd_arr_add_inplace_vec_inline_x4(a,b);
   print_qd_arr(c,2,"ref");
   print_qd_arr(a,2,"ans");
   qd_destroy_aligned(a);

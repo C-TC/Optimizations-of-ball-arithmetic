@@ -54,6 +54,9 @@ void qd_arr_add_inplace(qd_arr lo, qd_arr ro);
 void qd_arr_add_inplace_inline(qd_arr lo, qd_arr ro);
 void qd_arr_add_inplace_vec(qd_arr lo, qd_arr ro);
 void qd_arr_add_inplace_vec_inline(qd_arr lo, qd_arr ro);
+//reorder useless
+void qd_arr_add_inplace_vec_inline_reorder(qd_arr lo, qd_arr ro);
+void qd_arr_add_inplace_vec_inline_x4(qd_arr lo, qd_arr ro);
 
 /* Computes fl(a+b) and err(a+b).  Assumes |a| >= |b|. */
 inline double quick_two_sum(double a, double b, double *err)
