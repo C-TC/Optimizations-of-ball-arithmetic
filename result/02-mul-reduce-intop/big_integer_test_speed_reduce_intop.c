@@ -31,32 +31,6 @@ double rdtsc_big_integer_multiply(BigInteger left, BigInteger right) {
   return (double)cycles / num_runs;
 }
 
-double rdtsc_big_integer_multiply_inplace_fixed_precision(BigInteger *left,
-                                                          BigInteger right,
-                                                          int precision) {
-  int i, num_runs = 1;
-  myInt64 cycles;
-  myInt64 start;
-
-  while (num_runs < (1 << 14)) {
-    start = start_tsc();
-    for (i = 0; i < num_runs; ++i) {
-      big_integer_multiply_inplace_fixed_precision(left, right, precision);
-    }
-    cycles = stop_tsc(start);
-    if (cycles >= CYCLES_REQUIRED)
-      break;
-    num_runs *= 2;
-  }
-
-  start = start_tsc();
-  for (i = 0; i < num_runs; ++i) {
-    big_integer_multiply_inplace_fixed_precision(left, right, precision);
-  }
-  cycles = stop_tsc(start);
-  return (double)cycles / num_runs;
-}
-
 double rdtsc_big_integer_multiply_inplace_fixed_precision_unfold(BigInteger *left,
                                                           BigInteger right,
                                                           int precision) {
