@@ -12,7 +12,7 @@ bash run.sh
 
 ---
 
-### open timing_mul_vec_p.py
+### open timing\_mul\_vec\_intop.py
 
 
 3. line 38,40: 看一下cache标注文字的位置是否合适，可能需要上下调整位置

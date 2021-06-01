@@ -12,7 +12,7 @@ bash run.sh
 
 ---
 
-### open timing_mul_vec_p.py
+### open timing\_mul\_vec\_p.py
 
 
 2.   看一下是否是16x speedup，（`python3 timing_mul_vec_p.py` 会输出两个数字，代表大致的speedup）
