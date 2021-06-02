@@ -58,7 +58,7 @@ double rdtsc_qd_mul_inplace(qd_arr left, qd_arr right) {
   return (double)cycles / num_runs;
 }
 
-double rdtsc_qd_mul_inplace_vec(qd_arr left, qd_arr right) {
+double rdtsc_qd_mul_inplace_inline_vec(qd_arr left, qd_arr right) {
   int i, num_runs = 1;
   myInt64 cycles;
   myInt64 start;
@@ -66,7 +66,7 @@ double rdtsc_qd_mul_inplace_vec(qd_arr left, qd_arr right) {
   while (num_runs < (1 << 14)) {
     start = start_tsc();
     for (i = 0; i < num_runs; ++i) {
-      qd_arr_mul_inplace_vec(left, right);
+      qd_arr_mul_inplace_inline_vec(left, right);
     }
     cycles = stop_tsc(start);
     if (cycles >= CYCLES_REQUIRED)
@@ -76,7 +76,31 @@ double rdtsc_qd_mul_inplace_vec(qd_arr left, qd_arr right) {
 
   start = start_tsc();
   for (i = 0; i < num_runs; ++i) {
-    qd_arr_mul_inplace_vec(left, right);
+    qd_arr_mul_inplace_inline_vec(left, right);
+  }
+  cycles = stop_tsc(start);
+  return (double)cycles / num_runs;
+}
+
+double rdtsc_qd_mul_inplace_inline_vec_x4(qd_arr left, qd_arr right) {
+  int i, num_runs = 1;
+  myInt64 cycles;
+  myInt64 start;
+
+  while (num_runs < (1 << 14)) {
+    start = start_tsc();
+    for (i = 0; i < num_runs; ++i) {
+      qd_arr_mul_inplace_inline_vec_x4(left, right);
+    }
+    cycles = stop_tsc(start);
+    if (cycles >= CYCLES_REQUIRED)
+      break;
+    num_runs *= 2;
+  }
+
+  start = start_tsc();
+  for (i = 0; i < num_runs; ++i) {
+    qd_arr_mul_inplace_inline_vec_x4(left, right);
   }
   cycles = stop_tsc(start);
   return (double)cycles / num_runs;
@@ -92,7 +116,8 @@ int main() {
 
     double cycles_qd_mul = 0;
     double cycles_qd_mul_inplace = 0;
-    double cycles_qd_mul_inplace_vec = 0;
+    double cycles_qd_mul_inplace_inline_vec = 0;
+    double cycles_qd_mul_inplace_inline_vec_x4 = 0;
     for (int j = 0; j < REP_COUNT; j++) {
       cycles_qd_mul += rdtsc_qd_mul(left,right);
     }
@@ -100,13 +125,17 @@ int main() {
       cycles_qd_mul_inplace += rdtsc_qd_mul_inplace(left,right);
     }
     for (int j = 0; j < REP_COUNT; j++) {
-      cycles_qd_mul_inplace_vec += rdtsc_qd_mul_inplace_vec(left,right);
+      cycles_qd_mul_inplace_inline_vec += rdtsc_qd_mul_inplace_inline_vec(left,right);
     }
-    printf("%d %.2f %.2f %.2f\n",
+    for (int j = 0; j < REP_COUNT; j++) {
+      cycles_qd_mul_inplace_inline_vec_x4 += rdtsc_qd_mul_inplace_inline_vec_x4(left,right);
+    }
+    printf("%d %.2f %.2f %.2f %.2f\n",
     n, 
     cycles_qd_mul / REP_COUNT, 
     cycles_qd_mul_inplace / REP_COUNT,
-    cycles_qd_mul_inplace_vec / REP_COUNT);
+    cycles_qd_mul_inplace_inline_vec / REP_COUNT,
+    cycles_qd_mul_inplace_inline_vec_x4 / REP_COUNT);
     qd_destroy_aligned(left);
     qd_destroy_aligned(right);
   }

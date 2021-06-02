@@ -63,7 +63,8 @@ void qd_arr_add_inplace_vec_inline_x6(qd_arr lo, qd_arr ro);
 void qd_arr_add_inplace_vec_inline_x8(qd_arr lo, qd_arr ro);
 
 void qd_arr_mul_inplace(qd_arr lo, qd_arr ro);
-void qd_arr_mul_inplace_vec(qd_arr lo, qd_arr ro);
+void qd_arr_mul_inplace_inline_vec(qd_arr lo, qd_arr ro);
+void qd_arr_mul_inplace_inline_vec_x4(qd_arr lo, qd_arr ro);
 
 /* Computes fl(a+b) and err(a+b).  Assumes |a| >= |b|. */
 static inline double quick_two_sum(double a, double b, double *err)
