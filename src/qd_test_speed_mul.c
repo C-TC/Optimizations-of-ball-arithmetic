@@ -82,6 +82,54 @@ double rdtsc_qd_mul_inplace_inline_vec(qd_arr left, qd_arr right) {
   return (double)cycles / num_runs;
 }
 
+double rdtsc_qd_mul_inplace_inline_vec_x2(qd_arr left, qd_arr right) {
+  int i, num_runs = 1;
+  myInt64 cycles;
+  myInt64 start;
+
+  while (num_runs < (1 << 14)) {
+    start = start_tsc();
+    for (i = 0; i < num_runs; ++i) {
+      qd_arr_mul_inplace_inline_vec_x2(left, right);
+    }
+    cycles = stop_tsc(start);
+    if (cycles >= CYCLES_REQUIRED)
+      break;
+    num_runs *= 2;
+  }
+
+  start = start_tsc();
+  for (i = 0; i < num_runs; ++i) {
+    qd_arr_mul_inplace_inline_vec_x2(left, right);
+  }
+  cycles = stop_tsc(start);
+  return (double)cycles / num_runs;
+}
+
+double rdtsc_qd_mul_inplace_inline_vec_x3(qd_arr left, qd_arr right) {
+  int i, num_runs = 1;
+  myInt64 cycles;
+  myInt64 start;
+
+  while (num_runs < (1 << 14)) {
+    start = start_tsc();
+    for (i = 0; i < num_runs; ++i) {
+      qd_arr_mul_inplace_inline_vec_x3(left, right);
+    }
+    cycles = stop_tsc(start);
+    if (cycles >= CYCLES_REQUIRED)
+      break;
+    num_runs *= 2;
+  }
+
+  start = start_tsc();
+  for (i = 0; i < num_runs; ++i) {
+    qd_arr_mul_inplace_inline_vec_x3(left, right);
+  }
+  cycles = stop_tsc(start);
+  return (double)cycles / num_runs;
+}
+
 double rdtsc_qd_mul_inplace_inline_vec_x4(qd_arr left, qd_arr right) {
   int i, num_runs = 1;
   myInt64 cycles;
@@ -108,7 +156,7 @@ double rdtsc_qd_mul_inplace_inline_vec_x4(qd_arr left, qd_arr right) {
 
 int main() {
   // testing
-  for (int i = 3; i <= 14; i++) { //18 -> out of L3
+  for (int i = 3; i <= 18; i++) { //18 -> out of L3
     int n = 1 << i;
     srand(11);
     qd_arr left = qd_arr_create_random_aligned(n, -1, 1);
@@ -117,6 +165,8 @@ int main() {
     double cycles_qd_mul = 0;
     double cycles_qd_mul_inplace = 0;
     double cycles_qd_mul_inplace_inline_vec = 0;
+    double cycles_qd_mul_inplace_inline_vec_x2 = 0;
+    double cycles_qd_mul_inplace_inline_vec_x3 = 0;
     double cycles_qd_mul_inplace_inline_vec_x4 = 0;
     for (int j = 0; j < REP_COUNT; j++) {
       cycles_qd_mul += rdtsc_qd_mul(left,right);
@@ -128,13 +178,21 @@ int main() {
       cycles_qd_mul_inplace_inline_vec += rdtsc_qd_mul_inplace_inline_vec(left,right);
     }
     for (int j = 0; j < REP_COUNT; j++) {
+      cycles_qd_mul_inplace_inline_vec_x2 += rdtsc_qd_mul_inplace_inline_vec_x2(left,right);
+    }
+    for (int j = 0; j < REP_COUNT; j++) {
+      cycles_qd_mul_inplace_inline_vec_x3 += rdtsc_qd_mul_inplace_inline_vec_x3(left,right);
+    }
+    for (int j = 0; j < REP_COUNT; j++) {
       cycles_qd_mul_inplace_inline_vec_x4 += rdtsc_qd_mul_inplace_inline_vec_x4(left,right);
     }
-    printf("%d %.2f %.2f %.2f %.2f\n",
+    printf("%d %.2f %.2f %.2f %.2f %.2f %.2f\n",
     n, 
     cycles_qd_mul / REP_COUNT, 
     cycles_qd_mul_inplace / REP_COUNT,
     cycles_qd_mul_inplace_inline_vec / REP_COUNT,
+    cycles_qd_mul_inplace_inline_vec_x2 / REP_COUNT,
+    cycles_qd_mul_inplace_inline_vec_x3 / REP_COUNT,
     cycles_qd_mul_inplace_inline_vec_x4 / REP_COUNT);
     qd_destroy_aligned(left);
     qd_destroy_aligned(right);
