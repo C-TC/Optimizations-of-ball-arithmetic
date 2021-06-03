@@ -1,4 +1,4 @@
-CC := gcc
+CC := g++
 CFLAGS := -Wall -O3 -march=native
 ifeq ($(MAKECMDGOALS),debug)
 	CFLAGS := -Wall -g -ggdb -DDEBUG -O0
@@ -59,3 +59,23 @@ $(TEST_DIR)/$(BIG_FLOAT_BENCHMARK): $(BIG_FLOAT_BENCHMARK_OBJS)
 $(BUILD_DIR)/test/%.o: $(TEST_DIR)/%.c
 	mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
+
+
+$(BUILD_DIR)/%.o : $(SRC_DIR)/%.cpp
+	mkdir -p $(dir $@)
+	g++ $(CFLAGS) -lstdc++ --std=c++11 $(INCLUDES) -c $<  -o $@
+
+BIG_INT_ADD_TEST := big_int_add_test
+BIG_INT_ADD_TEST_SRCS := src/big_integer_add_test.cpp src/big_integer.c src/big_integer_add.c
+BIG_INT_ADD_TEST_OBJS := build/big_integer_add_test.o build/big_integer.o build/big_integer_add.o
+big_int_add_test:
+$(BIG_INT_ADD_TEST): $(BIG_INT_ADD_TEST_OBJS)
+	g++ $(CFLAGS) --std=c++11 -lstdc++ $(INCLUDES) -o $(BIG_INT_ADD_TEST) $(BIG_INT_ADD_TEST_OBJS) $(LFLAGS) $(LIBS)
+
+BIG_INT_ADD_BM := big_int_add_bm
+BIG_INT_ADD_BM_SRCS := src/big_integer_add_bm.c src/big_integer.c src/big_integer_add.c
+BIG_INT_ADD_BM_OBJS := build/big_integer_add_bm.o build/big_integer.o build/big_integer_add.o
+big_int_add_bm:
+CFLAGS_NO_VEC := -Wall -O3 -fno-tree-vectorize -march=native
+$(BIG_INT_ADD_BM): $(BIG_INT_ADD_BM_OBJS)
+	$(CC) $(CFLAGS_NO_VEC) $(INCLUDES) -o $(BIG_INT_ADD_BM) $(BIG_INT_ADD_BM_OBJS) $(LFLAGS) $(LIBS)
