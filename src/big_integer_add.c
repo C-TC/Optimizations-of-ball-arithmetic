@@ -258,17 +258,31 @@ void big_integer_add_inplace_inline_intrinsics(const BigInteger left,
     pResult->sign = left.sign;
     // unsigned long borrow = 0;
     int i;
-    unsigned char carry = 0;
+    unsigned int carry = 0;
+    unsigned char useless;
     unsigned int *uintpLeft = (unsigned int *)left.data.bits;
     unsigned int *uintpRight = (unsigned int *)right.data.bits;
     unsigned int *uintpResult = (unsigned int *)pResult->data.bits;
     for (i = 0; i < size; ++i) {
-      carry = _addcarry_u32(-carry, uintpLeft[2 * i], -uintpRight[2 * i],
-                            uintpResult + 2 * i);
+      useless = _addcarry_u32(0, uintpLeft[2 * i] + carry, -uintpRight[2 * i],
+                              uintpResult + 2 * i);
+      if (uintpLeft[2 * i] + carry >= uintpRight[2 * i]) {
+        // printf(">= carry %u\n", carry);
+        carry = 0;
+        // printf(">= carry %u\n", carry);
+      } else {
+        // printf("< carry %u\n", carry);
+        carry = -1;
+        // printf("< carry %u\n", carry);
+      }
       // borrow = left.data.bits[i] - right.data.bits[i] - borrow;
       // pResult->data.bits[i] = borrow & bit_mask;
       // borrow = (borrow >> UINT_NUM_BITS) & 1;
     }
+    // if (carry != 0) {
+    //  // printf("original: %u; carry: %u\n", uintpResult[2 * i], carry);
+    //  uintpResult[2 * i - 2] -= carry;
+    //}
     // assert(borrow == 0);
     assert(carry == 0);
     memset(pResult->data.bits + size, 0, pResult->data.capacity - size);
@@ -281,14 +295,29 @@ void big_integer_add_inplace_inline_intrinsics(const BigInteger left,
     assert(i != 0 || pResult->data.bits[0] > 0);
   } else {
     pResult->sign = right.sign;
-    unsigned long borrow = 0;
+    unsigned char useless;
+    unsigned int carry = 0;
+    unsigned int *uintpLeft = (unsigned int *)left.data.bits;
+    unsigned int *uintpRight = (unsigned int *)right.data.bits;
+    unsigned int *uintpResult = (unsigned int *)pResult->data.bits;
     int i;
     for (i = 0; i < size; ++i) {
-      borrow = right.data.bits[i] - left.data.bits[i] - borrow;
-      pResult->data.bits[i] = borrow & bit_mask;
-      borrow = (borrow >> UINT_NUM_BITS) & 1;
+      useless = _addcarry_u32(0, -uintpLeft[2 * i], uintpRight[2 * i] + carry,
+                              uintpResult + 2 * i);
+      if (uintpRight[2 * i] + carry >= uintpLeft[2 * i]) {
+        carry = 0;
+      } else {
+        carry = -1;
+      }
+      // borrow = right.data.bits[i] - left.data.bits[i] - borrow;
+      // pResult->data.bits[i] = borrow & bit_mask;
+      // borrow = (borrow >> UINT_NUM_BITS) & 1;
     }
-    assert(borrow == 0);
+    if (carry != 0) {
+      // printf("original: %u; carry: %u\n", uintpResult[2 * i], carry);
+      uintpResult[2 * i - 2] -= carry;
+    }
+    // assert(borrow == 0);
     for (; i >= 0; --i) {
       if (pResult->data.bits[i] > 0) {
         pResult->data.size = i + 1;

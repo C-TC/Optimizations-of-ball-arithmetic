@@ -57,8 +57,9 @@ void register_functions() {
 
 int main() {
   BigInteger left1, left2, right1, right2;
-  BigInteger gt1, gt2, gt3, gt4, result1, result2, result3, result4;
-  int size = 2;
+  BigInteger gt1, gt2, gt3, gt4, gt5, gt6;
+  BigInteger result1, result2, result3, result4, result5, result6;
+  int size = 1 << 3;
   initialize(&left1, 1, size, size + 4, 0);
   initialize(&left2, -1, size, size + 4, 1);
   initialize(&right1, 1, size, size + 4, 2);
@@ -67,14 +68,20 @@ int main() {
   initialize(&gt2, 1, size + 4, size + 8, 4);
   initialize(&gt3, 1, size + 4, size + 8, 4);
   initialize(&gt4, 1, size + 4, size + 8, 4);
+  initialize(&gt5, 1, size + 4, size + 8, 4);
+  initialize(&gt6, 1, size + 4, size + 8, 4);
   initialize(&result1, 1, size + 4, size + 8, 5);
   initialize(&result2, 1, size + 4, size + 8, 5);
   initialize(&result3, 1, size + 4, size + 8, 5);
   initialize(&result4, 1, size + 4, size + 8, 5);
+  initialize(&result5, 1, size + 4, size + 8, 5);
+  initialize(&result6, 1, size + 4, size + 8, 5);
   big_integer_add_inplace(left1, right1, &gt1);
   big_integer_add_inplace(left1, right2, &gt2);
   big_integer_add_inplace(left2, right1, &gt3);
   big_integer_add_inplace(left2, right2, &gt4);
+  big_integer_add_inplace(right2, left1, &gt5);
+  big_integer_add_inplace(right1, left2, &gt6);
 
   register_functions();
   for (int i = 0; i < numFuncs; ++i) {
@@ -94,6 +101,10 @@ int main() {
     assert(big_integer_compare(gt3, result3) == 0);
     f(left2, right2, &result4);
     assert(big_integer_compare(gt4, result4) == 0);
+    f(right2, left1, &result5);
+    assert(big_integer_compare(gt5, result5) == 0);
+    f(right1, left2, &result6);
+    assert(big_integer_compare(gt6, result6) == 0);
     std::cout << funcNames[i] << " verified!" << std::endl;
   }
   printf("all tests passed\n");
