@@ -56,6 +56,8 @@ void register_functions() {
 #define CYCLES_REQUIRED 1e8
 #define REP 5
 
+#define WARM_CACHE
+
 double perf_test(comp_func f, std::string name, int intops, int n) {
   double cycles = 0;
   long num_runs = 100;
@@ -80,6 +82,7 @@ double perf_test(comp_func f, std::string name, int intops, int n) {
 
   double total_cycles = 0;
 #ifndef WARM_CACHE
+  printf("cold cache scenario\n");
   std::vector<BigInteger> lefts(num_runs), rights(num_runs), results(num_runs);
   for (int i = 0; i < num_runs; ++i) {
     initialize(&lefts[i], 1, n, n + 4, i * 3);
@@ -102,11 +105,28 @@ double perf_test(comp_func f, std::string name, int intops, int n) {
     big_integer_destroy(&rights[i]);
     big_integer_destroy(&results[i]);
   }
-  return total_cycles;
 #else
-  BigInteger left, right, result;
-  initialize()
+  // printf("warm cache scenario\n");
+  // BigInteger left, right, result;
+  // initialize(&left, 1, n, n + 4, 0);
+  // initialize(&right, 1, n, n + 4, 1);
+  // initialize(&result, 1, n, n + 4, 2);
+  for (int j = 0; j < REP; j++) {
+    start = start_tsc();
+    for (int i = 0; i < num_runs; ++i) {
+      f(left, right, &result);
+    }
+    end = stop_tsc(start);
+
+    cycles = ((double)end) / num_runs;
+    total_cycles += cycles;
+  }
+  total_cycles /= REP;
+  big_integer_destroy(&left);
+  big_integer_destroy(&right);
+  big_integer_destroy(&result);
 #endif
+  return total_cycles;
 }
 
 int main() {
