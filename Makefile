@@ -73,9 +73,8 @@ $(BIG_INT_ADD_TEST): $(BIG_INT_ADD_TEST_OBJS)
 	g++ $(CFLAGS) --std=c++11 -lstdc++ $(INCLUDES) -o $(BIG_INT_ADD_TEST) $(BIG_INT_ADD_TEST_OBJS) $(LFLAGS) $(LIBS)
 
 BIG_INT_ADD_BM := big_int_add_bm
-BIG_INT_ADD_BM_SRCS := src/big_integer_add_bm.c src/big_integer.c src/big_integer_add.c
+BIG_INT_ADD_BM_SRCS := src/big_integer_add_bm.cpp src/big_integer.c src/big_integer_add.c
 BIG_INT_ADD_BM_OBJS := build/big_integer_add_bm.o build/big_integer.o build/big_integer_add.o
 big_int_add_bm:
-CFLAGS_NO_VEC := -Wall -O3 -fno-tree-vectorize -march=native
 $(BIG_INT_ADD_BM): $(BIG_INT_ADD_BM_OBJS)
-	$(CC) $(CFLAGS_NO_VEC) $(INCLUDES) -o $(BIG_INT_ADD_BM) $(BIG_INT_ADD_BM_OBJS) $(LFLAGS) $(LIBS)
+	g++ $(CFLAGS) --std=c++11 -lstdc++ $(INCLUDES) -o $(BIG_INT_ADD_BM) $(BIG_INT_ADD_BM_OBJS) $(LFLAGS) $(LIBS)
