@@ -51,6 +51,8 @@ void register_functions() {
   add_function(big_integer_add_inplace_inline_intrinsics, "intrinsics", 0);
   add_function(big_integer_add_inplace_inline_intrinsics_v2, "intrinsics_v2",
                0);
+  add_function(big_integer_add_inplace_inline_intrinsics_v3, "intrinsics_v3",
+               0);
 }
 
 #define CYCLES_REQUIRED 1e8
