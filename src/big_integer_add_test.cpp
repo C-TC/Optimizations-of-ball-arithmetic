@@ -50,7 +50,7 @@ void add_function(comp_func f, std::string name, int intops) {
 }
 
 void register_functions() {
-  add_function(big_integer_add_inplace_inline, "inplace_intrinsincs", 0);
+  add_function(big_integer_add_inplace_inline, "inplace", 0);
   add_function(big_integer_add_inplace_inline_intrinsics, "inplace_intrinsincs",
                0);
 }
@@ -85,10 +85,10 @@ int main() {
     // big_integer_print(left1, "left1");
     // big_integer_print(right1, "right1");
     // big_integer_print(result1, "result1");
-    big_integer_print(left1, "left1");
-    big_integer_print(right2, "right2");
-    big_integer_print(gt2, "gt2: ");
-    big_integer_print(result2, "result2: ");
+    // big_integer_print(left1, "left1");
+    // big_integer_print(right2, "right2");
+    // big_integer_print(gt2, "gt2: ");
+    // big_integer_print(result2, "result2: ");
     assert(big_integer_compare(gt2, result2) == 0);
     f(left2, right1, &result3);
     assert(big_integer_compare(gt3, result3) == 0);

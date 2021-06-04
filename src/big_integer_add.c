@@ -124,6 +124,7 @@ void big_integer_add_inplace_inline(const BigInteger left,
       borrow = (borrow >> UINT_NUM_BITS) & 1;
     }
     assert(borrow == 0);
+    memset(pResult->data.bits + size, 0, pResult->data.capacity - size);
     for (; i >= 0; --i) {
       if (pResult->data.bits[i] > 0) {
         pResult->data.size = i + 1;
@@ -131,8 +132,8 @@ void big_integer_add_inplace_inline(const BigInteger left,
       }
     }
     assert(i != 0 || pResult->data.bits[0] > 0);
-    memset(pResult->data.bits + pResult->data.size, 0,
-           pResult->data.capacity - pResult->data.size);
+    // memset(pResult->data.bits + pResult->data.size, 0,
+    //        pResult->data.capacity - pResult->data.size);
   } else {
     pResult->sign = right.sign;
     unsigned long borrow = 0;
@@ -143,6 +144,7 @@ void big_integer_add_inplace_inline(const BigInteger left,
       borrow = (borrow >> UINT_NUM_BITS) & 1;
     }
     assert(borrow == 0);
+    memset(pResult->data.bits + size, 0, pResult->data.capacity - size);
     for (; i >= 0; --i) {
       if (pResult->data.bits[i] > 0) {
         pResult->data.size = i + 1;
@@ -150,8 +152,8 @@ void big_integer_add_inplace_inline(const BigInteger left,
       }
     }
     assert(i != 0 || pResult->data.bits[0] > 0);
-    memset(pResult->data.bits + pResult->data.size, 0,
-           pResult->data.capacity - pResult->data.size);
+    // memset(pResult->data.bits + pResult->data.size, 0,
+    //        pResult->data.capacity - pResult->data.size);
   }
   return;
 }
@@ -192,13 +194,14 @@ void big_integer_add_inplace_inline_intrinsics(const BigInteger left,
     // unsigned long sum = 0;
     int i;
     unsigned char carry = 0;
-    unsigned int *uintpLeft = (unsigned int*)left.data.bits;
-    unsigned int *uintpRight = (unsigned int*)right.data.bits;
-    unsigned int *uintpResult = (unsigned int*)pResult->data.bits;
+    unsigned int *uintpLeft = (unsigned int *)left.data.bits;
+    unsigned int *uintpRight = (unsigned int *)right.data.bits;
+    unsigned int *uintpResult = (unsigned int *)pResult->data.bits;
 
     for (i = 0; i < size; ++i) {
       // assume left and right have same size
-      carry = _addcarryx_u32(carry, uintpLeft[2*i], uintpRight[2*i], uintpResult + 2*i);
+      carry = _addcarryx_u32(carry, uintpLeft[2 * i], uintpRight[2 * i],
+                             uintpResult + 2 * i);
       // sum += left.data.bits[i] + right.data.bits[i];
       // pResult->data.bits[i] = sum & bit_mask;
       // sum >>= UINT_NUM_BITS;
@@ -256,17 +259,19 @@ void big_integer_add_inplace_inline_intrinsics(const BigInteger left,
     // unsigned long borrow = 0;
     int i;
     unsigned char carry = 0;
-    unsigned int *uintpLeft = (unsigned int*)left.data.bits;
-    unsigned int *uintpRight = (unsigned int*)right.data.bits;
-    unsigned int *uintpResult = (unsigned int*)pResult->data.bits;
+    unsigned int *uintpLeft = (unsigned int *)left.data.bits;
+    unsigned int *uintpRight = (unsigned int *)right.data.bits;
+    unsigned int *uintpResult = (unsigned int *)pResult->data.bits;
     for (i = 0; i < size; ++i) {
-      carry = _addcarry_u32(-carry, uintpLeft[2*i], -uintpRight[2*i], uintpResult + 2*i);
+      carry = _addcarry_u32(-carry, uintpLeft[2 * i], -uintpRight[2 * i],
+                            uintpResult + 2 * i);
       // borrow = left.data.bits[i] - right.data.bits[i] - borrow;
       // pResult->data.bits[i] = borrow & bit_mask;
       // borrow = (borrow >> UINT_NUM_BITS) & 1;
     }
     // assert(borrow == 0);
     assert(carry == 0);
+    memset(pResult->data.bits + size, 0, pResult->data.capacity - size);
     for (; i >= 0; --i) {
       if (pResult->data.bits[i] > 0) {
         pResult->data.size = i + 1;
@@ -274,8 +279,6 @@ void big_integer_add_inplace_inline_intrinsics(const BigInteger left,
       }
     }
     assert(i != 0 || pResult->data.bits[0] > 0);
-    memset(pResult->data.bits + pResult->data.size, 0,
-           pResult->data.capacity - pResult->data.size);
   } else {
     pResult->sign = right.sign;
     unsigned long borrow = 0;
@@ -292,9 +295,8 @@ void big_integer_add_inplace_inline_intrinsics(const BigInteger left,
         break;
       }
     }
+    memset(pResult->data.bits + size, 0, pResult->data.capacity - size);
     assert(i != 0 || pResult->data.bits[0] > 0);
-    memset(pResult->data.bits + pResult->data.size, 0,
-           pResult->data.capacity - pResult->data.size);
   }
   return;
 }
