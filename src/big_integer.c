@@ -164,7 +164,7 @@ void big_integer_print_data(const BigIntegerData bigIntData, const char *msg) {
   printf("%4d%4d\t", bigIntData.capacity, bigIntData.size);
   int i;
   for (i = 0; i < bigIntData.size; ++i) {
-    printf("%10lu\t", bigIntData.bits[i]);
+    printf("%14lu\t", bigIntData.bits[i]);
   }
   printf("\n");
 }

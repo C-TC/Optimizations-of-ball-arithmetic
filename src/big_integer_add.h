@@ -20,6 +20,11 @@ void big_integer_add_inplace_inline_intrinsics_v2(const BigInteger left,
 void big_integer_add_inplace_inline_intrinsics_v3(const BigInteger left,
                                                   const BigInteger right,
                                                   BigInteger *pResult);
+
+void big_integer_add_inplace_inline_intrinsics_v4(const BigInteger left,
+                                                  const BigInteger right,
+                                                  BigInteger *pResult);
+
 /*
 void big_integer_add_inplace_inline_unfold_1x(const BigInteger left,
                                               const BigInteger right,

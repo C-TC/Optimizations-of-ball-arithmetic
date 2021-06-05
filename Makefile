@@ -63,18 +63,18 @@ $(BUILD_DIR)/test/%.o: $(TEST_DIR)/%.c
 
 $(BUILD_DIR)/%.o : $(SRC_DIR)/%.cpp
 	mkdir -p $(dir $@)
-	g++ $(CFLAGS) -lstdc++ --std=c++11 $(INCLUDES) -c $<  -o $@
+	$(CC) $(CFLAGS) -lstdc++ --std=c++11 $(INCLUDES) -c $<  -o $@
 
 BIG_INT_ADD_TEST := big_int_add_test
 BIG_INT_ADD_TEST_SRCS := src/big_integer_add_test.cpp src/big_integer.c src/big_integer_add.c
 BIG_INT_ADD_TEST_OBJS := build/big_integer_add_test.o build/big_integer.o build/big_integer_add.o
 big_int_add_test:
 $(BIG_INT_ADD_TEST): $(BIG_INT_ADD_TEST_OBJS)
-	g++ $(CFLAGS) --std=c++11 -lstdc++ $(INCLUDES) -o $(BIG_INT_ADD_TEST) $(BIG_INT_ADD_TEST_OBJS) $(LFLAGS) $(LIBS)
+	$(CC) $(CFLAGS) --std=c++11 -lstdc++ $(INCLUDES) -o $(BIG_INT_ADD_TEST) $(BIG_INT_ADD_TEST_OBJS) $(LFLAGS) $(LIBS)
 
 BIG_INT_ADD_BM := big_int_add_bm
 BIG_INT_ADD_BM_SRCS := src/big_integer_add_bm.cpp src/big_integer.c src/big_integer_add.c
 BIG_INT_ADD_BM_OBJS := build/big_integer_add_bm.o build/big_integer.o build/big_integer_add.o
 big_int_add_bm:
 $(BIG_INT_ADD_BM): $(BIG_INT_ADD_BM_OBJS)
-	g++ $(CFLAGS) --std=c++11 -lstdc++ $(INCLUDES) -o $(BIG_INT_ADD_BM) $(BIG_INT_ADD_BM_OBJS) $(LFLAGS) $(LIBS)
+	$(CC) $(CFLAGS) --std=c++11 -lstdc++ $(INCLUDES) -o $(BIG_INT_ADD_BM) $(BIG_INT_ADD_BM_OBJS) $(LFLAGS) $(LIBS)

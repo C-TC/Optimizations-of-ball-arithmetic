@@ -57,13 +57,15 @@ void register_functions() {
                0);
   add_function(big_integer_add_inplace_inline_intrinsics_v3, "intrinsics_v3",
                0);
+  add_function(big_integer_add_inplace_inline_intrinsics_v4, "intrinsics_v4",
+               0);
 }
 
 int main() {
   BigInteger left1, left2, right1, right2;
   BigInteger gt1, gt2, gt3, gt4, gt5, gt6;
   BigInteger result1, result2, result3, result4, result5, result6;
-  int size = 1 << 3;
+  int size = 1 << 5;
   initialize(&left1, 1, size, size + 4, 0);
   initialize(&left2, -1, size, size + 4, 1);
   initialize(&right1, 1, size, size + 4, 2);
@@ -91,7 +93,12 @@ int main() {
   for (int i = 0; i < numFuncs; ++i) {
     comp_func f = userFuncs[i];
     f(left1, right1, &result1);
+    // big_integer_print(left1, "left1");
+    // big_integer_print(right1, "right1");
+    // big_integer_print(gt1, "gt1: ");
+    // big_integer_print(result1, "result1");
     assert(big_integer_compare(gt1, result1) == 0);
+    big_integer_set(0, &result1);
     f(left1, right2, &result2);
     // big_integer_print(left1, "left1");
     // big_integer_print(right1, "right1");
@@ -101,14 +108,24 @@ int main() {
     // big_integer_print(gt2, "gt2: ");
     // big_integer_print(result2, "result2: ");
     assert(big_integer_compare(gt2, result2) == 0);
+    big_integer_set(0, &result2);
     f(left2, right1, &result3);
     assert(big_integer_compare(gt3, result3) == 0);
+    big_integer_set(0, &result3);
     f(left2, right2, &result4);
+
+    // big_integer_print(left2, "left2");
+    // big_integer_print(right2, "right2");
+    // big_integer_print(gt4, "gt4: ");
+    // big_integer_print(result4, "result4");
     assert(big_integer_compare(gt4, result4) == 0);
+    big_integer_set(0, &result4);
     f(right2, left1, &result5);
     assert(big_integer_compare(gt5, result5) == 0);
+    big_integer_set(0, &result5);
     f(right1, left2, &result6);
     assert(big_integer_compare(gt6, result6) == 0);
+    big_integer_set(0, &result6);
     std::cout << funcNames[i] << " verified!" << std::endl;
   }
   printf("all tests passed\n");
