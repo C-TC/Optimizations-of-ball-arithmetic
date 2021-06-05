@@ -68,6 +68,16 @@ void qd_arr_mul_inplace_inline_vec_x2(qd_arr lo, qd_arr ro);
 void qd_arr_mul_inplace_inline_vec_x3(qd_arr lo, qd_arr ro);
 void qd_arr_mul_inplace_inline_vec_x4(qd_arr lo, qd_arr ro);
 
+// overhead test
+qd_arr qd_arr_add_overhead(qd_arr lo, qd_arr ro);
+void qd_arr_add_inplace_overhead(qd_arr lo, qd_arr ro);
+void qd_arr_add_inplace_vec_overhead(qd_arr lo, qd_arr ro);
+void qd_arr_add_inplace_vec_inline_x2_overhead(qd_arr lo, qd_arr ro);
+void qd_arr_add_inplace_vec_inline_x3_overhead(qd_arr lo, qd_arr ro);
+void qd_arr_add_inplace_vec_inline_x4_overhead(qd_arr lo, qd_arr ro);
+void qd_arr_add_inplace_vec_inline_x6_overhead(qd_arr lo, qd_arr ro);
+void qd_arr_add_inplace_vec_inline_x8_overhead(qd_arr lo, qd_arr ro);
+
 /* Computes fl(a+b) and err(a+b).  Assumes |a| >= |b|. */
 static inline double quick_two_sum(double a, double b, double *err)
 {
