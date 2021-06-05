@@ -259,13 +259,12 @@ void big_integer_add_inplace_inline_intrinsics(const BigInteger left,
     // unsigned long borrow = 0;
     int i;
     unsigned int carry = 0;
-    unsigned char useless;
     unsigned int *uintpLeft = (unsigned int *)left.data.bits;
     unsigned int *uintpRight = (unsigned int *)right.data.bits;
     unsigned int *uintpResult = (unsigned int *)pResult->data.bits;
     for (i = 0; i < size; ++i) {
-      useless = _addcarry_u32(0, uintpLeft[2 * i] + carry, -uintpRight[2 * i],
-                              uintpResult + 2 * i);
+      _addcarry_u32(0, uintpLeft[2 * i] + carry, -uintpRight[2 * i],
+                    uintpResult + 2 * i);
       if (uintpLeft[2 * i] + carry >= uintpRight[2 * i]) {
         // printf(">= carry %u\n", carry);
         carry = 0;
@@ -295,15 +294,14 @@ void big_integer_add_inplace_inline_intrinsics(const BigInteger left,
     assert(i != 0 || pResult->data.bits[0] > 0);
   } else {
     pResult->sign = right.sign;
-    unsigned char useless;
     unsigned int carry = 0;
     unsigned int *uintpLeft = (unsigned int *)left.data.bits;
     unsigned int *uintpRight = (unsigned int *)right.data.bits;
     unsigned int *uintpResult = (unsigned int *)pResult->data.bits;
     int i;
     for (i = 0; i < size; ++i) {
-      useless = _addcarry_u32(0, -uintpLeft[2 * i], uintpRight[2 * i] + carry,
-                              uintpResult + 2 * i);
+      _addcarry_u32(0, -uintpLeft[2 * i], uintpRight[2 * i] + carry,
+                    uintpResult + 2 * i);
       if (uintpRight[2 * i] + carry >= uintpLeft[2 * i]) {
         carry = 0;
       } else {
@@ -430,13 +428,12 @@ void big_integer_add_inplace_inline_intrinsics_v2(const BigInteger left,
     // unsigned long borrow = 0;
     int i;
     unsigned int carry = 0;
-    unsigned char useless;
     unsigned int *uintpLeft = (unsigned int *)left.data.bits;
     unsigned int *uintpRight = (unsigned int *)right.data.bits;
     unsigned int *uintpResult = (unsigned int *)pResult->data.bits;
     for (i = 0; i < size; ++i) {
-      useless = _addcarry_u32(0, uintpLeft[2 * i] + carry, -uintpRight[2 * i],
-                              uintpResult + 2 * i);
+      _addcarry_u32(0, uintpLeft[2 * i] + carry, -uintpRight[2 * i],
+                    uintpResult + 2 * i);
       if (uintpLeft[2 * i] + carry >= uintpRight[2 * i]) {
         // printf(">= carry %u\n", carry);
         carry = 0;
@@ -466,15 +463,14 @@ void big_integer_add_inplace_inline_intrinsics_v2(const BigInteger left,
     assert(i != 0 || pResult->data.bits[0] > 0);
   } else {
     pResult->sign = right.sign;
-    unsigned char useless;
     unsigned int carry = 0;
     unsigned int *uintpLeft = (unsigned int *)left.data.bits;
     unsigned int *uintpRight = (unsigned int *)right.data.bits;
     unsigned int *uintpResult = (unsigned int *)pResult->data.bits;
     int i;
     for (i = 0; i < size; ++i) {
-      useless = _addcarry_u32(0, -uintpLeft[2 * i], uintpRight[2 * i] + carry,
-                              uintpResult + 2 * i);
+      _addcarry_u32(0, -uintpLeft[2 * i], uintpRight[2 * i] + carry,
+                    uintpResult + 2 * i);
       if (uintpRight[2 * i] + carry >= uintpLeft[2 * i]) {
         carry = 0;
       } else {
@@ -625,13 +621,12 @@ void big_integer_add_inplace_inline_intrinsics_v3(const BigInteger left,
     // unsigned long borrow = 0;
     int i;
     unsigned int carry = 0;
-    unsigned char useless;
     unsigned int *uintpLeft = (unsigned int *)left.data.bits;
     unsigned int *uintpRight = (unsigned int *)right.data.bits;
     unsigned int *uintpResult = (unsigned int *)pResult->data.bits;
     for (i = 0; i < size; ++i) {
-      useless = _addcarry_u32(0, uintpLeft[2 * i] + carry, -uintpRight[2 * i],
-                              uintpResult + 2 * i);
+      _addcarry_u32(0, uintpLeft[2 * i] + carry, -uintpRight[2 * i],
+                    uintpResult + 2 * i);
       if (uintpLeft[2 * i] + carry >= uintpRight[2 * i]) {
         // printf(">= carry %u\n", carry);
         carry = 0;
@@ -661,15 +656,14 @@ void big_integer_add_inplace_inline_intrinsics_v3(const BigInteger left,
     assert(i != 0 || pResult->data.bits[0] > 0);
   } else {
     pResult->sign = right.sign;
-    unsigned char useless;
     unsigned int carry = 0;
     unsigned int *uintpLeft = (unsigned int *)left.data.bits;
     unsigned int *uintpRight = (unsigned int *)right.data.bits;
     unsigned int *uintpResult = (unsigned int *)pResult->data.bits;
     int i;
     for (i = 0; i < size; ++i) {
-      useless = _addcarry_u32(0, -uintpLeft[2 * i], uintpRight[2 * i] + carry,
-                              uintpResult + 2 * i);
+      _addcarry_u32(0, -uintpLeft[2 * i], uintpRight[2 * i] + carry,
+                    uintpResult + 2 * i);
       if (uintpRight[2 * i] + carry >= uintpLeft[2 * i]) {
         carry = 0;
       } else {
