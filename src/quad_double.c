@@ -25,6 +25,7 @@ void print_qd_arr(qd_arr qda, int num, const char* msg) {
   }
 }
 
+// FLOPS = 84n
 quad_double qd_add_qd(quad_double *a, quad_double *b) {
   
   double s0, s1, s2, s3;
@@ -89,6 +90,7 @@ quad_double qd_mul_d(quad_double *a, double b) {
 }
 
 /* quad-double * quad-double */
+// FLOPS = 192
 /* a0 * b0                    0
         a0 * b1               1
         a1 * b0               2
@@ -426,6 +428,36 @@ qd_arr qd_arr_mul(qd_arr lo, qd_arr ro) {
     /* O(eps^4) terms -- Nine-One-Sum */
     t1 += lo.d1[i] * ro.d3[i] + lo.d2[i] * ro.d2[i] + lo.d3[i] * ro.d1[i] + q6 + q7 + q8 + q9 + s2;
 
+    renorm5(&p0, &p1, &s0, &t0, &t1);
+    ans.d0[i] = p0;
+    ans.d1[i] = p1;
+    ans.d2[i] = s0;
+    ans.d3[i] = t0;
+  }
+  return ans;
+}
+
+qd_arr qd_arr_mul_overhead(qd_arr lo, qd_arr ro) {
+  //assert(lo.size == ro.size);
+  qd_arr ans;
+  int size = lo.size;
+  ans.size = size;
+  ans.d0 = (double *)malloc(size * sizeof(double));
+  ans.d1 = (double *)malloc(size * sizeof(double));
+  ans.d2 = (double *)malloc(size * sizeof(double));
+  ans.d3 = (double *)malloc(size * sizeof(double));
+
+
+  double p0, p1;
+  double t0, t1;
+  double s0;
+
+  for (int i = 0; i < size; i++) {
+    p0 = lo.d0[i];
+    p1 = lo.d0[i];
+    s0 = 1e-20;
+    t0 = 1e-20;
+    t1 = 1e-20;
     renorm5(&p0, &p1, &s0, &t0, &t1);
     ans.d0[i] = p0;
     ans.d1[i] = p1;
@@ -5015,6 +5047,29 @@ void qd_arr_mul_inplace(qd_arr lo, qd_arr ro) {
   }
 }
 
+void qd_arr_mul_inplace_overhead(qd_arr lo, qd_arr ro) {
+  //assert(lo.size == ro.size);
+  int size = lo.size;
+
+  double p0, p1;
+  double t0, t1;
+  double s0;
+
+  for (int i = 0; i < size; i++) {
+    p0 = lo.d0[i];
+    p1 = lo.d0[i];
+    s0 = 1e-20;
+    t0 = 1e-20;
+    t1 = 1e-20;
+    
+    renorm5(&p0, &p1, &s0, &t0, &t1);
+    lo.d0[i] = p0;
+    lo.d1[i] = p1;
+    lo.d2[i] = s0;
+    lo.d3[i] = t0;
+  }
+}
+
 void qd_arr_mul_inplace_inline_vec(qd_arr lo, qd_arr ro) {
   //assert(lo.size == ro.size);
   int size = lo.size;
@@ -5359,6 +5414,41 @@ void qd_arr_mul_inplace_inline_vec(qd_arr lo, qd_arr ro) {
 
     /* O(eps^4) terms -- Nine-One-Sum */
     t1 += lo.d1[i] * ro.d3[i] + lo.d2[i] * ro.d2[i] + lo.d3[i] * ro.d1[i] + q6 + q7 + q8 + q9 + s2;
+
+    renorm5_inline(&p0, &p1, &s0, &t0, &t1);
+    lo.d0[i] = p0;
+    lo.d1[i] = p1;
+    lo.d2[i] = s0;
+    lo.d3[i] = t0;
+  }
+}
+
+void qd_arr_mul_inplace_inline_vec_overhead(qd_arr lo, qd_arr ro) {
+  //assert(lo.size == ro.size);
+  int size = lo.size;
+
+  double p0, p1;
+  double t0, t1;
+  double s0;
+
+  double *tmp_vec = (double *)_mm_malloc(4 * sizeof(double), ALIGNMENT);
+  int i;
+  for (i = 0; i + 3 < size; i+=4) {
+    
+    renorm5_inline(lo.d0 + i, lo.d1 + i, lo.d2 + i, lo.d3 + i, tmp_vec);
+    renorm5_inline(lo.d0 + i + 1, lo.d1 + i + 1, lo.d2 + i + 1, lo.d3 + i + 1, tmp_vec + 1);
+    renorm5_inline(lo.d0 + i + 2, lo.d1 + i + 2, lo.d2 + i + 2, lo.d3 + i + 2, tmp_vec + 2);
+    renorm5_inline(lo.d0 + i + 3, lo.d1 + i + 3, lo.d2 + i + 3, lo.d3 + i + 3, tmp_vec + 3);
+  }
+
+  _mm_free(tmp_vec);
+
+  for (; i < size; i++) {
+    p0 = lo.d0[i];
+    p1 = lo.d0[i];
+    s0 = 1e-20;
+    t0 = 1e-20;
+    t1 = 1e-20;
 
     renorm5_inline(&p0, &p1, &s0, &t0, &t1);
     lo.d0[i] = p0;
@@ -5923,6 +6013,48 @@ void qd_arr_mul_inplace_inline_vec_x2(qd_arr lo, qd_arr ro) {
 
     /* O(eps^4) terms -- Nine-One-Sum */
     t1 += lo.d1[i] * ro.d3[i] + lo.d2[i] * ro.d2[i] + lo.d3[i] * ro.d1[i] + q6 + q7 + q8 + q9 + s2;
+
+    renorm5_inline(&p0, &p1, &s0, &t0, &t1);
+    lo.d0[i] = p0;
+    lo.d1[i] = p1;
+    lo.d2[i] = s0;
+    lo.d3[i] = t0;
+  }
+}
+
+void qd_arr_mul_inplace_inline_vec_x2_overhead(qd_arr lo, qd_arr ro) {
+  //assert(lo.size == ro.size);
+  int size = lo.size;
+
+  double p0, p1;
+  double t0, t1;
+  double s0;
+  
+  double *tmp_vec_x0 = (double *)_mm_malloc(4 * sizeof(double), ALIGNMENT);
+  double *tmp_vec_x1 = (double *)_mm_malloc(4 * sizeof(double), ALIGNMENT);
+  
+  int i;
+  for (i = 0; i + 7 < size; i+=8) {
+    
+    renorm5_inline(lo.d0 + i, lo.d1 + i, lo.d2 + i, lo.d3 + i, tmp_vec_x0);
+    renorm5_inline(lo.d0 + i + 1, lo.d1 + i + 1, lo.d2 + i + 1, lo.d3 + i + 1, tmp_vec_x0 + 1);
+    renorm5_inline(lo.d0 + i + 2, lo.d1 + i + 2, lo.d2 + i + 2, lo.d3 + i + 2, tmp_vec_x0 + 2);
+    renorm5_inline(lo.d0 + i + 3, lo.d1 + i + 3, lo.d2 + i + 3, lo.d3 + i + 3, tmp_vec_x0 + 3);
+    renorm5_inline(lo.d0 + i + 4, lo.d1 + i + 4, lo.d2 + i + 4, lo.d3 + i + 4, tmp_vec_x1);
+    renorm5_inline(lo.d0 + i + 5, lo.d1 + i + 5, lo.d2 + i + 5, lo.d3 + i + 5, tmp_vec_x1 + 1);
+    renorm5_inline(lo.d0 + i + 6, lo.d1 + i + 6, lo.d2 + i + 6, lo.d3 + i + 6, tmp_vec_x1 + 2);
+    renorm5_inline(lo.d0 + i + 7, lo.d1 + i + 7, lo.d2 + i + 7, lo.d3 + i + 7, tmp_vec_x1 + 3);
+  }
+
+  _mm_free(tmp_vec_x0);
+  _mm_free(tmp_vec_x1);
+
+  for (; i < size; i++) {
+    p0 = lo.d0[i];
+    p1 = lo.d0[i];
+    s0 = 1e-20;
+    t0 = 1e-20;
+    t1 = 1e-20;
 
     renorm5_inline(&p0, &p1, &s0, &t0, &t1);
     lo.d0[i] = p0;
@@ -6690,6 +6822,54 @@ void qd_arr_mul_inplace_inline_vec_x3(qd_arr lo, qd_arr ro) {
 
     /* O(eps^4) terms -- Nine-One-Sum */
     t1 += lo.d1[i] * ro.d3[i] + lo.d2[i] * ro.d2[i] + lo.d3[i] * ro.d1[i] + q6 + q7 + q8 + q9 + s2;
+
+    renorm5_inline(&p0, &p1, &s0, &t0, &t1);
+    lo.d0[i] = p0;
+    lo.d1[i] = p1;
+    lo.d2[i] = s0;
+    lo.d3[i] = t0;
+  }
+}
+
+void qd_arr_mul_inplace_inline_vec_x3_overhead(qd_arr lo, qd_arr ro) {
+  //assert(lo.size == ro.size);
+  int size = lo.size;
+
+  double p0, p1;
+  double t0, t1;
+  double s0;
+  
+  double *tmp_vec_x0 = (double *)_mm_malloc(4 * sizeof(double), ALIGNMENT);
+  double *tmp_vec_x1 = (double *)_mm_malloc(4 * sizeof(double), ALIGNMENT);
+  double *tmp_vec_x2 = (double *)_mm_malloc(4 * sizeof(double), ALIGNMENT);
+  
+  int i;
+  for (i = 0; i + 11 < size; i+=12) {
+    
+    renorm5_inline(lo.d0 + i, lo.d1 + i, lo.d2 + i, lo.d3 + i, tmp_vec_x0);
+    renorm5_inline(lo.d0 + i + 1, lo.d1 + i + 1, lo.d2 + i + 1, lo.d3 + i + 1, tmp_vec_x0 + 1);
+    renorm5_inline(lo.d0 + i + 2, lo.d1 + i + 2, lo.d2 + i + 2, lo.d3 + i + 2, tmp_vec_x0 + 2);
+    renorm5_inline(lo.d0 + i + 3, lo.d1 + i + 3, lo.d2 + i + 3, lo.d3 + i + 3, tmp_vec_x0 + 3);
+    renorm5_inline(lo.d0 + i + 4, lo.d1 + i + 4, lo.d2 + i + 4, lo.d3 + i + 4, tmp_vec_x1);
+    renorm5_inline(lo.d0 + i + 5, lo.d1 + i + 5, lo.d2 + i + 5, lo.d3 + i + 5, tmp_vec_x1 + 1);
+    renorm5_inline(lo.d0 + i + 6, lo.d1 + i + 6, lo.d2 + i + 6, lo.d3 + i + 6, tmp_vec_x1 + 2);
+    renorm5_inline(lo.d0 + i + 7, lo.d1 + i + 7, lo.d2 + i + 7, lo.d3 + i + 7, tmp_vec_x1 + 3);
+    renorm5_inline(lo.d0 + i + 8, lo.d1 + i + 8, lo.d2 + i + 8, lo.d3 + i + 8, tmp_vec_x2);
+    renorm5_inline(lo.d0 + i + 9, lo.d1 + i + 9, lo.d2 + i + 9, lo.d3 + i + 9, tmp_vec_x2 + 1);
+    renorm5_inline(lo.d0 + i + 10, lo.d1 + i + 10, lo.d2 + i + 10, lo.d3 + i + 10, tmp_vec_x2 + 2);
+    renorm5_inline(lo.d0 + i + 11, lo.d1 + i + 11, lo.d2 + i + 11, lo.d3 + i + 11, tmp_vec_x2 + 3);
+  }
+
+  _mm_free(tmp_vec_x0);
+  _mm_free(tmp_vec_x1);
+  _mm_free(tmp_vec_x2);
+
+  for (; i < size; i++) {
+    p0 = lo.d0[i];
+    p1 = lo.d0[i];
+    s0 = 1e-20;
+    t0 = 1e-20;
+    t1 = 1e-20;
 
     renorm5_inline(&p0, &p1, &s0, &t0, &t1);
     lo.d0[i] = p0;
@@ -7660,6 +7840,60 @@ void qd_arr_mul_inplace_inline_vec_x4(qd_arr lo, qd_arr ro) {
 
     /* O(eps^4) terms -- Nine-One-Sum */
     t1 += lo.d1[i] * ro.d3[i] + lo.d2[i] * ro.d2[i] + lo.d3[i] * ro.d1[i] + q6 + q7 + q8 + q9 + s2;
+
+    renorm5_inline(&p0, &p1, &s0, &t0, &t1);
+    lo.d0[i] = p0;
+    lo.d1[i] = p1;
+    lo.d2[i] = s0;
+    lo.d3[i] = t0;
+  }
+}
+
+void qd_arr_mul_inplace_inline_vec_x4_overhead(qd_arr lo, qd_arr ro) {
+  //assert(lo.size == ro.size);
+  int size = lo.size;
+
+  double p0, p1;
+  double t0, t1;
+  double s0;
+  
+  double *tmp_vec_x0 = (double *)_mm_malloc(4 * sizeof(double), ALIGNMENT);
+  double *tmp_vec_x1 = (double *)_mm_malloc(4 * sizeof(double), ALIGNMENT);
+  double *tmp_vec_x2 = (double *)_mm_malloc(4 * sizeof(double), ALIGNMENT);
+  double *tmp_vec_x3 = (double *)_mm_malloc(4 * sizeof(double), ALIGNMENT);
+  
+  int i;
+  for (i = 0; i + 15 < size; i+=16) {
+    
+    renorm5_inline(lo.d0 + i, lo.d1 + i, lo.d2 + i, lo.d3 + i, tmp_vec_x0);
+    renorm5_inline(lo.d0 + i + 1, lo.d1 + i + 1, lo.d2 + i + 1, lo.d3 + i + 1, tmp_vec_x0 + 1);
+    renorm5_inline(lo.d0 + i + 2, lo.d1 + i + 2, lo.d2 + i + 2, lo.d3 + i + 2, tmp_vec_x0 + 2);
+    renorm5_inline(lo.d0 + i + 3, lo.d1 + i + 3, lo.d2 + i + 3, lo.d3 + i + 3, tmp_vec_x0 + 3);
+    renorm5_inline(lo.d0 + i + 4, lo.d1 + i + 4, lo.d2 + i + 4, lo.d3 + i + 4, tmp_vec_x1);
+    renorm5_inline(lo.d0 + i + 5, lo.d1 + i + 5, lo.d2 + i + 5, lo.d3 + i + 5, tmp_vec_x1 + 1);
+    renorm5_inline(lo.d0 + i + 6, lo.d1 + i + 6, lo.d2 + i + 6, lo.d3 + i + 6, tmp_vec_x1 + 2);
+    renorm5_inline(lo.d0 + i + 7, lo.d1 + i + 7, lo.d2 + i + 7, lo.d3 + i + 7, tmp_vec_x1 + 3);
+    renorm5_inline(lo.d0 + i + 8, lo.d1 + i + 8, lo.d2 + i + 8, lo.d3 + i + 8, tmp_vec_x2);
+    renorm5_inline(lo.d0 + i + 9, lo.d1 + i + 9, lo.d2 + i + 9, lo.d3 + i + 9, tmp_vec_x2 + 1);
+    renorm5_inline(lo.d0 + i + 10, lo.d1 + i + 10, lo.d2 + i + 10, lo.d3 + i + 10, tmp_vec_x2 + 2);
+    renorm5_inline(lo.d0 + i + 11, lo.d1 + i + 11, lo.d2 + i + 11, lo.d3 + i + 11, tmp_vec_x2 + 3);
+    renorm5_inline(lo.d0 + i + 12, lo.d1 + i + 12, lo.d2 + i + 12, lo.d3 + i + 12, tmp_vec_x3);
+    renorm5_inline(lo.d0 + i + 13, lo.d1 + i + 13, lo.d2 + i + 13, lo.d3 + i + 13, tmp_vec_x3 + 1);
+    renorm5_inline(lo.d0 + i + 14, lo.d1 + i + 14, lo.d2 + i + 14, lo.d3 + i + 14, tmp_vec_x3 + 2);
+    renorm5_inline(lo.d0 + i + 15, lo.d1 + i + 15, lo.d2 + i + 15, lo.d3 + i + 15, tmp_vec_x3 + 3);
+  }
+
+  _mm_free(tmp_vec_x0);
+  _mm_free(tmp_vec_x1);
+  _mm_free(tmp_vec_x2);
+  _mm_free(tmp_vec_x3);
+
+  for (; i < size; i++) {
+    p0 = lo.d0[i];
+    p1 = lo.d0[i];
+    s0 = 1e-20;
+    t0 = 1e-20;
+    t1 = 1e-20;
 
     renorm5_inline(&p0, &p1, &s0, &t0, &t1);
     lo.d0[i] = p0;

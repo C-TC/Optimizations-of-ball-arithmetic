@@ -396,9 +396,11 @@ double rdtsc_qd_add_inplace_vec_inline_x8_overhead(qd_arr left, qd_arr right) {
 
 int main() {
   // testing
-  for (int i = 3; i <= 18; i++) { //18 -> out of L3
+  FILE *f;
+  
+  for (int i = 3; i <= 17; i++) { //17 -> 8MB out of L3
     int n = 1 << i;
-    srand(11);
+    srand(12);
     qd_arr left = qd_arr_create_random_aligned(n, -1, 1);
     qd_arr right = qd_arr_create_random_aligned(n, -1e-10, 1e-10);
 
@@ -452,6 +454,32 @@ int main() {
     cycles_qd_add_inplace_vec_inline_x4 / REP_COUNT,
     cycles_qd_add_inplace_vec_inline_x6 / REP_COUNT,
     cycles_qd_add_inplace_vec_inline_x8 / REP_COUNT);
+    f = fopen("qd_add_noOH_speed.data", "a");
+    fprintf(f, "%d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\n",
+    n, 
+    cycles_qd_add / REP_COUNT, 
+    cycles_qd_add_inplace / REP_COUNT,
+    cycles_qd_add_inplace_vec / REP_COUNT,
+    cycles_qd_add_inplace_vec_inline_x2 / REP_COUNT,
+    cycles_qd_add_inplace_vec_inline_x3 / REP_COUNT,
+    cycles_qd_add_inplace_vec_inline_x4 / REP_COUNT,
+    cycles_qd_add_inplace_vec_inline_x6 / REP_COUNT,
+    cycles_qd_add_inplace_vec_inline_x8 / REP_COUNT);
+    fclose(f);
+
+    f = fopen("qd_add_noOH_perf.data", "a");
+    fprintf(f, "%d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\n",
+    n, 
+    63 * n / (cycles_qd_add / REP_COUNT), 
+    63 * n / (cycles_qd_add_inplace / REP_COUNT),
+    63 * n / (cycles_qd_add_inplace_vec / REP_COUNT),
+    63 * n / (cycles_qd_add_inplace_vec_inline_x2 / REP_COUNT),
+    63 * n / (cycles_qd_add_inplace_vec_inline_x3 / REP_COUNT),
+    63 * n / (cycles_qd_add_inplace_vec_inline_x4 / REP_COUNT),
+    63 * n / (cycles_qd_add_inplace_vec_inline_x6 / REP_COUNT),
+    63 * n / (cycles_qd_add_inplace_vec_inline_x8 / REP_COUNT));
+    fclose(f);
+
     qd_destroy_aligned(left);
     qd_destroy_aligned(right);
   }

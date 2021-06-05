@@ -156,7 +156,9 @@ double rdtsc_qd_mul_inplace_inline_vec_x4(qd_arr left, qd_arr right) {
 
 int main() {
   // testing
-  for (int i = 3; i <= 18; i++) { //18 -> out of L3
+  FILE *f;
+  
+  for (int i = 3; i <= 17; i++) { //17 -> 8MB out of L3
     int n = 1 << i;
     srand(11);
     qd_arr left = qd_arr_create_random_aligned(n, -1, 1);
@@ -194,6 +196,28 @@ int main() {
     cycles_qd_mul_inplace_inline_vec_x2 / REP_COUNT,
     cycles_qd_mul_inplace_inline_vec_x3 / REP_COUNT,
     cycles_qd_mul_inplace_inline_vec_x4 / REP_COUNT);
+    f = fopen("qd_mul_speed.data", "a");
+    fprintf(f, "%d %.2f %.2f %.2f %.2f %.2f %.2f\n",
+    n, 
+    cycles_qd_mul / REP_COUNT, 
+    cycles_qd_mul_inplace / REP_COUNT,
+    cycles_qd_mul_inplace_inline_vec / REP_COUNT,
+    cycles_qd_mul_inplace_inline_vec_x2 / REP_COUNT,
+    cycles_qd_mul_inplace_inline_vec_x3 / REP_COUNT,
+    cycles_qd_mul_inplace_inline_vec_x4 / REP_COUNT);
+    fclose(f);
+
+    f = fopen("qd_mul_perf.data", "a");
+    fprintf(f, "%d %.2f %.2f %.2f %.2f %.2f %.2f\n",
+    n, 
+    192 * n / (cycles_qd_mul / REP_COUNT), 
+    192 * n / (cycles_qd_mul_inplace / REP_COUNT),
+    192 * n / (cycles_qd_mul_inplace_inline_vec / REP_COUNT),
+    192 * n / (cycles_qd_mul_inplace_inline_vec_x2 / REP_COUNT),
+    192 * n / (cycles_qd_mul_inplace_inline_vec_x3 / REP_COUNT),
+    192 * n / (cycles_qd_mul_inplace_inline_vec_x4 / REP_COUNT));
+    fclose(f);
+
     qd_destroy_aligned(left);
     qd_destroy_aligned(right);
   }

@@ -65,6 +65,7 @@ qd_s:
 	$(CC) -std=c99 -Wall -O3 -march=native $(INCLUDES) -o qd_test_add ./src/qd_test_speed_add.c quad_double.o $(LFLAGS) $(LIBS)
 	$(CC) -std=c99 -Wall -O3 -march=native $(INCLUDES) -o qd_test_overhead_add ./src/qd_test_overhead_add.c quad_double.o $(LFLAGS) $(LIBS)
 	$(CC) -std=c99 -Wall -O3 -march=native $(INCLUDES) -o qd_test_mul ./src/qd_test_speed_mul.c quad_double.o $(LFLAGS) $(LIBS)
+	$(CC) -std=c99 -Wall -O3 -march=native $(INCLUDES) -o qd_test_overhead_mul ./src/qd_test_overhead_mul.c quad_double.o $(LFLAGS) $(LIBS)
 
 qd_c: 
 	$(CC) -std=c99 -Wall -O3 -fno-tree-vectorize  -march=native $(INCLUDES) -o qd_test_correctness ./src/quad_double.c $(LFLAGS) $(LIBS)

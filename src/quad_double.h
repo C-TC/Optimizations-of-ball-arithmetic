@@ -68,6 +68,7 @@ void qd_arr_mul_inplace_inline_vec_x2(qd_arr lo, qd_arr ro);
 void qd_arr_mul_inplace_inline_vec_x3(qd_arr lo, qd_arr ro);
 void qd_arr_mul_inplace_inline_vec_x4(qd_arr lo, qd_arr ro);
 
+
 // overhead test
 qd_arr qd_arr_add_overhead(qd_arr lo, qd_arr ro);
 void qd_arr_add_inplace_overhead(qd_arr lo, qd_arr ro);
@@ -77,6 +78,13 @@ void qd_arr_add_inplace_vec_inline_x3_overhead(qd_arr lo, qd_arr ro);
 void qd_arr_add_inplace_vec_inline_x4_overhead(qd_arr lo, qd_arr ro);
 void qd_arr_add_inplace_vec_inline_x6_overhead(qd_arr lo, qd_arr ro);
 void qd_arr_add_inplace_vec_inline_x8_overhead(qd_arr lo, qd_arr ro);
+
+qd_arr qd_arr_mul_overhead(qd_arr lo, qd_arr ro);
+void qd_arr_mul_inplace_overhead(qd_arr lo, qd_arr ro);
+void qd_arr_mul_inplace_inline_vec_overhead(qd_arr lo, qd_arr ro);
+void qd_arr_mul_inplace_inline_vec_x2_overhead(qd_arr lo, qd_arr ro);
+void qd_arr_mul_inplace_inline_vec_x3_overhead(qd_arr lo, qd_arr ro);
+void qd_arr_mul_inplace_inline_vec_x4_overhead(qd_arr lo, qd_arr ro);
 
 /* Computes fl(a+b) and err(a+b).  Assumes |a| >= |b|. */
 static inline double quick_two_sum(double a, double b, double *err)
@@ -101,6 +109,7 @@ static inline double quick_two_diff(double a, double b, double *err)
 }
 
 /* Computes fl(a+b) and err(a+b).  */
+// FLOPS = 6
 static inline double two_sum(double a, double b, double *err)
 {
   double s = a + b;
@@ -132,6 +141,7 @@ err = _mm256_add_pd(tmp_0, tmp_1);
 out = tmp_s;
 */
 
+// FLOPS = 18
 static inline void three_sum(double *a, double *b, double *c) {
   double t1, t2, t3;
   t1 = two_sum(*a, *b, &t2);
@@ -207,6 +217,7 @@ in3 = _mm256_add_pd(tmp2_0, tmp2_1);
 in2 = tmp2_s;
 */
 
+// FLOPS = 13
 static inline void three_sum2(double *a, double *b, double *c) {
   double t1, t2, t3;
   t1 = two_sum(*a, *b, &t2);
@@ -292,6 +303,7 @@ static inline void split(double a, double *hi, double *lo)
 #endif
 
 /* Computes fl(a*b) and err(a*b). */
+// FLOPS = 3
 static inline double two_prod(double a, double b, double *err)
 {
 #ifdef QD_FMS
@@ -366,6 +378,7 @@ static inline void renorm4(double *c0, double *c1,
   *c3 = s3;
 }
 
+// FLOPS = 21
 static inline void renorm5(double *c0, double *c1,
                    double *c2, double *c3, double *c4)
 {
