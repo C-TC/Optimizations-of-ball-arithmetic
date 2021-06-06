@@ -1,4 +1,4 @@
-CC := g++
+CC := /opt/intel/oneapi/compiler/2021.2.0/linux/bin/intel64/icpc
 CFLAGS := -Wall -O3 -march=native
 ifeq ($(MAKECMDGOALS),debug)
 	CFLAGS := -Wall -g -ggdb -DDEBUG -O0
@@ -67,7 +67,7 @@ $(BUILD_DIR)/%.o : $(SRC_DIR)/%.cpp
 
 BIG_INT_ADD_TEST := big_int_add_test
 BIG_INT_ADD_TEST_SRCS := src/big_integer_add_test.cpp src/big_integer.c src/big_integer_add.c
-BIG_INT_ADD_TEST_OBJS := build/big_integer_add_test.o build/big_integer.o build/big_integer_add.o
+BIG_INT_ADD_TEST_OBJS := build/big_integer.o build/big_integer_add.o build/big_integer_add_test.o
 big_int_add_test:
 $(BIG_INT_ADD_TEST): $(BIG_INT_ADD_TEST_OBJS)
 	$(CC) $(CFLAGS) --std=c++11 -lstdc++ $(INCLUDES) -o $(BIG_INT_ADD_TEST) $(BIG_INT_ADD_TEST_OBJS) $(LFLAGS) $(LIBS)

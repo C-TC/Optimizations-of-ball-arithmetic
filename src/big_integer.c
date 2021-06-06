@@ -1611,7 +1611,7 @@ void big_integer_multiply_inplace_fixed_precision_verter_1x_unfold(
   int j = offset_right;
   for (; j < right_size - 3; j += 4) {
     __m256i carry1 = _mm256_set1_epi64x(0);
-    __m256i ro1 = _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j));
+    __m256i ro1 = _mm256_loadu_si256((const __m256i *)(right.data.bits + j));
     for (int i = offset_left; i < left_size; i++) {
       int idx = j - offset_right + i - offset_left;
       __m256i lo = _mm256_set1_epi64x(left->data.bits[i]);
@@ -1620,9 +1620,9 @@ void big_integer_multiply_inplace_fixed_precision_verter_1x_unfold(
 
       carry1 = _mm256_add_epi64(carry1, mul_res1);
       carry1 = _mm256_add_epi64(
-          carry1, _mm256_loadu_si256((const __m256i_u *)(tmp + idx)));
+          carry1, _mm256_loadu_si256((const __m256i *)(tmp + idx)));
 
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx),
+      _mm256_storeu_si256((__m256i *)(tmp + idx),
                           _mm256_and_si256(carry1, bit_maskv));
       carry1 = _mm256_srli_epi64(carry1, UINT_NUM_BITS);
     }
@@ -1630,7 +1630,7 @@ void big_integer_multiply_inplace_fixed_precision_verter_1x_unfold(
     int idx = j - offset_right + precision;
     unsigned long carry = 0;
     unsigned long carry_array[] = {0, 0, 0, 0};
-    __m256i_u *carry_array_addr = (__m256i_u *)carry_array;
+    __m256i *carry_array_addr = (__m256i *)carry_array;
 
     _mm256_storeu_si256(carry_array_addr, carry1);
     carry += tmp[idx] + carry_array[0];
@@ -1686,9 +1686,9 @@ void big_integer_multiply_inplace_fixed_precision_verter_2x_unfold(
   for (; j < right_size - 7; j += 8) {
     __m256i carry1 = _mm256_set1_epi64x(0);
     __m256i carry2 = _mm256_set1_epi64x(0);
-    __m256i ro1 = _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j));
+    __m256i ro1 = _mm256_loadu_si256((const __m256i *)(right.data.bits + j));
     __m256i ro2 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 4));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 4));
     for (int i = offset_left; i < left_size; i++) {
       int idx = j - offset_right + i - offset_left;
       __m256i lo = _mm256_set1_epi64x(left->data.bits[i]);
@@ -1698,14 +1698,14 @@ void big_integer_multiply_inplace_fixed_precision_verter_2x_unfold(
 
       carry1 = _mm256_add_epi64(carry1, mul_res1);
       carry1 = _mm256_add_epi64(
-          carry1, _mm256_loadu_si256((const __m256i_u *)(tmp + idx)));
+          carry1, _mm256_loadu_si256((const __m256i *)(tmp + idx)));
       carry2 = _mm256_add_epi64(carry2, mul_res2);
       carry2 = _mm256_add_epi64(
-          carry2, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 4)));
+          carry2, _mm256_loadu_si256((const __m256i *)(tmp + idx + 4)));
 
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx),
+      _mm256_storeu_si256((__m256i *)(tmp + idx),
                           _mm256_and_si256(carry1, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 4),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 4),
                           _mm256_and_si256(carry2, bit_maskv));
       carry1 = _mm256_srli_epi64(carry1, UINT_NUM_BITS);
       carry2 = _mm256_srli_epi64(carry2, UINT_NUM_BITS);
@@ -1714,7 +1714,7 @@ void big_integer_multiply_inplace_fixed_precision_verter_2x_unfold(
     int idx = j - offset_right + precision;
     unsigned long carry = 0;
     unsigned long carry_array[] = {0, 0, 0, 0};
-    __m256i_u *carry_array_addr = (__m256i_u *)carry_array;
+    __m256i *carry_array_addr = (__m256i *)carry_array;
 
     _mm256_storeu_si256(carry_array_addr, carry1);
     carry += tmp[idx] + carry_array[0];
@@ -1786,13 +1786,13 @@ void big_integer_multiply_inplace_fixed_precision_verter_4x_unfold(
     __m256i carry2 = _mm256_set1_epi64x(0);
     __m256i carry3 = _mm256_set1_epi64x(0);
     __m256i carry4 = _mm256_set1_epi64x(0);
-    __m256i ro1 = _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j));
+    __m256i ro1 = _mm256_loadu_si256((const __m256i *)(right.data.bits + j));
     __m256i ro2 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 4));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 4));
     __m256i ro3 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 8));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 8));
     __m256i ro4 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 12));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 12));
     for (int i = offset_left; i < left_size; i++) {
       int idx = j - offset_right + i - offset_left;
       __m256i lo = _mm256_set1_epi64x(left->data.bits[i]);
@@ -1804,24 +1804,24 @@ void big_integer_multiply_inplace_fixed_precision_verter_4x_unfold(
 
       carry1 = _mm256_add_epi64(carry1, mul_res1);
       carry1 = _mm256_add_epi64(
-          carry1, _mm256_loadu_si256((const __m256i_u *)(tmp + idx)));
+          carry1, _mm256_loadu_si256((const __m256i *)(tmp + idx)));
       carry2 = _mm256_add_epi64(carry2, mul_res2);
       carry2 = _mm256_add_epi64(
-          carry2, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 4)));
+          carry2, _mm256_loadu_si256((const __m256i *)(tmp + idx + 4)));
       carry3 = _mm256_add_epi64(carry3, mul_res3);
       carry3 = _mm256_add_epi64(
-          carry3, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 8)));
+          carry3, _mm256_loadu_si256((const __m256i *)(tmp + idx + 8)));
       carry4 = _mm256_add_epi64(carry4, mul_res4);
       carry4 = _mm256_add_epi64(
-          carry4, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 12)));
+          carry4, _mm256_loadu_si256((const __m256i *)(tmp + idx + 12)));
 
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx),
+      _mm256_storeu_si256((__m256i *)(tmp + idx),
                           _mm256_and_si256(carry1, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 4),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 4),
                           _mm256_and_si256(carry2, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 8),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 8),
                           _mm256_and_si256(carry3, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 12),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 12),
                           _mm256_and_si256(carry4, bit_maskv));
       carry1 = _mm256_srli_epi64(carry1, UINT_NUM_BITS);
       carry2 = _mm256_srli_epi64(carry2, UINT_NUM_BITS);
@@ -1832,7 +1832,7 @@ void big_integer_multiply_inplace_fixed_precision_verter_4x_unfold(
     int idx = j - offset_right + precision;
     unsigned long carry = 0;
     unsigned long carry_array[] = {0, 0, 0, 0};
-    __m256i_u *carry_array_addr = (__m256i_u *)carry_array;
+    __m256i *carry_array_addr = (__m256i *)carry_array;
 
     _mm256_storeu_si256(carry_array_addr, carry1);
     carry += tmp[idx] + carry_array[0];
@@ -1936,21 +1936,21 @@ void big_integer_multiply_inplace_fixed_precision_verter_8x_unfold(
     __m256i carry6 = _mm256_set1_epi64x(0);
     __m256i carry7 = _mm256_set1_epi64x(0);
     __m256i carry8 = _mm256_set1_epi64x(0);
-    __m256i ro1 = _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j));
+    __m256i ro1 = _mm256_loadu_si256((const __m256i *)(right.data.bits + j));
     __m256i ro2 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 4));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 4));
     __m256i ro3 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 8));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 8));
     __m256i ro4 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 12));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 12));
     __m256i ro5 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 16));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 16));
     __m256i ro6 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 20));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 20));
     __m256i ro7 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 24));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 24));
     __m256i ro8 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 28));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 28));
     for (int i = offset_left; i < left_size; i++) {
       int idx = j - offset_right + i - offset_left;
       __m256i lo = _mm256_set1_epi64x(left->data.bits[i]);
@@ -1966,44 +1966,44 @@ void big_integer_multiply_inplace_fixed_precision_verter_8x_unfold(
 
       carry1 = _mm256_add_epi64(carry1, mul_res1);
       carry1 = _mm256_add_epi64(
-          carry1, _mm256_loadu_si256((const __m256i_u *)(tmp + idx)));
+          carry1, _mm256_loadu_si256((const __m256i *)(tmp + idx)));
       carry2 = _mm256_add_epi64(carry2, mul_res2);
       carry2 = _mm256_add_epi64(
-          carry2, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 4)));
+          carry2, _mm256_loadu_si256((const __m256i *)(tmp + idx + 4)));
       carry3 = _mm256_add_epi64(carry3, mul_res3);
       carry3 = _mm256_add_epi64(
-          carry3, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 8)));
+          carry3, _mm256_loadu_si256((const __m256i *)(tmp + idx + 8)));
       carry4 = _mm256_add_epi64(carry4, mul_res4);
       carry4 = _mm256_add_epi64(
-          carry4, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 12)));
+          carry4, _mm256_loadu_si256((const __m256i *)(tmp + idx + 12)));
       carry5 = _mm256_add_epi64(carry5, mul_res5);
       carry5 = _mm256_add_epi64(
-          carry5, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 16)));
+          carry5, _mm256_loadu_si256((const __m256i *)(tmp + idx + 16)));
       carry6 = _mm256_add_epi64(carry6, mul_res6);
       carry6 = _mm256_add_epi64(
-          carry6, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 20)));
+          carry6, _mm256_loadu_si256((const __m256i *)(tmp + idx + 20)));
       carry7 = _mm256_add_epi64(carry7, mul_res7);
       carry7 = _mm256_add_epi64(
-          carry7, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 24)));
+          carry7, _mm256_loadu_si256((const __m256i *)(tmp + idx + 24)));
       carry8 = _mm256_add_epi64(carry8, mul_res8);
       carry8 = _mm256_add_epi64(
-          carry8, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 28)));
+          carry8, _mm256_loadu_si256((const __m256i *)(tmp + idx + 28)));
 
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx),
+      _mm256_storeu_si256((__m256i *)(tmp + idx),
                           _mm256_and_si256(carry1, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 4),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 4),
                           _mm256_and_si256(carry2, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 8),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 8),
                           _mm256_and_si256(carry3, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 12),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 12),
                           _mm256_and_si256(carry4, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 16),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 16),
                           _mm256_and_si256(carry5, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 20),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 20),
                           _mm256_and_si256(carry6, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 24),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 24),
                           _mm256_and_si256(carry7, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 28),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 28),
                           _mm256_and_si256(carry8, bit_maskv));
       carry1 = _mm256_srli_epi64(carry1, UINT_NUM_BITS);
       carry2 = _mm256_srli_epi64(carry2, UINT_NUM_BITS);
@@ -2018,7 +2018,7 @@ void big_integer_multiply_inplace_fixed_precision_verter_8x_unfold(
     int idx = j - offset_right + precision;
     unsigned long carry = 0;
     unsigned long carry_array[] = {0, 0, 0, 0};
-    __m256i_u *carry_array_addr = (__m256i_u *)carry_array;
+    __m256i *carry_array_addr = (__m256i *)carry_array;
 
     _mm256_storeu_si256(carry_array_addr, carry1);
     carry += tmp[idx] + carry_array[0];
@@ -2182,29 +2182,29 @@ void big_integer_multiply_inplace_fixed_precision_verter_12x_unfold(
     __m256i carry10 = _mm256_set1_epi64x(0);
     __m256i carry11 = _mm256_set1_epi64x(0);
     __m256i carry12 = _mm256_set1_epi64x(0);
-    __m256i ro1 = _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j));
+    __m256i ro1 = _mm256_loadu_si256((const __m256i *)(right.data.bits + j));
     __m256i ro2 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 4));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 4));
     __m256i ro3 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 8));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 8));
     __m256i ro4 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 12));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 12));
     __m256i ro5 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 16));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 16));
     __m256i ro6 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 20));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 20));
     __m256i ro7 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 24));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 24));
     __m256i ro8 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 28));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 28));
     __m256i ro9 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 32));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 32));
     __m256i ro10 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 36));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 36));
     __m256i ro11 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 40));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 40));
     __m256i ro12 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 44));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 44));
     for (int i = offset_left; i < left_size; i++) {
       int idx = j - offset_right + i - offset_left;
       __m256i lo = _mm256_set1_epi64x(left->data.bits[i]);
@@ -2224,64 +2224,64 @@ void big_integer_multiply_inplace_fixed_precision_verter_12x_unfold(
 
       carry1 = _mm256_add_epi64(carry1, mul_res1);
       carry1 = _mm256_add_epi64(
-          carry1, _mm256_loadu_si256((const __m256i_u *)(tmp + idx)));
+          carry1, _mm256_loadu_si256((const __m256i *)(tmp + idx)));
       carry2 = _mm256_add_epi64(carry2, mul_res2);
       carry2 = _mm256_add_epi64(
-          carry2, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 4)));
+          carry2, _mm256_loadu_si256((const __m256i *)(tmp + idx + 4)));
       carry3 = _mm256_add_epi64(carry3, mul_res3);
       carry3 = _mm256_add_epi64(
-          carry3, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 8)));
+          carry3, _mm256_loadu_si256((const __m256i *)(tmp + idx + 8)));
       carry4 = _mm256_add_epi64(carry4, mul_res4);
       carry4 = _mm256_add_epi64(
-          carry4, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 12)));
+          carry4, _mm256_loadu_si256((const __m256i *)(tmp + idx + 12)));
       carry5 = _mm256_add_epi64(carry5, mul_res5);
       carry5 = _mm256_add_epi64(
-          carry5, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 16)));
+          carry5, _mm256_loadu_si256((const __m256i *)(tmp + idx + 16)));
       carry6 = _mm256_add_epi64(carry6, mul_res6);
       carry6 = _mm256_add_epi64(
-          carry6, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 20)));
+          carry6, _mm256_loadu_si256((const __m256i *)(tmp + idx + 20)));
       carry7 = _mm256_add_epi64(carry7, mul_res7);
       carry7 = _mm256_add_epi64(
-          carry7, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 24)));
+          carry7, _mm256_loadu_si256((const __m256i *)(tmp + idx + 24)));
       carry8 = _mm256_add_epi64(carry8, mul_res8);
       carry8 = _mm256_add_epi64(
-          carry8, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 28)));
+          carry8, _mm256_loadu_si256((const __m256i *)(tmp + idx + 28)));
       carry9 = _mm256_add_epi64(carry9, mul_res9);
       carry9 = _mm256_add_epi64(
-          carry9, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 32)));
+          carry9, _mm256_loadu_si256((const __m256i *)(tmp + idx + 32)));
       carry10 = _mm256_add_epi64(carry10, mul_res10);
       carry10 = _mm256_add_epi64(
-          carry10, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 36)));
+          carry10, _mm256_loadu_si256((const __m256i *)(tmp + idx + 36)));
       carry11 = _mm256_add_epi64(carry11, mul_res11);
       carry11 = _mm256_add_epi64(
-          carry11, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 40)));
+          carry11, _mm256_loadu_si256((const __m256i *)(tmp + idx + 40)));
       carry12 = _mm256_add_epi64(carry12, mul_res12);
       carry12 = _mm256_add_epi64(
-          carry12, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 44)));
+          carry12, _mm256_loadu_si256((const __m256i *)(tmp + idx + 44)));
 
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx),
+      _mm256_storeu_si256((__m256i *)(tmp + idx),
                           _mm256_and_si256(carry1, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 4),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 4),
                           _mm256_and_si256(carry2, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 8),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 8),
                           _mm256_and_si256(carry3, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 12),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 12),
                           _mm256_and_si256(carry4, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 16),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 16),
                           _mm256_and_si256(carry5, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 20),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 20),
                           _mm256_and_si256(carry6, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 24),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 24),
                           _mm256_and_si256(carry7, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 28),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 28),
                           _mm256_and_si256(carry8, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 32),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 32),
                           _mm256_and_si256(carry9, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 36),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 36),
                           _mm256_and_si256(carry10, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 40),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 40),
                           _mm256_and_si256(carry11, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 44),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 44),
                           _mm256_and_si256(carry12, bit_maskv));
       carry1 = _mm256_srli_epi64(carry1, UINT_NUM_BITS);
       carry2 = _mm256_srli_epi64(carry2, UINT_NUM_BITS);
@@ -2300,7 +2300,7 @@ void big_integer_multiply_inplace_fixed_precision_verter_12x_unfold(
     int idx = j - offset_right + precision;
     unsigned long carry = 0;
     unsigned long carry_array[] = {0, 0, 0, 0};
-    __m256i_u *carry_array_addr = (__m256i_u *)carry_array;
+    __m256i *carry_array_addr = (__m256i *)carry_array;
 
     _mm256_storeu_si256(carry_array_addr, carry1);
     carry += tmp[idx] + carry_array[0];
@@ -2524,37 +2524,37 @@ void big_integer_multiply_inplace_fixed_precision_verter_16x_unfold(
     __m256i carry14 = _mm256_set1_epi64x(0);
     __m256i carry15 = _mm256_set1_epi64x(0);
     __m256i carry16 = _mm256_set1_epi64x(0);
-    __m256i ro1 = _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j));
+    __m256i ro1 = _mm256_loadu_si256((const __m256i *)(right.data.bits + j));
     __m256i ro2 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 4));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 4));
     __m256i ro3 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 8));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 8));
     __m256i ro4 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 12));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 12));
     __m256i ro5 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 16));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 16));
     __m256i ro6 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 20));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 20));
     __m256i ro7 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 24));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 24));
     __m256i ro8 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 28));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 28));
     __m256i ro9 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 32));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 32));
     __m256i ro10 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 36));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 36));
     __m256i ro11 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 40));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 40));
     __m256i ro12 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 44));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 44));
     __m256i ro13 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 48));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 48));
     __m256i ro14 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 52));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 52));
     __m256i ro15 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 56));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 56));
     __m256i ro16 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 60));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 60));
     for (int i = offset_left; i < left_size; i++) {
       int idx = j - offset_right + i - offset_left;
       __m256i lo = _mm256_set1_epi64x(left->data.bits[i]);
@@ -2578,84 +2578,84 @@ void big_integer_multiply_inplace_fixed_precision_verter_16x_unfold(
 
       carry1 = _mm256_add_epi64(carry1, mul_res1);
       carry1 = _mm256_add_epi64(
-          carry1, _mm256_loadu_si256((const __m256i_u *)(tmp + idx)));
+          carry1, _mm256_loadu_si256((const __m256i *)(tmp + idx)));
       carry2 = _mm256_add_epi64(carry2, mul_res2);
       carry2 = _mm256_add_epi64(
-          carry2, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 4)));
+          carry2, _mm256_loadu_si256((const __m256i *)(tmp + idx + 4)));
       carry3 = _mm256_add_epi64(carry3, mul_res3);
       carry3 = _mm256_add_epi64(
-          carry3, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 8)));
+          carry3, _mm256_loadu_si256((const __m256i *)(tmp + idx + 8)));
       carry4 = _mm256_add_epi64(carry4, mul_res4);
       carry4 = _mm256_add_epi64(
-          carry4, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 12)));
+          carry4, _mm256_loadu_si256((const __m256i *)(tmp + idx + 12)));
       carry5 = _mm256_add_epi64(carry5, mul_res5);
       carry5 = _mm256_add_epi64(
-          carry5, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 16)));
+          carry5, _mm256_loadu_si256((const __m256i *)(tmp + idx + 16)));
       carry6 = _mm256_add_epi64(carry6, mul_res6);
       carry6 = _mm256_add_epi64(
-          carry6, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 20)));
+          carry6, _mm256_loadu_si256((const __m256i *)(tmp + idx + 20)));
       carry7 = _mm256_add_epi64(carry7, mul_res7);
       carry7 = _mm256_add_epi64(
-          carry7, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 24)));
+          carry7, _mm256_loadu_si256((const __m256i *)(tmp + idx + 24)));
       carry8 = _mm256_add_epi64(carry8, mul_res8);
       carry8 = _mm256_add_epi64(
-          carry8, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 28)));
+          carry8, _mm256_loadu_si256((const __m256i *)(tmp + idx + 28)));
       carry9 = _mm256_add_epi64(carry9, mul_res9);
       carry9 = _mm256_add_epi64(
-          carry9, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 32)));
+          carry9, _mm256_loadu_si256((const __m256i *)(tmp + idx + 32)));
       carry10 = _mm256_add_epi64(carry10, mul_res10);
       carry10 = _mm256_add_epi64(
-          carry10, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 36)));
+          carry10, _mm256_loadu_si256((const __m256i *)(tmp + idx + 36)));
       carry11 = _mm256_add_epi64(carry11, mul_res11);
       carry11 = _mm256_add_epi64(
-          carry11, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 40)));
+          carry11, _mm256_loadu_si256((const __m256i *)(tmp + idx + 40)));
       carry12 = _mm256_add_epi64(carry12, mul_res12);
       carry12 = _mm256_add_epi64(
-          carry12, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 44)));
+          carry12, _mm256_loadu_si256((const __m256i *)(tmp + idx + 44)));
       carry13 = _mm256_add_epi64(carry13, mul_res13);
       carry13 = _mm256_add_epi64(
-          carry13, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 48)));
+          carry13, _mm256_loadu_si256((const __m256i *)(tmp + idx + 48)));
       carry14 = _mm256_add_epi64(carry14, mul_res14);
       carry14 = _mm256_add_epi64(
-          carry14, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 52)));
+          carry14, _mm256_loadu_si256((const __m256i *)(tmp + idx + 52)));
       carry15 = _mm256_add_epi64(carry15, mul_res15);
       carry15 = _mm256_add_epi64(
-          carry15, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 56)));
+          carry15, _mm256_loadu_si256((const __m256i *)(tmp + idx + 56)));
       carry16 = _mm256_add_epi64(carry16, mul_res16);
       carry16 = _mm256_add_epi64(
-          carry16, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 60)));
+          carry16, _mm256_loadu_si256((const __m256i *)(tmp + idx + 60)));
 
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx),
+      _mm256_storeu_si256((__m256i *)(tmp + idx),
                           _mm256_and_si256(carry1, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 4),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 4),
                           _mm256_and_si256(carry2, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 8),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 8),
                           _mm256_and_si256(carry3, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 12),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 12),
                           _mm256_and_si256(carry4, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 16),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 16),
                           _mm256_and_si256(carry5, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 20),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 20),
                           _mm256_and_si256(carry6, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 24),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 24),
                           _mm256_and_si256(carry7, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 28),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 28),
                           _mm256_and_si256(carry8, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 32),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 32),
                           _mm256_and_si256(carry9, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 36),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 36),
                           _mm256_and_si256(carry10, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 40),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 40),
                           _mm256_and_si256(carry11, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 44),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 44),
                           _mm256_and_si256(carry12, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 48),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 48),
                           _mm256_and_si256(carry13, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 52),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 52),
                           _mm256_and_si256(carry14, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 56),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 56),
                           _mm256_and_si256(carry15, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 60),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 60),
                           _mm256_and_si256(carry16, bit_maskv));
       carry1 = _mm256_srli_epi64(carry1, UINT_NUM_BITS);
       carry2 = _mm256_srli_epi64(carry2, UINT_NUM_BITS);
@@ -2678,7 +2678,7 @@ void big_integer_multiply_inplace_fixed_precision_verter_16x_unfold(
     int idx = j - offset_right + precision;
     unsigned long carry = 0;
     unsigned long carry_array[] = {0, 0, 0, 0};
-    __m256i_u *carry_array_addr = (__m256i_u *)carry_array;
+    __m256i *carry_array_addr = (__m256i *)carry_array;
 
     _mm256_storeu_si256(carry_array_addr, carry1);
     carry += tmp[idx] + carry_array[0];
@@ -2941,8 +2941,8 @@ void big_integer_multiply_inplace_quad_double(BigInteger *left,
   __m256i carry2 = _mm256_set1_epi64x(0);
   __m256i carry3 = _mm256_set1_epi64x(0);
   __m256i carry4 = _mm256_set1_epi64x(0);
-  __m256i ro1 = _mm256_loadu_si256((const __m256i_u *)(right.data.bits));
-  __m256i ro2 = _mm256_loadu_si256((const __m256i_u *)(right.data.bits + 4));
+  __m256i ro1 = _mm256_loadu_si256((const __m256i *)(right.data.bits));
+  __m256i ro2 = _mm256_loadu_si256((const __m256i *)(right.data.bits + 4));
 
   __m256i lo1, lo2, lo3, lo4, lo5, lo6, lo7, lo8;
   __m256i mul_res1, mul_res2;
@@ -2984,17 +2984,16 @@ void big_integer_multiply_inplace_quad_double(BigInteger *left,
   carry2 = _mm256_add_epi64(carry2, mul_res2);
   carry3 = _mm256_add_epi64(carry3, mul_res9);
   carry4 = _mm256_add_epi64(carry4, mul_res10);
-  carry1 =
-      _mm256_add_epi64(carry1, _mm256_loadu_si256((const __m256i_u *)(tmp)));
-  carry2 = _mm256_add_epi64(carry2,
-                            _mm256_loadu_si256((const __m256i_u *)(tmp + 4)));
+  carry1 = _mm256_add_epi64(carry1, _mm256_loadu_si256((const __m256i *)(tmp)));
+  carry2 =
+      _mm256_add_epi64(carry2, _mm256_loadu_si256((const __m256i *)(tmp + 4)));
   carry3 = _mm256_add_epi64(carry3, _mm256_and_si256(carry2, bit_maskv));
-  carry4 = _mm256_add_epi64(carry4,
-                            _mm256_loadu_si256((const __m256i_u *)(tmp + 8)));
-  _mm256_storeu_si256((__m256i_u *)(tmp), _mm256_and_si256(carry1, bit_maskv));
-  _mm256_storeu_si256((__m256i_u *)(tmp + 4),
+  carry4 =
+      _mm256_add_epi64(carry4, _mm256_loadu_si256((const __m256i *)(tmp + 8)));
+  _mm256_storeu_si256((__m256i *)(tmp), _mm256_and_si256(carry1, bit_maskv));
+  _mm256_storeu_si256((__m256i *)(tmp + 4),
                       _mm256_and_si256(carry3, bit_maskv));
-  _mm256_storeu_si256((__m256i_u *)(tmp + 8),
+  _mm256_storeu_si256((__m256i *)(tmp + 8),
                       _mm256_and_si256(carry4, bit_maskv));
   carry1 = _mm256_srli_epi64(carry1, UINT_NUM_BITS);
   carry2 = _mm256_srli_epi64(carry2, UINT_NUM_BITS);
@@ -3005,18 +3004,18 @@ void big_integer_multiply_inplace_quad_double(BigInteger *left,
   carry2 = _mm256_add_epi64(carry2, mul_res4);
   carry3 = _mm256_add_epi64(carry3, mul_res11);
   carry4 = _mm256_add_epi64(carry4, mul_res12);
-  carry1 = _mm256_add_epi64(carry1,
-                            _mm256_loadu_si256((const __m256i_u *)(tmp + 1)));
-  carry2 = _mm256_add_epi64(carry2,
-                            _mm256_loadu_si256((const __m256i_u *)(tmp + 5)));
+  carry1 =
+      _mm256_add_epi64(carry1, _mm256_loadu_si256((const __m256i *)(tmp + 1)));
+  carry2 =
+      _mm256_add_epi64(carry2, _mm256_loadu_si256((const __m256i *)(tmp + 5)));
   carry3 = _mm256_add_epi64(carry3, _mm256_and_si256(carry2, bit_maskv));
-  carry4 = _mm256_add_epi64(carry4,
-                            _mm256_loadu_si256((const __m256i_u *)(tmp + 9)));
-  _mm256_storeu_si256((__m256i_u *)(tmp + 1),
+  carry4 =
+      _mm256_add_epi64(carry4, _mm256_loadu_si256((const __m256i *)(tmp + 9)));
+  _mm256_storeu_si256((__m256i *)(tmp + 1),
                       _mm256_and_si256(carry1, bit_maskv));
-  _mm256_storeu_si256((__m256i_u *)(tmp + 5),
+  _mm256_storeu_si256((__m256i *)(tmp + 5),
                       _mm256_and_si256(carry3, bit_maskv));
-  _mm256_storeu_si256((__m256i_u *)(tmp + 9),
+  _mm256_storeu_si256((__m256i *)(tmp + 9),
                       _mm256_and_si256(carry4, bit_maskv));
   carry1 = _mm256_srli_epi64(carry1, UINT_NUM_BITS);
   carry2 = _mm256_srli_epi64(carry2, UINT_NUM_BITS);
@@ -3027,18 +3026,18 @@ void big_integer_multiply_inplace_quad_double(BigInteger *left,
   carry2 = _mm256_add_epi64(carry2, mul_res6);
   carry3 = _mm256_add_epi64(carry3, mul_res13);
   carry4 = _mm256_add_epi64(carry4, mul_res14);
-  carry1 = _mm256_add_epi64(carry1,
-                            _mm256_loadu_si256((const __m256i_u *)(tmp + 2)));
-  carry2 = _mm256_add_epi64(carry2,
-                            _mm256_loadu_si256((const __m256i_u *)(tmp + 6)));
+  carry1 =
+      _mm256_add_epi64(carry1, _mm256_loadu_si256((const __m256i *)(tmp + 2)));
+  carry2 =
+      _mm256_add_epi64(carry2, _mm256_loadu_si256((const __m256i *)(tmp + 6)));
   carry3 = _mm256_add_epi64(carry3, _mm256_and_si256(carry2, bit_maskv));
-  carry4 = _mm256_add_epi64(carry4,
-                            _mm256_loadu_si256((const __m256i_u *)(tmp + 10)));
-  _mm256_storeu_si256((__m256i_u *)(tmp + 2),
+  carry4 =
+      _mm256_add_epi64(carry4, _mm256_loadu_si256((const __m256i *)(tmp + 10)));
+  _mm256_storeu_si256((__m256i *)(tmp + 2),
                       _mm256_and_si256(carry1, bit_maskv));
-  _mm256_storeu_si256((__m256i_u *)(tmp + 6),
+  _mm256_storeu_si256((__m256i *)(tmp + 6),
                       _mm256_and_si256(carry3, bit_maskv));
-  _mm256_storeu_si256((__m256i_u *)(tmp + 10),
+  _mm256_storeu_si256((__m256i *)(tmp + 10),
                       _mm256_and_si256(carry4, bit_maskv));
   carry1 = _mm256_srli_epi64(carry1, UINT_NUM_BITS);
   carry2 = _mm256_srli_epi64(carry2, UINT_NUM_BITS);
@@ -3049,18 +3048,18 @@ void big_integer_multiply_inplace_quad_double(BigInteger *left,
   carry2 = _mm256_add_epi64(carry2, mul_res8);
   carry3 = _mm256_add_epi64(carry3, mul_res15);
   carry4 = _mm256_add_epi64(carry4, mul_res16);
-  carry1 = _mm256_add_epi64(carry1,
-                            _mm256_loadu_si256((const __m256i_u *)(tmp + 3)));
-  carry2 = _mm256_add_epi64(carry2,
-                            _mm256_loadu_si256((const __m256i_u *)(tmp + 7)));
+  carry1 =
+      _mm256_add_epi64(carry1, _mm256_loadu_si256((const __m256i *)(tmp + 3)));
+  carry2 =
+      _mm256_add_epi64(carry2, _mm256_loadu_si256((const __m256i *)(tmp + 7)));
   carry3 = _mm256_add_epi64(carry3, _mm256_and_si256(carry2, bit_maskv));
-  carry4 = _mm256_add_epi64(carry4,
-                            _mm256_loadu_si256((const __m256i_u *)(tmp + 11)));
-  _mm256_storeu_si256((__m256i_u *)(tmp + 3),
+  carry4 =
+      _mm256_add_epi64(carry4, _mm256_loadu_si256((const __m256i *)(tmp + 11)));
+  _mm256_storeu_si256((__m256i *)(tmp + 3),
                       _mm256_and_si256(carry1, bit_maskv));
-  _mm256_storeu_si256((__m256i_u *)(tmp + 7),
+  _mm256_storeu_si256((__m256i *)(tmp + 7),
                       _mm256_and_si256(carry3, bit_maskv));
-  _mm256_storeu_si256((__m256i_u *)(tmp + 11),
+  _mm256_storeu_si256((__m256i *)(tmp + 11),
                       _mm256_and_si256(carry4, bit_maskv));
   carry1 = _mm256_srli_epi64(carry1, UINT_NUM_BITS);
   carry2 = _mm256_srli_epi64(carry2, UINT_NUM_BITS);
@@ -3071,9 +3070,9 @@ void big_integer_multiply_inplace_quad_double(BigInteger *left,
   unsigned long carry_array1[] = {0, 0, 0, 0};
   unsigned long carry_array2[] = {0, 0, 0, 0};
   unsigned long carry_array3[] = {0, 0, 0, 0};
-  __m256i_u *carry_array_addr1 = (__m256i_u *)carry_array1;
-  __m256i_u *carry_array_addr2 = (__m256i_u *)carry_array2;
-  __m256i_u *carry_array_addr3 = (__m256i_u *)carry_array3;
+  __m256i *carry_array_addr1 = (__m256i *)carry_array1;
+  __m256i *carry_array_addr2 = (__m256i *)carry_array2;
+  __m256i *carry_array_addr3 = (__m256i *)carry_array3;
   carry2 = _mm256_add_epi64(carry2, carry3);
   _mm256_storeu_si256(carry_array_addr1, carry1);
   _mm256_storeu_si256(carry_array_addr2, carry2);
@@ -3150,37 +3149,37 @@ void big_integer_multiply_inplace_fixed_precision_verter_16x_unfold_reduce_intop
     __m256i carry11 = _mm256_set1_epi64x(0);
     __m256i carry13 = _mm256_set1_epi64x(0);
     __m256i carry15 = _mm256_set1_epi64x(0);
-    __m256i ro1 = _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j));
+    __m256i ro1 = _mm256_loadu_si256((const __m256i *)(right.data.bits + j));
     __m256i ro2 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 4));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 4));
     __m256i ro3 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 8));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 8));
     __m256i ro4 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 12));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 12));
     __m256i ro5 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 16));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 16));
     __m256i ro6 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 20));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 20));
     __m256i ro7 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 24));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 24));
     __m256i ro8 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 28));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 28));
     __m256i ro9 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 32));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 32));
     __m256i ro10 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 36));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 36));
     __m256i ro11 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 40));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 40));
     __m256i ro12 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 44));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 44));
     __m256i ro13 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 48));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 48));
     __m256i ro14 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 52));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 52));
     __m256i ro15 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 56));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 56));
     __m256i ro16 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 60));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 60));
     for (int i = offset_left; i < left_size; i++) {
       int idx = j - offset_right + i - offset_left;
       __m256i lo = _mm256_set1_epi64x(left->data.bits[i]);
@@ -3220,62 +3219,62 @@ void big_integer_multiply_inplace_fixed_precision_verter_16x_unfold_reduce_intop
       carry13 = _mm256_add_epi64(carry13, mul_res13);
       carry15 = _mm256_add_epi64(carry15, mul_res15);
       carry1 = _mm256_add_epi64(
-          carry1, _mm256_loadu_si256((const __m256i_u *)(tmp + idx)));
+          carry1, _mm256_loadu_si256((const __m256i *)(tmp + idx)));
       carry2 = _mm256_add_epi64(
-          carry2, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 4)));
+          carry2, _mm256_loadu_si256((const __m256i *)(tmp + idx + 4)));
       carry3 = _mm256_add_epi64(
-          carry3, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 8)));
+          carry3, _mm256_loadu_si256((const __m256i *)(tmp + idx + 8)));
       carry4 = _mm256_add_epi64(
-          carry4, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 12)));
+          carry4, _mm256_loadu_si256((const __m256i *)(tmp + idx + 12)));
       carry5 = _mm256_add_epi64(
-          carry5, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 16)));
+          carry5, _mm256_loadu_si256((const __m256i *)(tmp + idx + 16)));
       carry6 = _mm256_add_epi64(
-          carry6, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 20)));
+          carry6, _mm256_loadu_si256((const __m256i *)(tmp + idx + 20)));
       carry7 = _mm256_add_epi64(
-          carry7, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 24)));
+          carry7, _mm256_loadu_si256((const __m256i *)(tmp + idx + 24)));
       carry8 = _mm256_add_epi64(
-          carry8, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 28)));
+          carry8, _mm256_loadu_si256((const __m256i *)(tmp + idx + 28)));
       carry9 = _mm256_add_epi64(
-          carry9, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 32)));
+          carry9, _mm256_loadu_si256((const __m256i *)(tmp + idx + 32)));
       carry10 = _mm256_add_epi64(
-          carry10, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 36)));
+          carry10, _mm256_loadu_si256((const __m256i *)(tmp + idx + 36)));
       carry11 = _mm256_add_epi64(
-          carry11, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 40)));
+          carry11, _mm256_loadu_si256((const __m256i *)(tmp + idx + 40)));
       carry12 = _mm256_add_epi64(
-          carry12, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 44)));
+          carry12, _mm256_loadu_si256((const __m256i *)(tmp + idx + 44)));
       carry13 = _mm256_add_epi64(
-          carry13, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 48)));
+          carry13, _mm256_loadu_si256((const __m256i *)(tmp + idx + 48)));
       carry14 = _mm256_add_epi64(
-          carry14, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 52)));
+          carry14, _mm256_loadu_si256((const __m256i *)(tmp + idx + 52)));
       carry15 = _mm256_add_epi64(
-          carry15, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 56)));
+          carry15, _mm256_loadu_si256((const __m256i *)(tmp + idx + 56)));
       carry16 = _mm256_add_epi64(
-          carry16, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 60)));
+          carry16, _mm256_loadu_si256((const __m256i *)(tmp + idx + 60)));
 
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx),
+      _mm256_storeu_si256((__m256i *)(tmp + idx),
                           _mm256_and_si256(carry1, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 8),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 8),
                           _mm256_and_si256(carry3, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 16),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 16),
                           _mm256_and_si256(carry5, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 24),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 24),
                           _mm256_and_si256(carry7, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 32),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 32),
                           _mm256_and_si256(carry9, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 40),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 40),
                           _mm256_and_si256(carry11, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 48),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 48),
                           _mm256_and_si256(carry13, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 56),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 56),
                           _mm256_and_si256(carry15, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 4), carry2);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 12), carry4);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 20), carry6);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 28), carry8);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 36), carry10);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 44), carry12);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 52), carry14);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 60), carry16);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 4), carry2);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 12), carry4);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 20), carry6);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 28), carry8);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 36), carry10);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 44), carry12);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 52), carry14);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 60), carry16);
       carry1 = _mm256_srli_epi64(carry1, UINT_NUM_BITS);
       carry3 = _mm256_srli_epi64(carry3, UINT_NUM_BITS);
       carry5 = _mm256_srli_epi64(carry5, UINT_NUM_BITS);
@@ -3288,37 +3287,37 @@ void big_integer_multiply_inplace_fixed_precision_verter_16x_unfold_reduce_intop
 
     int idx = j - offset_right + precision;
     _mm256_storeu_si256(
-        (__m256i_u *)(tmp + idx),
+        (__m256i *)(tmp + idx),
         _mm256_add_epi64(carry1,
-                         _mm256_loadu_si256((const __m256i_u *)(tmp + idx))));
+                         _mm256_loadu_si256((const __m256i *)(tmp + idx))));
     _mm256_storeu_si256(
-        (__m256i_u *)(tmp + idx + 8),
-        _mm256_add_epi64(
-            carry3, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 8))));
+        (__m256i *)(tmp + idx + 8),
+        _mm256_add_epi64(carry3,
+                         _mm256_loadu_si256((const __m256i *)(tmp + idx + 8))));
     _mm256_storeu_si256(
-        (__m256i_u *)(tmp + idx + 16),
+        (__m256i *)(tmp + idx + 16),
         _mm256_add_epi64(
-            carry5, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 16))));
+            carry5, _mm256_loadu_si256((const __m256i *)(tmp + idx + 16))));
     _mm256_storeu_si256(
-        (__m256i_u *)(tmp + idx + 24),
+        (__m256i *)(tmp + idx + 24),
         _mm256_add_epi64(
-            carry7, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 24))));
+            carry7, _mm256_loadu_si256((const __m256i *)(tmp + idx + 24))));
     _mm256_storeu_si256(
-        (__m256i_u *)(tmp + idx + 32),
+        (__m256i *)(tmp + idx + 32),
         _mm256_add_epi64(
-            carry9, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 32))));
+            carry9, _mm256_loadu_si256((const __m256i *)(tmp + idx + 32))));
     _mm256_storeu_si256(
-        (__m256i_u *)(tmp + idx + 40),
+        (__m256i *)(tmp + idx + 40),
         _mm256_add_epi64(
-            carry11, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 40))));
+            carry11, _mm256_loadu_si256((const __m256i *)(tmp + idx + 40))));
     _mm256_storeu_si256(
-        (__m256i_u *)(tmp + idx + 48),
+        (__m256i *)(tmp + idx + 48),
         _mm256_add_epi64(
-            carry13, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 48))));
+            carry13, _mm256_loadu_si256((const __m256i *)(tmp + idx + 48))));
     _mm256_storeu_si256(
-        (__m256i_u *)(tmp + idx + 56),
+        (__m256i *)(tmp + idx + 56),
         _mm256_add_epi64(
-            carry15, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 56))));
+            carry15, _mm256_loadu_si256((const __m256i *)(tmp + idx + 56))));
   }
 
   unsigned long carry = 0;
@@ -3369,37 +3368,37 @@ void big_integer_multiply_inplace_fixed_precision_verter_16x_unfold_reduce_intop
     __m256i carry5 = _mm256_set1_epi64x(0);
     __m256i carry9 = _mm256_set1_epi64x(0);
     __m256i carry13 = _mm256_set1_epi64x(0);
-    __m256i ro1 = _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j));
+    __m256i ro1 = _mm256_loadu_si256((const __m256i *)(right.data.bits + j));
     __m256i ro2 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 4));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 4));
     __m256i ro3 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 8));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 8));
     __m256i ro4 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 12));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 12));
     __m256i ro5 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 16));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 16));
     __m256i ro6 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 20));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 20));
     __m256i ro7 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 24));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 24));
     __m256i ro8 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 28));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 28));
     __m256i ro9 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 32));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 32));
     __m256i ro10 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 36));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 36));
     __m256i ro11 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 40));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 40));
     __m256i ro12 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 44));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 44));
     __m256i ro13 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 48));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 48));
     __m256i ro14 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 52));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 52));
     __m256i ro15 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 56));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 56));
     __m256i ro16 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 60));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 60));
     for (int i = offset_left; i < left_size; i++) {
       int idx = j - offset_right + i - offset_left;
       __m256i lo = _mm256_set1_epi64x(left->data.bits[i]);
@@ -3439,58 +3438,58 @@ void big_integer_multiply_inplace_fixed_precision_verter_16x_unfold_reduce_intop
       carry9 = _mm256_add_epi64(carry9, mul_res9);
       carry13 = _mm256_add_epi64(carry13, mul_res13);
       carry1 = _mm256_add_epi64(
-          carry1, _mm256_loadu_si256((const __m256i_u *)(tmp + idx)));
+          carry1, _mm256_loadu_si256((const __m256i *)(tmp + idx)));
       carry2 = _mm256_add_epi64(
-          carry2, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 4)));
+          carry2, _mm256_loadu_si256((const __m256i *)(tmp + idx + 4)));
       carry3 = _mm256_add_epi64(
-          carry3, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 8)));
+          carry3, _mm256_loadu_si256((const __m256i *)(tmp + idx + 8)));
       carry4 = _mm256_add_epi64(
-          carry4, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 12)));
+          carry4, _mm256_loadu_si256((const __m256i *)(tmp + idx + 12)));
       carry5 = _mm256_add_epi64(
-          carry5, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 16)));
+          carry5, _mm256_loadu_si256((const __m256i *)(tmp + idx + 16)));
       carry6 = _mm256_add_epi64(
-          carry6, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 20)));
+          carry6, _mm256_loadu_si256((const __m256i *)(tmp + idx + 20)));
       carry7 = _mm256_add_epi64(
-          carry7, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 24)));
+          carry7, _mm256_loadu_si256((const __m256i *)(tmp + idx + 24)));
       carry8 = _mm256_add_epi64(
-          carry8, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 28)));
+          carry8, _mm256_loadu_si256((const __m256i *)(tmp + idx + 28)));
       carry9 = _mm256_add_epi64(
-          carry9, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 32)));
+          carry9, _mm256_loadu_si256((const __m256i *)(tmp + idx + 32)));
       carry10 = _mm256_add_epi64(
-          carry10, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 36)));
+          carry10, _mm256_loadu_si256((const __m256i *)(tmp + idx + 36)));
       carry11 = _mm256_add_epi64(
-          carry11, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 40)));
+          carry11, _mm256_loadu_si256((const __m256i *)(tmp + idx + 40)));
       carry12 = _mm256_add_epi64(
-          carry12, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 44)));
+          carry12, _mm256_loadu_si256((const __m256i *)(tmp + idx + 44)));
       carry13 = _mm256_add_epi64(
-          carry13, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 48)));
+          carry13, _mm256_loadu_si256((const __m256i *)(tmp + idx + 48)));
       carry14 = _mm256_add_epi64(
-          carry14, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 52)));
+          carry14, _mm256_loadu_si256((const __m256i *)(tmp + idx + 52)));
       carry15 = _mm256_add_epi64(
-          carry15, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 56)));
+          carry15, _mm256_loadu_si256((const __m256i *)(tmp + idx + 56)));
       carry16 = _mm256_add_epi64(
-          carry16, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 60)));
+          carry16, _mm256_loadu_si256((const __m256i *)(tmp + idx + 60)));
 
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx),
+      _mm256_storeu_si256((__m256i *)(tmp + idx),
                           _mm256_and_si256(carry1, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 16),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 16),
                           _mm256_and_si256(carry5, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 32),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 32),
                           _mm256_and_si256(carry9, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 48),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 48),
                           _mm256_and_si256(carry13, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 4), carry2);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 8), carry3);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 12), carry4);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 20), carry6);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 24), carry7);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 28), carry8);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 36), carry10);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 40), carry11);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 44), carry12);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 52), carry14);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 56), carry15);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 60), carry16);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 4), carry2);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 8), carry3);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 12), carry4);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 20), carry6);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 24), carry7);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 28), carry8);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 36), carry10);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 40), carry11);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 44), carry12);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 52), carry14);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 56), carry15);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 60), carry16);
       carry1 = _mm256_srli_epi64(carry1, UINT_NUM_BITS);
       carry5 = _mm256_srli_epi64(carry5, UINT_NUM_BITS);
       carry9 = _mm256_srli_epi64(carry9, UINT_NUM_BITS);
@@ -3499,21 +3498,21 @@ void big_integer_multiply_inplace_fixed_precision_verter_16x_unfold_reduce_intop
 
     int idx = j - offset_right + precision;
     _mm256_storeu_si256(
-        (__m256i_u *)(tmp + idx),
+        (__m256i *)(tmp + idx),
         _mm256_add_epi64(carry1,
-                         _mm256_loadu_si256((const __m256i_u *)(tmp + idx))));
+                         _mm256_loadu_si256((const __m256i *)(tmp + idx))));
     _mm256_storeu_si256(
-        (__m256i_u *)(tmp + idx + 16),
+        (__m256i *)(tmp + idx + 16),
         _mm256_add_epi64(
-            carry5, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 16))));
+            carry5, _mm256_loadu_si256((const __m256i *)(tmp + idx + 16))));
     _mm256_storeu_si256(
-        (__m256i_u *)(tmp + idx + 32),
+        (__m256i *)(tmp + idx + 32),
         _mm256_add_epi64(
-            carry9, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 32))));
+            carry9, _mm256_loadu_si256((const __m256i *)(tmp + idx + 32))));
     _mm256_storeu_si256(
-        (__m256i_u *)(tmp + idx + 48),
+        (__m256i *)(tmp + idx + 48),
         _mm256_add_epi64(
-            carry13, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 48))));
+            carry13, _mm256_loadu_si256((const __m256i *)(tmp + idx + 48))));
   }
 
   unsigned long carry = 0;
@@ -3562,37 +3561,37 @@ void big_integer_multiply_inplace_fixed_precision_verter_16x_unfold_reduce_intop
   for (; j < right_size - 63; j += 64) {
     __m256i carry1 = _mm256_set1_epi64x(0);
     __m256i carry9 = _mm256_set1_epi64x(0);
-    __m256i ro1 = _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j));
+    __m256i ro1 = _mm256_loadu_si256((const __m256i *)(right.data.bits + j));
     __m256i ro2 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 4));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 4));
     __m256i ro3 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 8));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 8));
     __m256i ro4 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 12));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 12));
     __m256i ro5 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 16));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 16));
     __m256i ro6 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 20));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 20));
     __m256i ro7 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 24));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 24));
     __m256i ro8 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 28));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 28));
     __m256i ro9 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 32));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 32));
     __m256i ro10 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 36));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 36));
     __m256i ro11 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 40));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 40));
     __m256i ro12 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 44));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 44));
     __m256i ro13 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 48));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 48));
     __m256i ro14 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 52));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 52));
     __m256i ro15 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 56));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 56));
     __m256i ro16 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 60));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 60));
     for (int i = offset_left; i < left_size; i++) {
       int idx = j - offset_right + i - offset_left;
       __m256i lo = _mm256_set1_epi64x(left->data.bits[i]);
@@ -3632,69 +3631,69 @@ void big_integer_multiply_inplace_fixed_precision_verter_16x_unfold_reduce_intop
       carry1 = _mm256_add_epi64(carry1, mul_res1);
       carry9 = _mm256_add_epi64(carry9, mul_res9);
       carry1 = _mm256_add_epi64(
-          carry1, _mm256_loadu_si256((const __m256i_u *)(tmp + idx)));
+          carry1, _mm256_loadu_si256((const __m256i *)(tmp + idx)));
       carry2 = _mm256_add_epi64(
-          carry2, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 4)));
+          carry2, _mm256_loadu_si256((const __m256i *)(tmp + idx + 4)));
       carry3 = _mm256_add_epi64(
-          carry3, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 8)));
+          carry3, _mm256_loadu_si256((const __m256i *)(tmp + idx + 8)));
       carry4 = _mm256_add_epi64(
-          carry4, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 12)));
+          carry4, _mm256_loadu_si256((const __m256i *)(tmp + idx + 12)));
       carry5 = _mm256_add_epi64(
-          carry5, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 16)));
+          carry5, _mm256_loadu_si256((const __m256i *)(tmp + idx + 16)));
       carry6 = _mm256_add_epi64(
-          carry6, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 20)));
+          carry6, _mm256_loadu_si256((const __m256i *)(tmp + idx + 20)));
       carry7 = _mm256_add_epi64(
-          carry7, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 24)));
+          carry7, _mm256_loadu_si256((const __m256i *)(tmp + idx + 24)));
       carry8 = _mm256_add_epi64(
-          carry8, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 28)));
+          carry8, _mm256_loadu_si256((const __m256i *)(tmp + idx + 28)));
       carry9 = _mm256_add_epi64(
-          carry9, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 32)));
+          carry9, _mm256_loadu_si256((const __m256i *)(tmp + idx + 32)));
       carry10 = _mm256_add_epi64(
-          carry10, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 36)));
+          carry10, _mm256_loadu_si256((const __m256i *)(tmp + idx + 36)));
       carry11 = _mm256_add_epi64(
-          carry11, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 40)));
+          carry11, _mm256_loadu_si256((const __m256i *)(tmp + idx + 40)));
       carry12 = _mm256_add_epi64(
-          carry12, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 44)));
+          carry12, _mm256_loadu_si256((const __m256i *)(tmp + idx + 44)));
       carry13 = _mm256_add_epi64(
-          carry13, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 48)));
+          carry13, _mm256_loadu_si256((const __m256i *)(tmp + idx + 48)));
       carry14 = _mm256_add_epi64(
-          carry14, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 52)));
+          carry14, _mm256_loadu_si256((const __m256i *)(tmp + idx + 52)));
       carry15 = _mm256_add_epi64(
-          carry15, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 56)));
+          carry15, _mm256_loadu_si256((const __m256i *)(tmp + idx + 56)));
       carry16 = _mm256_add_epi64(
-          carry16, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 60)));
+          carry16, _mm256_loadu_si256((const __m256i *)(tmp + idx + 60)));
 
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx),
+      _mm256_storeu_si256((__m256i *)(tmp + idx),
                           _mm256_and_si256(carry1, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 32),
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 32),
                           _mm256_and_si256(carry9, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 4), carry2);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 8), carry3);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 12), carry4);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 16), carry5);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 20), carry6);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 24), carry7);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 28), carry8);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 36), carry10);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 40), carry11);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 44), carry12);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 48), carry13);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 52), carry14);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 56), carry15);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 60), carry16);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 4), carry2);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 8), carry3);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 12), carry4);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 16), carry5);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 20), carry6);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 24), carry7);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 28), carry8);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 36), carry10);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 40), carry11);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 44), carry12);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 48), carry13);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 52), carry14);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 56), carry15);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 60), carry16);
       carry1 = _mm256_srli_epi64(carry1, UINT_NUM_BITS);
       carry9 = _mm256_srli_epi64(carry9, UINT_NUM_BITS);
     }
 
     int idx = j - offset_right + precision;
     _mm256_storeu_si256(
-        (__m256i_u *)(tmp + idx),
+        (__m256i *)(tmp + idx),
         _mm256_add_epi64(carry1,
-                         _mm256_loadu_si256((const __m256i_u *)(tmp + idx))));
+                         _mm256_loadu_si256((const __m256i *)(tmp + idx))));
     _mm256_storeu_si256(
-        (__m256i_u *)(tmp + idx + 32),
+        (__m256i *)(tmp + idx + 32),
         _mm256_add_epi64(
-            carry9, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 32))));
+            carry9, _mm256_loadu_si256((const __m256i *)(tmp + idx + 32))));
   }
 
   unsigned long carry = 0;
@@ -3742,37 +3741,37 @@ void big_integer_multiply_inplace_fixed_precision_verter_16x_unfold_reduce_intop
   int j = offset_right;
   for (; j < right_size - 63; j += 64) {
     __m256i carry1 = _mm256_set1_epi64x(0);
-    __m256i ro1 = _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j));
+    __m256i ro1 = _mm256_loadu_si256((const __m256i *)(right.data.bits + j));
     __m256i ro2 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 4));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 4));
     __m256i ro3 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 8));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 8));
     __m256i ro4 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 12));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 12));
     __m256i ro5 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 16));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 16));
     __m256i ro6 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 20));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 20));
     __m256i ro7 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 24));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 24));
     __m256i ro8 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 28));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 28));
     __m256i ro9 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 32));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 32));
     __m256i ro10 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 36));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 36));
     __m256i ro11 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 40));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 40));
     __m256i ro12 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 44));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 44));
     __m256i ro13 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 48));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 48));
     __m256i ro14 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 52));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 52));
     __m256i ro15 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 56));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 56));
     __m256i ro16 =
-        _mm256_loadu_si256((const __m256i_u *)(right.data.bits + j + 60));
+        _mm256_loadu_si256((const __m256i *)(right.data.bits + j + 60));
     for (int i = offset_left; i < left_size; i++) {
       int idx = j - offset_right + i - offset_left;
       __m256i lo = _mm256_set1_epi64x(left->data.bits[i]);
@@ -3812,63 +3811,63 @@ void big_integer_multiply_inplace_fixed_precision_verter_16x_unfold_reduce_intop
 
       carry1 = _mm256_add_epi64(carry1, mul_res1);
       carry1 = _mm256_add_epi64(
-          carry1, _mm256_loadu_si256((const __m256i_u *)(tmp + idx)));
+          carry1, _mm256_loadu_si256((const __m256i *)(tmp + idx)));
       carry2 = _mm256_add_epi64(
-          carry2, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 4)));
+          carry2, _mm256_loadu_si256((const __m256i *)(tmp + idx + 4)));
       carry3 = _mm256_add_epi64(
-          carry3, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 8)));
+          carry3, _mm256_loadu_si256((const __m256i *)(tmp + idx + 8)));
       carry4 = _mm256_add_epi64(
-          carry4, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 12)));
+          carry4, _mm256_loadu_si256((const __m256i *)(tmp + idx + 12)));
       carry5 = _mm256_add_epi64(
-          carry5, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 16)));
+          carry5, _mm256_loadu_si256((const __m256i *)(tmp + idx + 16)));
       carry6 = _mm256_add_epi64(
-          carry6, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 20)));
+          carry6, _mm256_loadu_si256((const __m256i *)(tmp + idx + 20)));
       carry7 = _mm256_add_epi64(
-          carry7, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 24)));
+          carry7, _mm256_loadu_si256((const __m256i *)(tmp + idx + 24)));
       carry8 = _mm256_add_epi64(
-          carry8, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 28)));
+          carry8, _mm256_loadu_si256((const __m256i *)(tmp + idx + 28)));
       carry9 = _mm256_add_epi64(
-          carry9, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 32)));
+          carry9, _mm256_loadu_si256((const __m256i *)(tmp + idx + 32)));
       carry10 = _mm256_add_epi64(
-          carry10, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 36)));
+          carry10, _mm256_loadu_si256((const __m256i *)(tmp + idx + 36)));
       carry11 = _mm256_add_epi64(
-          carry11, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 40)));
+          carry11, _mm256_loadu_si256((const __m256i *)(tmp + idx + 40)));
       carry12 = _mm256_add_epi64(
-          carry12, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 44)));
+          carry12, _mm256_loadu_si256((const __m256i *)(tmp + idx + 44)));
       carry13 = _mm256_add_epi64(
-          carry13, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 48)));
+          carry13, _mm256_loadu_si256((const __m256i *)(tmp + idx + 48)));
       carry14 = _mm256_add_epi64(
-          carry14, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 52)));
+          carry14, _mm256_loadu_si256((const __m256i *)(tmp + idx + 52)));
       carry15 = _mm256_add_epi64(
-          carry15, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 56)));
+          carry15, _mm256_loadu_si256((const __m256i *)(tmp + idx + 56)));
       carry16 = _mm256_add_epi64(
-          carry16, _mm256_loadu_si256((const __m256i_u *)(tmp + idx + 60)));
+          carry16, _mm256_loadu_si256((const __m256i *)(tmp + idx + 60)));
 
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx),
+      _mm256_storeu_si256((__m256i *)(tmp + idx),
                           _mm256_and_si256(carry1, bit_maskv));
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 4), carry2);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 8), carry3);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 12), carry4);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 16), carry5);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 20), carry6);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 24), carry7);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 28), carry8);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 32), carry9);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 36), carry10);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 40), carry11);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 44), carry12);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 48), carry13);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 52), carry14);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 56), carry15);
-      _mm256_storeu_si256((__m256i_u *)(tmp + idx + 60), carry16);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 4), carry2);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 8), carry3);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 12), carry4);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 16), carry5);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 20), carry6);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 24), carry7);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 28), carry8);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 32), carry9);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 36), carry10);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 40), carry11);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 44), carry12);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 48), carry13);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 52), carry14);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 56), carry15);
+      _mm256_storeu_si256((__m256i *)(tmp + idx + 60), carry16);
       carry1 = _mm256_srli_epi64(carry1, UINT_NUM_BITS);
     }
 
     int idx = j - offset_right + precision;
     _mm256_storeu_si256(
-        (__m256i_u *)(tmp + idx),
+        (__m256i *)(tmp + idx),
         _mm256_add_epi64(carry1,
-                         _mm256_loadu_si256((const __m256i_u *)(tmp + idx))));
+                         _mm256_loadu_si256((const __m256i *)(tmp + idx))));
   }
 
   unsigned long carry = 0;
@@ -4007,15 +4006,15 @@ void big_integer_sum_3_unfold_1x(const BigInteger op1, const BigInteger op2,
 
   int i = 0;
   for (; i < precision - 3; i += 4) {
-    sum1 = _mm256_loadu_si256((const __m256i_u *)(data1 + i));
+    sum1 = _mm256_loadu_si256((const __m256i *)(data1 + i));
 
     sum1 = _mm256_add_epi64(sum1,
-                            _mm256_loadu_si256((const __m256i_u *)(data2 + i)));
+                            _mm256_loadu_si256((const __m256i *)(data2 + i)));
 
     sum1 = _mm256_add_epi64(sum1,
-                            _mm256_loadu_si256((const __m256i_u *)(data3 + i)));
+                            _mm256_loadu_si256((const __m256i *)(data3 + i)));
 
-    _mm256_storeu_si256((__m256i_u *)(res_data + i), sum1);
+    _mm256_storeu_si256((__m256i *)(res_data + i), sum1);
   }
 
   unsigned long carry = 0;
@@ -4060,21 +4059,21 @@ void big_integer_sum_3_unfold_2x(const BigInteger op1, const BigInteger op2,
 
   int i = 0;
   for (; i < precision - 7; i += 8) {
-    sum1 = _mm256_loadu_si256((const __m256i_u *)(data1 + i));
-    sum2 = _mm256_loadu_si256((const __m256i_u *)(data1 + i + 4));
+    sum1 = _mm256_loadu_si256((const __m256i *)(data1 + i));
+    sum2 = _mm256_loadu_si256((const __m256i *)(data1 + i + 4));
 
     sum1 = _mm256_add_epi64(sum1,
-                            _mm256_loadu_si256((const __m256i_u *)(data2 + i)));
+                            _mm256_loadu_si256((const __m256i *)(data2 + i)));
     sum2 = _mm256_add_epi64(
-        sum2, _mm256_loadu_si256((const __m256i_u *)(data2 + i + 4)));
+        sum2, _mm256_loadu_si256((const __m256i *)(data2 + i + 4)));
 
     sum1 = _mm256_add_epi64(sum1,
-                            _mm256_loadu_si256((const __m256i_u *)(data3 + i)));
+                            _mm256_loadu_si256((const __m256i *)(data3 + i)));
     sum2 = _mm256_add_epi64(
-        sum2, _mm256_loadu_si256((const __m256i_u *)(data3 + i + 4)));
+        sum2, _mm256_loadu_si256((const __m256i *)(data3 + i + 4)));
 
-    _mm256_storeu_si256((__m256i_u *)(res_data + i), sum1);
-    _mm256_storeu_si256((__m256i_u *)(res_data + i + 4), sum2);
+    _mm256_storeu_si256((__m256i *)(res_data + i), sum1);
+    _mm256_storeu_si256((__m256i *)(res_data + i + 4), sum2);
   }
 
   unsigned long carry = 0;
@@ -4121,33 +4120,33 @@ void big_integer_sum_3_unfold_4x(const BigInteger op1, const BigInteger op2,
 
   int i = 0;
   for (; i < precision - 15; i += 16) {
-    sum1 = _mm256_loadu_si256((const __m256i_u *)(data1 + i));
-    sum2 = _mm256_loadu_si256((const __m256i_u *)(data1 + i + 4));
-    sum3 = _mm256_loadu_si256((const __m256i_u *)(data1 + i + 8));
-    sum4 = _mm256_loadu_si256((const __m256i_u *)(data1 + i + 12));
+    sum1 = _mm256_loadu_si256((const __m256i *)(data1 + i));
+    sum2 = _mm256_loadu_si256((const __m256i *)(data1 + i + 4));
+    sum3 = _mm256_loadu_si256((const __m256i *)(data1 + i + 8));
+    sum4 = _mm256_loadu_si256((const __m256i *)(data1 + i + 12));
 
     sum1 = _mm256_add_epi64(sum1,
-                            _mm256_loadu_si256((const __m256i_u *)(data2 + i)));
+                            _mm256_loadu_si256((const __m256i *)(data2 + i)));
     sum2 = _mm256_add_epi64(
-        sum2, _mm256_loadu_si256((const __m256i_u *)(data2 + i + 4)));
+        sum2, _mm256_loadu_si256((const __m256i *)(data2 + i + 4)));
     sum3 = _mm256_add_epi64(
-        sum3, _mm256_loadu_si256((const __m256i_u *)(data2 + i + 8)));
+        sum3, _mm256_loadu_si256((const __m256i *)(data2 + i + 8)));
     sum4 = _mm256_add_epi64(
-        sum4, _mm256_loadu_si256((const __m256i_u *)(data2 + i + 12)));
+        sum4, _mm256_loadu_si256((const __m256i *)(data2 + i + 12)));
 
     sum1 = _mm256_add_epi64(sum1,
-                            _mm256_loadu_si256((const __m256i_u *)(data3 + i)));
+                            _mm256_loadu_si256((const __m256i *)(data3 + i)));
     sum2 = _mm256_add_epi64(
-        sum2, _mm256_loadu_si256((const __m256i_u *)(data3 + i + 4)));
+        sum2, _mm256_loadu_si256((const __m256i *)(data3 + i + 4)));
     sum3 = _mm256_add_epi64(
-        sum3, _mm256_loadu_si256((const __m256i_u *)(data3 + i + 8)));
+        sum3, _mm256_loadu_si256((const __m256i *)(data3 + i + 8)));
     sum4 = _mm256_add_epi64(
-        sum4, _mm256_loadu_si256((const __m256i_u *)(data3 + i + 12)));
+        sum4, _mm256_loadu_si256((const __m256i *)(data3 + i + 12)));
 
-    _mm256_storeu_si256((__m256i_u *)(res_data + i), sum1);
-    _mm256_storeu_si256((__m256i_u *)(res_data + i + 4), sum2);
-    _mm256_storeu_si256((__m256i_u *)(res_data + i + 8), sum3);
-    _mm256_storeu_si256((__m256i_u *)(res_data + i + 12), sum4);
+    _mm256_storeu_si256((__m256i *)(res_data + i), sum1);
+    _mm256_storeu_si256((__m256i *)(res_data + i + 4), sum2);
+    _mm256_storeu_si256((__m256i *)(res_data + i + 8), sum3);
+    _mm256_storeu_si256((__m256i *)(res_data + i + 12), sum4);
   }
 
   unsigned long carry = 0;
@@ -4198,57 +4197,57 @@ void big_integer_sum_3_unfold_8x(const BigInteger op1, const BigInteger op2,
 
   int i = 0;
   for (; i < precision - 31; i += 32) {
-    sum1 = _mm256_loadu_si256((const __m256i_u *)(data1 + i));
-    sum2 = _mm256_loadu_si256((const __m256i_u *)(data1 + i + 4));
-    sum3 = _mm256_loadu_si256((const __m256i_u *)(data1 + i + 8));
-    sum4 = _mm256_loadu_si256((const __m256i_u *)(data1 + i + 12));
-    sum5 = _mm256_loadu_si256((const __m256i_u *)(data1 + i + 16));
-    sum6 = _mm256_loadu_si256((const __m256i_u *)(data1 + i + 20));
-    sum7 = _mm256_loadu_si256((const __m256i_u *)(data1 + i + 24));
-    sum8 = _mm256_loadu_si256((const __m256i_u *)(data1 + i + 28));
+    sum1 = _mm256_loadu_si256((const __m256i *)(data1 + i));
+    sum2 = _mm256_loadu_si256((const __m256i *)(data1 + i + 4));
+    sum3 = _mm256_loadu_si256((const __m256i *)(data1 + i + 8));
+    sum4 = _mm256_loadu_si256((const __m256i *)(data1 + i + 12));
+    sum5 = _mm256_loadu_si256((const __m256i *)(data1 + i + 16));
+    sum6 = _mm256_loadu_si256((const __m256i *)(data1 + i + 20));
+    sum7 = _mm256_loadu_si256((const __m256i *)(data1 + i + 24));
+    sum8 = _mm256_loadu_si256((const __m256i *)(data1 + i + 28));
 
     sum1 = _mm256_add_epi64(sum1,
-                            _mm256_loadu_si256((const __m256i_u *)(data2 + i)));
+                            _mm256_loadu_si256((const __m256i *)(data2 + i)));
     sum2 = _mm256_add_epi64(
-        sum2, _mm256_loadu_si256((const __m256i_u *)(data2 + i + 4)));
+        sum2, _mm256_loadu_si256((const __m256i *)(data2 + i + 4)));
     sum3 = _mm256_add_epi64(
-        sum3, _mm256_loadu_si256((const __m256i_u *)(data2 + i + 8)));
+        sum3, _mm256_loadu_si256((const __m256i *)(data2 + i + 8)));
     sum4 = _mm256_add_epi64(
-        sum4, _mm256_loadu_si256((const __m256i_u *)(data2 + i + 12)));
+        sum4, _mm256_loadu_si256((const __m256i *)(data2 + i + 12)));
     sum5 = _mm256_add_epi64(
-        sum5, _mm256_loadu_si256((const __m256i_u *)(data2 + i + 16)));
+        sum5, _mm256_loadu_si256((const __m256i *)(data2 + i + 16)));
     sum6 = _mm256_add_epi64(
-        sum6, _mm256_loadu_si256((const __m256i_u *)(data2 + i + 20)));
+        sum6, _mm256_loadu_si256((const __m256i *)(data2 + i + 20)));
     sum7 = _mm256_add_epi64(
-        sum7, _mm256_loadu_si256((const __m256i_u *)(data2 + i + 24)));
+        sum7, _mm256_loadu_si256((const __m256i *)(data2 + i + 24)));
     sum8 = _mm256_add_epi64(
-        sum8, _mm256_loadu_si256((const __m256i_u *)(data2 + i + 28)));
+        sum8, _mm256_loadu_si256((const __m256i *)(data2 + i + 28)));
 
     sum1 = _mm256_add_epi64(sum1,
-                            _mm256_loadu_si256((const __m256i_u *)(data3 + i)));
+                            _mm256_loadu_si256((const __m256i *)(data3 + i)));
     sum2 = _mm256_add_epi64(
-        sum2, _mm256_loadu_si256((const __m256i_u *)(data3 + i + 4)));
+        sum2, _mm256_loadu_si256((const __m256i *)(data3 + i + 4)));
     sum3 = _mm256_add_epi64(
-        sum3, _mm256_loadu_si256((const __m256i_u *)(data3 + i + 8)));
+        sum3, _mm256_loadu_si256((const __m256i *)(data3 + i + 8)));
     sum4 = _mm256_add_epi64(
-        sum4, _mm256_loadu_si256((const __m256i_u *)(data3 + i + 12)));
+        sum4, _mm256_loadu_si256((const __m256i *)(data3 + i + 12)));
     sum5 = _mm256_add_epi64(
-        sum5, _mm256_loadu_si256((const __m256i_u *)(data3 + i + 16)));
+        sum5, _mm256_loadu_si256((const __m256i *)(data3 + i + 16)));
     sum6 = _mm256_add_epi64(
-        sum6, _mm256_loadu_si256((const __m256i_u *)(data3 + i + 20)));
+        sum6, _mm256_loadu_si256((const __m256i *)(data3 + i + 20)));
     sum7 = _mm256_add_epi64(
-        sum7, _mm256_loadu_si256((const __m256i_u *)(data3 + i + 24)));
+        sum7, _mm256_loadu_si256((const __m256i *)(data3 + i + 24)));
     sum8 = _mm256_add_epi64(
-        sum8, _mm256_loadu_si256((const __m256i_u *)(data3 + i + 28)));
+        sum8, _mm256_loadu_si256((const __m256i *)(data3 + i + 28)));
 
-    _mm256_storeu_si256((__m256i_u *)(res_data + i), sum1);
-    _mm256_storeu_si256((__m256i_u *)(res_data + i + 4), sum2);
-    _mm256_storeu_si256((__m256i_u *)(res_data + i + 8), sum3);
-    _mm256_storeu_si256((__m256i_u *)(res_data + i + 12), sum4);
-    _mm256_storeu_si256((__m256i_u *)(res_data + i + 16), sum5);
-    _mm256_storeu_si256((__m256i_u *)(res_data + i + 20), sum6);
-    _mm256_storeu_si256((__m256i_u *)(res_data + i + 24), sum7);
-    _mm256_storeu_si256((__m256i_u *)(res_data + i + 28), sum8);
+    _mm256_storeu_si256((__m256i *)(res_data + i), sum1);
+    _mm256_storeu_si256((__m256i *)(res_data + i + 4), sum2);
+    _mm256_storeu_si256((__m256i *)(res_data + i + 8), sum3);
+    _mm256_storeu_si256((__m256i *)(res_data + i + 12), sum4);
+    _mm256_storeu_si256((__m256i *)(res_data + i + 16), sum5);
+    _mm256_storeu_si256((__m256i *)(res_data + i + 20), sum6);
+    _mm256_storeu_si256((__m256i *)(res_data + i + 24), sum7);
+    _mm256_storeu_si256((__m256i *)(res_data + i + 28), sum8);
   }
 
   unsigned long carry = 0;
@@ -4329,21 +4328,21 @@ void big_integer_sum_5_unfold_1x(const BigInteger op1, const BigInteger op2,
 
   int i = 0;
   for (; i < precision - 3; i += 4) {
-    sum1 = _mm256_loadu_si256((const __m256i_u *)(data1 + i));
+    sum1 = _mm256_loadu_si256((const __m256i *)(data1 + i));
 
     sum1 = _mm256_add_epi64(sum1,
-                            _mm256_loadu_si256((const __m256i_u *)(data2 + i)));
+                            _mm256_loadu_si256((const __m256i *)(data2 + i)));
 
     sum1 = _mm256_add_epi64(sum1,
-                            _mm256_loadu_si256((const __m256i_u *)(data3 + i)));
+                            _mm256_loadu_si256((const __m256i *)(data3 + i)));
 
     sum1 = _mm256_add_epi64(sum1,
-                            _mm256_loadu_si256((const __m256i_u *)(data4 + i)));
+                            _mm256_loadu_si256((const __m256i *)(data4 + i)));
 
     sum1 = _mm256_add_epi64(sum1,
-                            _mm256_loadu_si256((const __m256i_u *)(data5 + i)));
+                            _mm256_loadu_si256((const __m256i *)(data5 + i)));
 
-    _mm256_storeu_si256((__m256i_u *)(res_data + i), sum1);
+    _mm256_storeu_si256((__m256i *)(res_data + i), sum1);
   }
 
   unsigned long carry = 0;
@@ -4393,31 +4392,31 @@ void big_integer_sum_5_unfold_2x(const BigInteger op1, const BigInteger op2,
 
   int i = 0;
   for (; i < precision - 7; i += 8) {
-    sum1 = _mm256_loadu_si256((const __m256i_u *)(data1 + i));
-    sum2 = _mm256_loadu_si256((const __m256i_u *)(data1 + i + 4));
+    sum1 = _mm256_loadu_si256((const __m256i *)(data1 + i));
+    sum2 = _mm256_loadu_si256((const __m256i *)(data1 + i + 4));
 
     sum1 = _mm256_add_epi64(sum1,
-                            _mm256_loadu_si256((const __m256i_u *)(data2 + i)));
+                            _mm256_loadu_si256((const __m256i *)(data2 + i)));
     sum2 = _mm256_add_epi64(
-        sum2, _mm256_loadu_si256((const __m256i_u *)(data2 + i + 4)));
+        sum2, _mm256_loadu_si256((const __m256i *)(data2 + i + 4)));
 
     sum1 = _mm256_add_epi64(sum1,
-                            _mm256_loadu_si256((const __m256i_u *)(data3 + i)));
+                            _mm256_loadu_si256((const __m256i *)(data3 + i)));
     sum2 = _mm256_add_epi64(
-        sum2, _mm256_loadu_si256((const __m256i_u *)(data3 + i + 4)));
+        sum2, _mm256_loadu_si256((const __m256i *)(data3 + i + 4)));
 
     sum1 = _mm256_add_epi64(sum1,
-                            _mm256_loadu_si256((const __m256i_u *)(data4 + i)));
+                            _mm256_loadu_si256((const __m256i *)(data4 + i)));
     sum2 = _mm256_add_epi64(
-        sum2, _mm256_loadu_si256((const __m256i_u *)(data4 + i + 4)));
+        sum2, _mm256_loadu_si256((const __m256i *)(data4 + i + 4)));
 
     sum1 = _mm256_add_epi64(sum1,
-                            _mm256_loadu_si256((const __m256i_u *)(data5 + i)));
+                            _mm256_loadu_si256((const __m256i *)(data5 + i)));
     sum2 = _mm256_add_epi64(
-        sum2, _mm256_loadu_si256((const __m256i_u *)(data5 + i + 4)));
+        sum2, _mm256_loadu_si256((const __m256i *)(data5 + i + 4)));
 
-    _mm256_storeu_si256((__m256i_u *)(res_data + i), sum1);
-    _mm256_storeu_si256((__m256i_u *)(res_data + i + 4), sum2);
+    _mm256_storeu_si256((__m256i *)(res_data + i), sum1);
+    _mm256_storeu_si256((__m256i *)(res_data + i + 4), sum2);
   }
 
   unsigned long carry = 0;
@@ -4469,51 +4468,51 @@ void big_integer_sum_5_unfold_4x(const BigInteger op1, const BigInteger op2,
 
   int i = 0;
   for (; i < precision - 7; i += 8) {
-    sum1 = _mm256_loadu_si256((const __m256i_u *)(data1 + i));
-    sum2 = _mm256_loadu_si256((const __m256i_u *)(data1 + i + 4));
-    sum3 = _mm256_loadu_si256((const __m256i_u *)(data1 + i + 8));
-    sum4 = _mm256_loadu_si256((const __m256i_u *)(data1 + i + 12));
+    sum1 = _mm256_loadu_si256((const __m256i *)(data1 + i));
+    sum2 = _mm256_loadu_si256((const __m256i *)(data1 + i + 4));
+    sum3 = _mm256_loadu_si256((const __m256i *)(data1 + i + 8));
+    sum4 = _mm256_loadu_si256((const __m256i *)(data1 + i + 12));
 
     sum1 = _mm256_add_epi64(sum1,
-                            _mm256_loadu_si256((const __m256i_u *)(data2 + i)));
+                            _mm256_loadu_si256((const __m256i *)(data2 + i)));
     sum2 = _mm256_add_epi64(
-        sum2, _mm256_loadu_si256((const __m256i_u *)(data2 + i + 4)));
+        sum2, _mm256_loadu_si256((const __m256i *)(data2 + i + 4)));
     sum3 = _mm256_add_epi64(
-        sum3, _mm256_loadu_si256((const __m256i_u *)(data2 + i + 8)));
+        sum3, _mm256_loadu_si256((const __m256i *)(data2 + i + 8)));
     sum4 = _mm256_add_epi64(
-        sum4, _mm256_loadu_si256((const __m256i_u *)(data2 + i + 12)));
+        sum4, _mm256_loadu_si256((const __m256i *)(data2 + i + 12)));
 
     sum1 = _mm256_add_epi64(sum1,
-                            _mm256_loadu_si256((const __m256i_u *)(data3 + i)));
+                            _mm256_loadu_si256((const __m256i *)(data3 + i)));
     sum2 = _mm256_add_epi64(
-        sum2, _mm256_loadu_si256((const __m256i_u *)(data3 + i + 4)));
+        sum2, _mm256_loadu_si256((const __m256i *)(data3 + i + 4)));
     sum3 = _mm256_add_epi64(
-        sum3, _mm256_loadu_si256((const __m256i_u *)(data3 + i + 8)));
+        sum3, _mm256_loadu_si256((const __m256i *)(data3 + i + 8)));
     sum4 = _mm256_add_epi64(
-        sum4, _mm256_loadu_si256((const __m256i_u *)(data3 + i + 12)));
+        sum4, _mm256_loadu_si256((const __m256i *)(data3 + i + 12)));
 
     sum1 = _mm256_add_epi64(sum1,
-                            _mm256_loadu_si256((const __m256i_u *)(data4 + i)));
+                            _mm256_loadu_si256((const __m256i *)(data4 + i)));
     sum2 = _mm256_add_epi64(
-        sum2, _mm256_loadu_si256((const __m256i_u *)(data4 + i + 4)));
+        sum2, _mm256_loadu_si256((const __m256i *)(data4 + i + 4)));
     sum3 = _mm256_add_epi64(
-        sum3, _mm256_loadu_si256((const __m256i_u *)(data4 + i + 8)));
+        sum3, _mm256_loadu_si256((const __m256i *)(data4 + i + 8)));
     sum4 = _mm256_add_epi64(
-        sum4, _mm256_loadu_si256((const __m256i_u *)(data4 + i + 12)));
+        sum4, _mm256_loadu_si256((const __m256i *)(data4 + i + 12)));
 
     sum1 = _mm256_add_epi64(sum1,
-                            _mm256_loadu_si256((const __m256i_u *)(data5 + i)));
+                            _mm256_loadu_si256((const __m256i *)(data5 + i)));
     sum2 = _mm256_add_epi64(
-        sum2, _mm256_loadu_si256((const __m256i_u *)(data5 + i + 4)));
+        sum2, _mm256_loadu_si256((const __m256i *)(data5 + i + 4)));
     sum3 = _mm256_add_epi64(
-        sum3, _mm256_loadu_si256((const __m256i_u *)(data5 + i + 8)));
+        sum3, _mm256_loadu_si256((const __m256i *)(data5 + i + 8)));
     sum4 = _mm256_add_epi64(
-        sum4, _mm256_loadu_si256((const __m256i_u *)(data5 + i + 12)));
+        sum4, _mm256_loadu_si256((const __m256i *)(data5 + i + 12)));
 
-    _mm256_storeu_si256((__m256i_u *)(res_data + i), sum1);
-    _mm256_storeu_si256((__m256i_u *)(res_data + i + 4), sum2);
-    _mm256_storeu_si256((__m256i_u *)(res_data + i + 8), sum3);
-    _mm256_storeu_si256((__m256i_u *)(res_data + i + 12), sum4);
+    _mm256_storeu_si256((__m256i *)(res_data + i), sum1);
+    _mm256_storeu_si256((__m256i *)(res_data + i + 4), sum2);
+    _mm256_storeu_si256((__m256i *)(res_data + i + 8), sum3);
+    _mm256_storeu_si256((__m256i *)(res_data + i + 12), sum4);
   }
 
   unsigned long carry = 0;
@@ -4569,91 +4568,91 @@ void big_integer_sum_5_unfold_8x(const BigInteger op1, const BigInteger op2,
 
   int i = 0;
   for (; i < precision - 7; i += 8) {
-    sum1 = _mm256_loadu_si256((const __m256i_u *)(data1 + i));
-    sum2 = _mm256_loadu_si256((const __m256i_u *)(data1 + i + 4));
-    sum3 = _mm256_loadu_si256((const __m256i_u *)(data1 + i + 8));
-    sum4 = _mm256_loadu_si256((const __m256i_u *)(data1 + i + 12));
-    sum5 = _mm256_loadu_si256((const __m256i_u *)(data1 + i + 16));
-    sum6 = _mm256_loadu_si256((const __m256i_u *)(data1 + i + 20));
-    sum7 = _mm256_loadu_si256((const __m256i_u *)(data1 + i + 24));
-    sum8 = _mm256_loadu_si256((const __m256i_u *)(data1 + i + 28));
+    sum1 = _mm256_loadu_si256((const __m256i *)(data1 + i));
+    sum2 = _mm256_loadu_si256((const __m256i *)(data1 + i + 4));
+    sum3 = _mm256_loadu_si256((const __m256i *)(data1 + i + 8));
+    sum4 = _mm256_loadu_si256((const __m256i *)(data1 + i + 12));
+    sum5 = _mm256_loadu_si256((const __m256i *)(data1 + i + 16));
+    sum6 = _mm256_loadu_si256((const __m256i *)(data1 + i + 20));
+    sum7 = _mm256_loadu_si256((const __m256i *)(data1 + i + 24));
+    sum8 = _mm256_loadu_si256((const __m256i *)(data1 + i + 28));
 
     sum1 = _mm256_add_epi64(sum1,
-                            _mm256_loadu_si256((const __m256i_u *)(data2 + i)));
+                            _mm256_loadu_si256((const __m256i *)(data2 + i)));
     sum2 = _mm256_add_epi64(
-        sum2, _mm256_loadu_si256((const __m256i_u *)(data2 + i + 4)));
+        sum2, _mm256_loadu_si256((const __m256i *)(data2 + i + 4)));
     sum3 = _mm256_add_epi64(
-        sum3, _mm256_loadu_si256((const __m256i_u *)(data2 + i + 8)));
+        sum3, _mm256_loadu_si256((const __m256i *)(data2 + i + 8)));
     sum4 = _mm256_add_epi64(
-        sum4, _mm256_loadu_si256((const __m256i_u *)(data2 + i + 12)));
+        sum4, _mm256_loadu_si256((const __m256i *)(data2 + i + 12)));
     sum5 = _mm256_add_epi64(
-        sum5, _mm256_loadu_si256((const __m256i_u *)(data2 + i + 16)));
+        sum5, _mm256_loadu_si256((const __m256i *)(data2 + i + 16)));
     sum6 = _mm256_add_epi64(
-        sum6, _mm256_loadu_si256((const __m256i_u *)(data2 + i + 20)));
+        sum6, _mm256_loadu_si256((const __m256i *)(data2 + i + 20)));
     sum7 = _mm256_add_epi64(
-        sum7, _mm256_loadu_si256((const __m256i_u *)(data2 + i + 24)));
+        sum7, _mm256_loadu_si256((const __m256i *)(data2 + i + 24)));
     sum8 = _mm256_add_epi64(
-        sum8, _mm256_loadu_si256((const __m256i_u *)(data2 + i + 28)));
+        sum8, _mm256_loadu_si256((const __m256i *)(data2 + i + 28)));
 
     sum1 = _mm256_add_epi64(sum1,
-                            _mm256_loadu_si256((const __m256i_u *)(data3 + i)));
+                            _mm256_loadu_si256((const __m256i *)(data3 + i)));
     sum2 = _mm256_add_epi64(
-        sum2, _mm256_loadu_si256((const __m256i_u *)(data3 + i + 4)));
+        sum2, _mm256_loadu_si256((const __m256i *)(data3 + i + 4)));
     sum3 = _mm256_add_epi64(
-        sum3, _mm256_loadu_si256((const __m256i_u *)(data3 + i + 8)));
+        sum3, _mm256_loadu_si256((const __m256i *)(data3 + i + 8)));
     sum4 = _mm256_add_epi64(
-        sum4, _mm256_loadu_si256((const __m256i_u *)(data3 + i + 12)));
+        sum4, _mm256_loadu_si256((const __m256i *)(data3 + i + 12)));
     sum5 = _mm256_add_epi64(
-        sum5, _mm256_loadu_si256((const __m256i_u *)(data3 + i + 16)));
+        sum5, _mm256_loadu_si256((const __m256i *)(data3 + i + 16)));
     sum6 = _mm256_add_epi64(
-        sum6, _mm256_loadu_si256((const __m256i_u *)(data3 + i + 20)));
+        sum6, _mm256_loadu_si256((const __m256i *)(data3 + i + 20)));
     sum7 = _mm256_add_epi64(
-        sum7, _mm256_loadu_si256((const __m256i_u *)(data3 + i + 24)));
+        sum7, _mm256_loadu_si256((const __m256i *)(data3 + i + 24)));
     sum8 = _mm256_add_epi64(
-        sum8, _mm256_loadu_si256((const __m256i_u *)(data3 + i + 28)));
+        sum8, _mm256_loadu_si256((const __m256i *)(data3 + i + 28)));
 
     sum1 = _mm256_add_epi64(sum1,
-                            _mm256_loadu_si256((const __m256i_u *)(data4 + i)));
+                            _mm256_loadu_si256((const __m256i *)(data4 + i)));
     sum2 = _mm256_add_epi64(
-        sum2, _mm256_loadu_si256((const __m256i_u *)(data4 + i + 4)));
+        sum2, _mm256_loadu_si256((const __m256i *)(data4 + i + 4)));
     sum3 = _mm256_add_epi64(
-        sum3, _mm256_loadu_si256((const __m256i_u *)(data4 + i + 8)));
+        sum3, _mm256_loadu_si256((const __m256i *)(data4 + i + 8)));
     sum4 = _mm256_add_epi64(
-        sum4, _mm256_loadu_si256((const __m256i_u *)(data4 + i + 12)));
+        sum4, _mm256_loadu_si256((const __m256i *)(data4 + i + 12)));
     sum5 = _mm256_add_epi64(
-        sum4, _mm256_loadu_si256((const __m256i_u *)(data4 + i + 16)));
+        sum4, _mm256_loadu_si256((const __m256i *)(data4 + i + 16)));
     sum6 = _mm256_add_epi64(
-        sum4, _mm256_loadu_si256((const __m256i_u *)(data4 + i + 20)));
+        sum4, _mm256_loadu_si256((const __m256i *)(data4 + i + 20)));
     sum7 = _mm256_add_epi64(
-        sum4, _mm256_loadu_si256((const __m256i_u *)(data4 + i + 24)));
+        sum4, _mm256_loadu_si256((const __m256i *)(data4 + i + 24)));
     sum8 = _mm256_add_epi64(
-        sum4, _mm256_loadu_si256((const __m256i_u *)(data4 + i + 28)));
+        sum4, _mm256_loadu_si256((const __m256i *)(data4 + i + 28)));
 
     sum1 = _mm256_add_epi64(sum1,
-                            _mm256_loadu_si256((const __m256i_u *)(data5 + i)));
+                            _mm256_loadu_si256((const __m256i *)(data5 + i)));
     sum2 = _mm256_add_epi64(
-        sum2, _mm256_loadu_si256((const __m256i_u *)(data5 + i + 4)));
+        sum2, _mm256_loadu_si256((const __m256i *)(data5 + i + 4)));
     sum3 = _mm256_add_epi64(
-        sum3, _mm256_loadu_si256((const __m256i_u *)(data5 + i + 8)));
+        sum3, _mm256_loadu_si256((const __m256i *)(data5 + i + 8)));
     sum4 = _mm256_add_epi64(
-        sum4, _mm256_loadu_si256((const __m256i_u *)(data5 + i + 12)));
+        sum4, _mm256_loadu_si256((const __m256i *)(data5 + i + 12)));
     sum5 = _mm256_add_epi64(
-        sum5, _mm256_loadu_si256((const __m256i_u *)(data5 + i + 16)));
+        sum5, _mm256_loadu_si256((const __m256i *)(data5 + i + 16)));
     sum6 = _mm256_add_epi64(
-        sum6, _mm256_loadu_si256((const __m256i_u *)(data5 + i + 20)));
+        sum6, _mm256_loadu_si256((const __m256i *)(data5 + i + 20)));
     sum7 = _mm256_add_epi64(
-        sum7, _mm256_loadu_si256((const __m256i_u *)(data5 + i + 24)));
+        sum7, _mm256_loadu_si256((const __m256i *)(data5 + i + 24)));
     sum8 = _mm256_add_epi64(
-        sum8, _mm256_loadu_si256((const __m256i_u *)(data5 + i + 28)));
+        sum8, _mm256_loadu_si256((const __m256i *)(data5 + i + 28)));
 
-    _mm256_storeu_si256((__m256i_u *)(res_data + i), sum1);
-    _mm256_storeu_si256((__m256i_u *)(res_data + i + 4), sum2);
-    _mm256_storeu_si256((__m256i_u *)(res_data + i + 8), sum3);
-    _mm256_storeu_si256((__m256i_u *)(res_data + i + 12), sum4);
-    _mm256_storeu_si256((__m256i_u *)(res_data + i + 16), sum5);
-    _mm256_storeu_si256((__m256i_u *)(res_data + i + 20), sum6);
-    _mm256_storeu_si256((__m256i_u *)(res_data + i + 24), sum7);
-    _mm256_storeu_si256((__m256i_u *)(res_data + i + 28), sum8);
+    _mm256_storeu_si256((__m256i *)(res_data + i), sum1);
+    _mm256_storeu_si256((__m256i *)(res_data + i + 4), sum2);
+    _mm256_storeu_si256((__m256i *)(res_data + i + 8), sum3);
+    _mm256_storeu_si256((__m256i *)(res_data + i + 12), sum4);
+    _mm256_storeu_si256((__m256i *)(res_data + i + 16), sum5);
+    _mm256_storeu_si256((__m256i *)(res_data + i + 20), sum6);
+    _mm256_storeu_si256((__m256i *)(res_data + i + 24), sum7);
+    _mm256_storeu_si256((__m256i *)(res_data + i + 28), sum8);
   }
 
   unsigned long carry = 0;
@@ -4915,30 +4914,30 @@ void big_integer_sum_8_unfold_1x(const BigInteger op1, const BigInteger op2,
 
   int i = 0;
   for (; i < precision - 3; i += 4) {
-    sum1 = _mm256_loadu_si256((const __m256i_u *)(data1 + i));
+    sum1 = _mm256_loadu_si256((const __m256i *)(data1 + i));
 
     sum1 = _mm256_add_epi64(sum1,
-                            _mm256_loadu_si256((const __m256i_u *)(data2 + i)));
+                            _mm256_loadu_si256((const __m256i *)(data2 + i)));
 
     sum1 = _mm256_add_epi64(sum1,
-                            _mm256_loadu_si256((const __m256i_u *)(data3 + i)));
+                            _mm256_loadu_si256((const __m256i *)(data3 + i)));
 
     sum1 = _mm256_add_epi64(sum1,
-                            _mm256_loadu_si256((const __m256i_u *)(data4 + i)));
+                            _mm256_loadu_si256((const __m256i *)(data4 + i)));
 
     sum1 = _mm256_add_epi64(sum1,
-                            _mm256_loadu_si256((const __m256i_u *)(data5 + i)));
+                            _mm256_loadu_si256((const __m256i *)(data5 + i)));
 
     sum1 = _mm256_add_epi64(sum1,
-                            _mm256_loadu_si256((const __m256i_u *)(data6 + i)));
+                            _mm256_loadu_si256((const __m256i *)(data6 + i)));
 
     sum1 = _mm256_add_epi64(sum1,
-                            _mm256_loadu_si256((const __m256i_u *)(data7 + i)));
+                            _mm256_loadu_si256((const __m256i *)(data7 + i)));
 
     sum1 = _mm256_add_epi64(sum1,
-                            _mm256_loadu_si256((const __m256i_u *)(data8 + i)));
+                            _mm256_loadu_si256((const __m256i *)(data8 + i)));
 
-    _mm256_storeu_si256((__m256i_u *)(res_data + i), sum1);
+    _mm256_storeu_si256((__m256i *)(res_data + i), sum1);
   }
 
   unsigned long carry = 0;
@@ -4995,46 +4994,46 @@ void big_integer_sum_8_unfold_2x(const BigInteger op1, const BigInteger op2,
 
   int i = 0;
   for (; i < precision - 7; i += 8) {
-    sum1 = _mm256_loadu_si256((const __m256i_u *)(data1 + i));
-    sum2 = _mm256_loadu_si256((const __m256i_u *)(data1 + i + 4));
+    sum1 = _mm256_loadu_si256((const __m256i *)(data1 + i));
+    sum2 = _mm256_loadu_si256((const __m256i *)(data1 + i + 4));
 
     sum1 = _mm256_add_epi64(sum1,
-                            _mm256_loadu_si256((const __m256i_u *)(data2 + i)));
+                            _mm256_loadu_si256((const __m256i *)(data2 + i)));
     sum2 = _mm256_add_epi64(
-        sum2, _mm256_loadu_si256((const __m256i_u *)(data2 + i + 4)));
+        sum2, _mm256_loadu_si256((const __m256i *)(data2 + i + 4)));
 
     sum1 = _mm256_add_epi64(sum1,
-                            _mm256_loadu_si256((const __m256i_u *)(data3 + i)));
+                            _mm256_loadu_si256((const __m256i *)(data3 + i)));
     sum2 = _mm256_add_epi64(
-        sum2, _mm256_loadu_si256((const __m256i_u *)(data3 + i + 4)));
+        sum2, _mm256_loadu_si256((const __m256i *)(data3 + i + 4)));
 
     sum1 = _mm256_add_epi64(sum1,
-                            _mm256_loadu_si256((const __m256i_u *)(data4 + i)));
+                            _mm256_loadu_si256((const __m256i *)(data4 + i)));
     sum2 = _mm256_add_epi64(
-        sum2, _mm256_loadu_si256((const __m256i_u *)(data4 + i + 4)));
+        sum2, _mm256_loadu_si256((const __m256i *)(data4 + i + 4)));
 
     sum1 = _mm256_add_epi64(sum1,
-                            _mm256_loadu_si256((const __m256i_u *)(data5 + i)));
+                            _mm256_loadu_si256((const __m256i *)(data5 + i)));
     sum2 = _mm256_add_epi64(
-        sum2, _mm256_loadu_si256((const __m256i_u *)(data5 + i + 4)));
+        sum2, _mm256_loadu_si256((const __m256i *)(data5 + i + 4)));
 
     sum1 = _mm256_add_epi64(sum1,
-                            _mm256_loadu_si256((const __m256i_u *)(data6 + i)));
+                            _mm256_loadu_si256((const __m256i *)(data6 + i)));
     sum2 = _mm256_add_epi64(
-        sum2, _mm256_loadu_si256((const __m256i_u *)(data6 + i + 4)));
+        sum2, _mm256_loadu_si256((const __m256i *)(data6 + i + 4)));
 
     sum1 = _mm256_add_epi64(sum1,
-                            _mm256_loadu_si256((const __m256i_u *)(data7 + i)));
+                            _mm256_loadu_si256((const __m256i *)(data7 + i)));
     sum2 = _mm256_add_epi64(
-        sum2, _mm256_loadu_si256((const __m256i_u *)(data7 + i + 4)));
+        sum2, _mm256_loadu_si256((const __m256i *)(data7 + i + 4)));
 
     sum1 = _mm256_add_epi64(sum1,
-                            _mm256_loadu_si256((const __m256i_u *)(data8 + i)));
+                            _mm256_loadu_si256((const __m256i *)(data8 + i)));
     sum2 = _mm256_add_epi64(
-        sum2, _mm256_loadu_si256((const __m256i_u *)(data8 + i + 4)));
+        sum2, _mm256_loadu_si256((const __m256i *)(data8 + i + 4)));
 
-    _mm256_storeu_si256((__m256i_u *)(res_data + i), sum1);
-    _mm256_storeu_si256((__m256i_u *)(res_data + i + 4), sum2);
+    _mm256_storeu_si256((__m256i *)(res_data + i), sum1);
+    _mm256_storeu_si256((__m256i *)(res_data + i + 4), sum2);
   }
 
   unsigned long carry = 0;
