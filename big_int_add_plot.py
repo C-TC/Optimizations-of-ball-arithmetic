@@ -37,12 +37,13 @@ if __name__ == '__main__':
     plt.xticks(data_x, [r'$2^{' + str(i+5) + r'}$' for i in range(3, 20)], fontsize=14)
     plt.yticks(fontsize=14)
 
+    height = max(max(data_y1), max(data_y2), max(data_y3), max(data_y5), max(data_y6)) * 1.05
     plt.axvline(x=1365.3, linewidth=2, color='orange')
-    plt.text(1365.3*1.05, 1.42, 'L1 Cache', color='orange', fontsize='x-large')
+    plt.text(1365.3*1.05, height, 'L1 Cache', color='orange', fontsize='x-large')
     plt.axvline(x=10922.7, linewidth=2, color='orange')
-    plt.text(10922.7*1.05, 1.42, 'L2 Cache', color='orange', fontsize='x-large')
+    plt.text(10922.7*1.05, height, 'L2 Cache', color='orange', fontsize='x-large')
     plt.axvline(x=262144, linewidth=2, color='orange')
-    plt.text(262144*1.05, 1.42, 'L3 Cache', color='orange', fontsize='x-large')
+    plt.text(262144*1.05, height, 'L3 Cache', color='orange', fontsize='x-large')
 
     plt.title("Intel® Core™ i5-6300HQ CPU @ 2.30GHz (Skylake)\nL1: 32KB, L2: 256KB, L3: 6MB\nCompiler: g++ 7.5.0\nFlag:-march=native -O3", loc='left', fontsize=16, fontweight=1, color='black')
     plt.xlabel("Input Size / Precision [x 32 bits]", fontsize=16)
