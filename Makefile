@@ -1,4 +1,4 @@
-CC := /opt/intel/oneapi/compiler/2021.2.0/linux/bin/intel64/icpc
+CC := g++
 CFLAGS := -Wall -O3 -march=native
 ifeq ($(MAKECMDGOALS),debug)
 	CFLAGS := -Wall -g -ggdb -DDEBUG -O0

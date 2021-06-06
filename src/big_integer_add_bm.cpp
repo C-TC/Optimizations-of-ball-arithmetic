@@ -88,7 +88,7 @@ double perf_test(comp_func f, std::string name, int intops, int n) {
 
   double total_cycles = 0;
 #ifndef WARM_CACHE
-  printf("cold cache scenario\n");
+  // printf("cold cache scenario\n");
   std::vector<BigInteger> lefts(num_runs), rights(num_runs), results(num_runs);
   for (int i = 0; i < num_runs; ++i) {
     initialize(&lefts[i], 1, n, n + 4, i * 3);
@@ -137,12 +137,13 @@ double perf_test(comp_func f, std::string name, int intops, int n) {
 
 int main() {
   register_functions();
-  for (int j = 0; j < numFuncs; ++j) {
-    std::cout << funcNames[j] << "  ";
-  }
-  std::cout << std::endl;
-  for (int i = 3; i <= 18; i++) {
+  // for (int j = 0; j < numFuncs; ++j) {
+  //   std::cout << funcNames[j] << "  ";
+  // }
+  // std::cout << std::endl;
+  for (int i = 3; i <= 20; i++) {
     int n = 1 << i;
+    printf("%16d  ", n);
     for (int j = 0; j < numFuncs; ++j) {
       double cycles = perf_test(userFuncs[j], funcNames[j], 0, n);
       printf("%10.2f  ", cycles);

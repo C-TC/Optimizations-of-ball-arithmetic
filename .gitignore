@@ -4,6 +4,6 @@ prog
 prog_*
 *.o
 *.out
-big_int*
+# big_int*
 !src/big_int*
 **/*.pdf
