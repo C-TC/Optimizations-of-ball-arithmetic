@@ -5,5 +5,5 @@ prog_*
 *.o
 *.out
 big_int*
-**/*.pdf
+test/*.pdf
 /qd_test*
