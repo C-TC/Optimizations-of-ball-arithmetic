@@ -36,9 +36,9 @@ if __name__ == '__main__':
     plt.axvline(x=65536*1.5, linewidth=2, color='orange')
     plt.text(65536*1.5*1.05, 4.35, 'L3 Cache', color='orange', fontsize='x-large')
 
-    plt.text((2**7)*1.4, 3.0, "                 2.7x Speedup                 ", ha="center", va="center", rotation=90, size=15, bbox=dict(boxstyle="darrow,pad=0.3", fc="floralwhite", ec="darkred", lw=2)) 
+    plt.text((2**7)*1.4, 2.5, "               1.4x Speedup                 ", ha="center", va="center", rotation=90, size=9, bbox=dict(boxstyle="darrow,pad=0.3", fc="floralwhite", ec="darkred", lw=2)) 
 
-    plt.title("Intel® Core™ i5-6300HQ CPU @ 2.30GHz (Skylake)\nL1: 32KB, L2: 256KB, L3: 6MB\nCompiler: clang 12.0.0\nFlag:-march=native -O3", loc='left', fontsize=16, fontweight=1, color='black')
+    plt.title("Intel® Core™ i5-6300HQ CPU @ 2.30GHz (Skylake)\nL1: 32KB, L2: 256KB, L3: 6MB\nCompiler: gcc 7.5.0\nFlag:-march=native -O3", loc='left', fontsize=16, fontweight=1, color='black')
     plt.xlabel("Input Size / Precision [bit]", fontsize=16)
     plt.ylabel("Performance [Intop/Cycle]", fontsize=16)
     plt.savefig('timing_add_3.pdf')

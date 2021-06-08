@@ -34,7 +34,7 @@ if __name__ == '__main__':
     plt.xticks(data_x, [r'$2^{' + str(i+5) + r'}$' for i in range(3, 20)], fontsize=14)
     plt.yticks(fontsize=14)
 
-    plt.title("Intel® Core™ i5-6300HQ CPU @ 2.30GHz (Skylake)\nL1: 32KB, L2: 256KB, L3: 6MB\nCompiler: clang 12.0.0\nFlag:-march=native -O3", loc='left', fontsize=16, fontweight=1, color='black')
+    plt.title("Intel® Core™ i5-6300HQ CPU @ 2.30GHz (Skylake)\nL1: 32KB, L2: 256KB, L3: 6MB\nCompiler: gcc 7.5.0\nFlag:-march=native -O3", loc='left', fontsize=16, fontweight=1, color='black')
     plt.xlabel("Input Size / Precision [bit]", fontsize=16)
     plt.ylabel("Speedup", fontsize=16)
     plt.savefig('timing_add_2.pdf')

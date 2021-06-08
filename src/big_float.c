@@ -52,7 +52,25 @@ void big_float_mul_inplace_fixed_precision(BigFloat *lo, BigFloat ro, const int 
     lo->power += powerdiff;
     if (0 == lo->mantissa.sign) lo->power = 0;
 }
-
+BigFloatVec big_float_add_vec(BigFloatVec l, BigFloatVec r) {
+    BigFloatVec res;
+    BigIntVec bigldata, bigrdata, bigres;
+    bigldata.foo = l.foo.mantissa;
+    bigldata.bar = l.bar.mantissa;
+    bigldata.baz = l.baz.mantissa;
+    bigldata.foobar = l.foobar.mantissa;
+    bigrdata.foo = r.foo.mantissa;
+    bigrdata.bar = r.bar.mantissa;
+    bigrdata.baz = r.baz.mantissa;
+    bigrdata.foobar = r.foobar.mantissa;
+    bigres = big_int_add_vec(bigldata, bigrdata);
+    res.foo.mantissa = bigres.foo;
+    res.bar.mantissa = bigres.bar;
+    res.baz.mantissa = bigres.baz;
+    res.foobar.mantissa = bigres.foobar;
+    res.foo.power =  res.bar.power = res.baz.power = res.foobar.power = l.foo.power;
+    return res;
+}
 BigFloat big_float_add(BigFloat lo, BigFloat ro) {
     if (lo.mantissa.sign == 0) {
         BigFloat ans = big_float_deep_copy(ro);

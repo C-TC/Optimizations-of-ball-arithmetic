@@ -7,7 +7,14 @@ typedef struct Ball {
     BigFloat center;
     double radius;
 } Ball;
+typedef struct BallVec {
+    Ball foo;
+    Ball bar;
+    Ball baz;
+    Ball foobar;
+} BallVec;
 Ball ball_add(Ball, Ball);
+BallVec ball_add_vec(BallVec, BallVec);
 Ball ball_multiply(Ball, Ball);
 Ball ball_div(Ball, Ball);
 

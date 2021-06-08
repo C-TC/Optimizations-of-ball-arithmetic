@@ -39,7 +39,7 @@ if __name__ == '__main__':
     plt.axvline(x=16384, linewidth=2, color='orange')
     plt.text(16384*1.05, 0.84, 'L2 Cache', color='orange', fontsize='x-large')
 
-    plt.title("Intel® Core™ i5-6300HQ CPU @ 2.30GHz (Skylake)\nL1: 32KB, L2: 256KB, L3: 6MB\nCompiler: clang 12.0.0\nFlag:-march=native -O3", loc='left', fontsize=16, fontweight=1, color='black')
+    plt.title("Intel® Core™ i5-6300HQ CPU @ 2.30GHz (Skylake)\nL1: 32KB, L2: 256KB, L3: 6MB\nCompiler: gcc 7.5.0\nFlag:-march=native -O3", loc='left', fontsize=16, fontweight=1, color='black')
     plt.xlabel("Input Size / Precision [bit]", fontsize=16)
     plt.ylabel("Speedup", fontsize=16)
     plt.savefig('timing_mul_vec_intop.pdf')

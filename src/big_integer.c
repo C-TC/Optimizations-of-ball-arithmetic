@@ -19,7 +19,8 @@
 #endif
 
 const int UINT_NUM_BYTES = (sizeof(unsigned long));
-const int UINT_NUM_BITS = 32;
+#define UINT_NUM_BITS 32
+// const int UINT_NUM_BITS = 32;
 const unsigned long bit_mask = (1lu << UINT_NUM_BITS) - 1;
 
 /* PRIVATE FUNCTIONS DECLARATIONS */
@@ -60,6 +61,7 @@ int big_integer_compare_data_uint(const BigIntegerData *pBigIntData,
 /* add/subtract two unsigned bigints */
 BigIntegerData big_integer_add_data(const BigIntegerData left,
                                     const BigIntegerData right);
+BigIntegerDataVec big_integer_add_data_vec(BigIntegerDataVec, BigIntegerDataVec);
 void big_integer_add_data_inplace(const BigIntegerData left,
                                   const BigIntegerData right,
                                   BigIntegerData *pResult);
@@ -313,6 +315,69 @@ int big_integer_compare_data_uint(const BigIntegerData *pBigIntData,
     return -1;
 
   return 0;
+}
+
+BigIntegerDataVec big_integer_add_data_vec(BigIntegerDataVec l, BigIntegerDataVec r) {
+    BigIntegerDataVec res;
+    res.foo = big_integer_empty_data();
+    res.bar = big_integer_empty_data();
+    res.baz = big_integer_empty_data();
+    res.foobar = big_integer_empty_data();
+    int size = MAX(l.foo.size, r.foo.size);
+    int capacity = MAX(l.foo.capacity, l.foo.capacity);
+    res.foo.capacity = res.bar.capacity = res.foobar.capacity = res.baz.capacity = capacity;
+    res.foo.bits = malloc(capacity * UINT_NUM_BYTES);
+    res.bar.bits = malloc(capacity * UINT_NUM_BYTES);
+    res.baz.bits = malloc(capacity * UINT_NUM_BYTES);
+    res.foobar.bits = malloc(capacity * UINT_NUM_BYTES);
+    int i;
+    __m256i zero = _mm256_set1_epi64x(0);
+    __m256i sum = _mm256_set1_epi64x(0);
+    __m256i bit_maskv = _mm256_set1_epi64x(bit_mask);
+    __m256i zero_and_one = _mm256_set1_epi64x(INT_MAX);
+    for (i = 0; i < size; ++i) {
+      __m256i left_data = _mm256_set_epi64x(l.foo.bits[i], l.bar.bits[i], l.baz.bits[i], l.foobar.bits[i]);
+      __m256i right_data = _mm256_set_epi64x(r.foo.bits[i], r.bar.bits[i], r.baz.bits[i], r.foobar.bits[i]);
+      sum = _mm256_add_epi64(sum, _mm256_add_epi64(left_data, right_data));
+      unsigned long tmp[4];
+      _mm256_storeu_si256((__m256i *)tmp, _mm256_and_si256(sum, bit_maskv));
+      res.foo.bits[i] = tmp[0];
+      res.bar.bits[i] = tmp[1];
+      res.baz.bits[i] = tmp[2];
+      res.foobar.bits[i] = tmp[3];
+      __m256i tmpv;
+      tmpv = _mm256_add_epi64(_mm256_mul_epu32(sum, zero_and_one), _mm256_blend_epi32(sum, zero, 85));
+      sum = tmpv;
+    }
+    unsigned long sumv[4];
+    _mm256_storeu_si256((__m256i *)sumv, sum);
+    int ii = i, jj = i, kk = i, mm = i;
+    if (sumv[0] > 0) {
+      res.foo.bits[ii] = sumv[0] & bit_mask;
+      ii++;
+    }
+    res.foo.size = ii;
+    if (sumv[1] > 0) {
+      res.bar.bits[jj] = sumv[1] & bit_mask;
+      jj++;
+    }
+    res.bar.size = jj;
+    if (sumv[2] > 0) {
+      res.baz.bits[kk] = sumv[2] & bit_mask;
+      kk++;
+    }
+    res.baz.size = kk;
+    if (sumv[3] > 0) {
+      res.foobar.bits[mm] = sumv[3] & bit_mask;
+      mm++;
+    }
+    res.foobar.size = mm;
+
+    big_integer_clear_trash_data(&(res.foo));
+    big_integer_clear_trash_data(&(res.bar));
+    big_integer_clear_trash_data(&(res.foobar));
+    big_integer_clear_trash_data(&(res.baz));
+    return res;
 }
 
 BigIntegerData big_integer_add_data(const BigIntegerData left,
@@ -1006,7 +1071,24 @@ int big_integer_compare(const BigInteger left, const BigInteger right) {
   int sign = left.sign;
   return sign * big_integer_compare_data(&left.data, &right.data);
 }
-
+BigIntVec big_int_add_vec(BigIntVec l, BigIntVec r) {
+  BigIntVec res;
+  BigIntegerDataVec ldata, rdata;
+  ldata.foo = l.foo.data;
+  ldata.bar = l.bar.data;
+  ldata.baz = l.baz.data;
+  ldata.foobar = l.foobar.data;
+  rdata.foo = r.foo.data;
+  rdata.bar = r.bar.data;
+  rdata.baz = r.baz.data;
+  rdata.foobar = r.foobar.data;
+  BigIntegerDataVec res_data = big_integer_add_data_vec(ldata, rdata);
+  res.foo = big_integer_create_internal(l.foo.sign, res_data.foo);
+  res.bar = big_integer_create_internal(l.foo.sign, res_data.bar);
+  res.baz = big_integer_create_internal(l.foo.sign, res_data.baz);
+  res.foobar = big_integer_create_internal(l.foo.sign, res_data.foobar);
+  return res;
+}
 BigInteger big_integer_add(const BigInteger left, const BigInteger right) {
   if (left.sign == 0)
     return big_integer_deepcopy(right);

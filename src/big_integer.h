@@ -20,6 +20,20 @@ typedef struct BigInteger {
   BigIntegerData data;
 } BigInteger;
 
+typedef struct BigIntegerDataVec {
+  BigIntegerData foo;
+  BigIntegerData bar;
+  BigIntegerData baz;
+  BigIntegerData foobar;
+} BigIntegerDataVec;
+
+typedef struct BitIntVec {
+  BigInteger foo;
+  BigInteger bar;
+  BigInteger baz;
+  BigInteger foobar;
+} BigIntVec;
+
 /* create a big integer number */
 BigInteger big_integer_create(long long value);
 /* set a big integer number with a long long value*/
@@ -57,6 +71,7 @@ void big_integer_div_by_power_of_two_inplace_fixed_precision(BigInteger * bi, in
 
 /* adds two big integers together ( left + right ) */
 BigInteger big_integer_add(const BigInteger left, const BigInteger right);
+// void big_integer_add_vec(BigInteger,BigInteger,BigInteger,BigInteger,BigInteger,BigInteger,BigInteger,BigInteger);
 void big_integer_add_inplace(const BigInteger left, const BigInteger right,
                              BigInteger *pResult);
 /*
@@ -84,6 +99,8 @@ void big_integer_subtract_inplace(const BigInteger left, const BigInteger right,
 
 /* increments the bigInteger by the amount specified */
 void big_integer_increment(BigInteger *bigInt, const unsigned int value);
+BigIntVec big_int_add_vec(BigIntVec l, BigIntVec r);
+
 
 /* decrements the bigInteger by the amount specified */
 void big_integer_decrement(BigInteger *bigInt, const unsigned int value);

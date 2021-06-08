@@ -12,6 +12,25 @@ Ball ball_add(Ball lo, Ball ro) {
     ans.radius = lo.radius + ro.radius;
     return ans;
 }
+BallVec ball_add_vec(BallVec l, BallVec r) {
+    BallVec res;
+    BigFloatVec lfloat, rfloat, ansfloat;
+    lfloat.foo = l.foo.center;
+    lfloat.bar = l.bar.center;
+    lfloat.baz = l.baz.center;
+    lfloat.foobar = l.foobar.center;
+    rfloat.foo = r.foo.center;
+    rfloat.bar = r.bar.center;
+    rfloat.baz = r.baz.center;
+    rfloat.foobar = r.foobar.center;
+    ansfloat = big_float_add_vec(lfloat, rfloat);
+    res.foo.center = ansfloat.foo;
+    res.bar.center = ansfloat.bar;
+    res.baz.center = ansfloat.baz;
+    res.foobar.center = ansfloat.foobar;
+    return res;
+}
+// Ball ball_add_vec(Ball l1, Ball l2, Ball l3, Ball l4, Ball r1, Ball r2, )
 Ball ball_sub(Ball lo, Ball ro) {
     Ball ans;
     ans.center = big_float_sub(lo.center,ro.center);
@@ -335,18 +354,18 @@ int main() {
     big_float_destroy(&test2);
     //big_float_destroy(&out); */
 
-
-    double testdata = 2;
-    int precision = 80;
-    BigFloat bf1 = double_to_big_float_fixed_precision(testdata, 300);
-    big_float_print_msg(bf1,"input");
-    //BigFloat out2 = big_float_reciprocal_sqrt_fix_precision(bf1, precision, 1e-10);
-    BigFloat out3 = big_float_guided_reciprocal_sqrt_fix_precision(bf1, precision);
-    //big_float_print_msg(out2,"r sqrt");
-    big_float_print_msg(out3,"g r sqrt");
-    printf("transformed back to double: %e\n",big_float_to_double(out3));
-    printf("reference: %e\n",1/sqrt(testdata));
-    big_float_destroy(&bf1);
-    //big_float_destroy(&out2);
-    big_float_destroy(&out3);
+    printf("hell oworld\n");
+    // double testdata = 2;
+    // int precision = 80;
+    // BigFloat bf1 = double_to_big_float_fixed_precision(testdata, 300);
+    // big_float_print_msg(bf1,"input");
+    // //BigFloat out2 = big_float_reciprocal_sqrt_fix_precision(bf1, precision, 1e-10);
+    // BigFloat out3 = big_float_guided_reciprocal_sqrt_fix_precision(bf1, precision);
+    // //big_float_print_msg(out2,"r sqrt");
+    // big_float_print_msg(out3,"g r sqrt");
+    // printf("transformed back to double: %e\n",big_float_to_double(out3));
+    // printf("reference: %e\n",1/sqrt(testdata));
+    // big_float_destroy(&bf1);
+    // //big_float_destroy(&out2);
+    // big_float_destroy(&out3);
 }
